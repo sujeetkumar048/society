@@ -367,7 +367,11 @@
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
   }
 </style>
-</head>
+  <!-- ═══ Firebase SDK (Compat) ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script></head>
 <body>
 <div class="app">
 
@@ -392,19 +396,60 @@
       <!-- Biometric camera scan -->
       <div class="form-group">
         <div class="form-label">AI Biometric Face Scan</div>
-        <div class="camera-viewfinder" id="camViewfinder">
+
+        <!-- LIVE camera stream viewfinder -->
+        <div class="camera-viewfinder" id="camViewfinder" style="position:relative; overflow:hidden; background:#111; border-radius:12px; height:200px;">
+          <!-- Live video feed -->
+          <video id="camVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; display:none; border-radius:12px;"></video>
+          <!-- Canvas (invisible) to snap frame -->
+          <canvas id="camCanvas" style="display:none;"></canvas>
+          <!-- Scanning overlay animation -->
           <div class="scanner-line" id="camScanner" style="display:none;"></div>
           <div class="camera-overlay-box" id="camOverlay" style="display:none;"></div>
-          <svg viewBox="0 0 100 100" class="camera-placeholder-avatar" id="cameraSvgAvatar">
-            <circle cx="50" cy="35" r="20" fill="var(--muted)"/>
-            <path d="M50 60c-20 0-35 12-35 25h70c0-13-15-25-35-25z" fill="var(--muted)"/>
-          </svg>
-          <div id="capturedPhotoWrap" style="width:100%; height:100%; display:none;"></div>
+          <!-- Placeholder avatar (before camera opens) -->
+          <div id="cameraPlaceholder" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#1a2a24;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" style="width:48px; height:48px; margin-bottom:8px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <div style="font-size:12px; color:rgba(255,255,255,0.45); font-family:'Inter',sans-serif;">Camera not started</div>
+          </div>
+          <!-- Captured photo preview -->
+          <img id="capturedPhotoImg" style="width:100%; height:100%; object-fit:cover; display:none; position:absolute; top:0; left:0; border-radius:12px;">
+          <!-- Green corner brackets when captured -->
+          <div id="camBrackets" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+            <div style="position:absolute; top:10px; left:10px; width:28px; height:28px; border-top:3px solid #2ecc71; border-left:3px solid #2ecc71; border-radius:3px 0 0 0;"></div>
+            <div style="position:absolute; top:10px; right:10px; width:28px; height:28px; border-top:3px solid #2ecc71; border-right:3px solid #2ecc71; border-radius:0 3px 0 0;"></div>
+            <div style="position:absolute; bottom:10px; left:10px; width:28px; height:28px; border-bottom:3px solid #2ecc71; border-left:3px solid #2ecc71; border-radius:0 0 0 3px;"></div>
+            <div style="position:absolute; bottom:10px; right:10px; width:28px; height:28px; border-bottom:3px solid #2ecc71; border-right:3px solid #2ecc71; border-radius:0 0 3px 0;"></div>
+            <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(46,204,113,0.9); padding:3px 10px; border-radius:10px; font-size:10px; color:#fff; font-weight:700; font-family:'Inter',sans-serif;">✔ FACE VERIFIED</div>
+          </div>
+          <!-- Status label on live feed -->
+          <div id="camLiveLabel" style="display:none; position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.55); color:#fff; font-size:10px; font-weight:600; padding:4px 10px; border-radius:8px; font-family:'Inter',sans-serif; display:none;">
+            🔴 LIVE
+          </div>
         </div>
-        <button class="btn" id="btnCapturePhoto" onclick="simulatePhotoCapture()" style="background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:10px; height:auto; font-size:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Capture Biometric Photo
-        </button>
+
+        <!-- Camera action buttons -->
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="btn" id="btnOpenCamera" onclick="openLiveCamera()" style="flex:1; background:linear-gradient(135deg,var(--forest),var(--forest-dark)); color:white; padding:10px; height:auto; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Open Camera
+          </button>
+          <button class="btn" id="btnSnapPhoto" onclick="snapPhotoFromCamera()" style="flex:1; background:var(--paper); border:1.5px solid var(--forest); color:var(--forest); padding:10px; height:auto; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; display:none;">
+            📸 Capture &amp; Scan
+          </button>
+          <button class="btn" id="btnRetakePhoto" onclick="retakePhoto()" style="flex:1; background:#F5E1DC; border:1px solid var(--terracotta); color:var(--terracotta); padding:10px; height:auto; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; display:none;">
+            🔄 Retake
+          </button>
+        </div>
+
+        <!-- Fallback: pick from gallery -->
+        <label style="display:flex; align-items:center; gap:6px; margin-top:8px; cursor:pointer; font-size:11.5px; color:var(--muted);">
+          <input type="file" id="photoFileInput" accept="image/*" capture="user" style="display:none;" onchange="handlePhotoFileUpload(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="width:13px; height:13px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Or pick from gallery / file
+        </label>
+
+        <!-- Hidden legacy wrap for backward compat -->
+        <div id="capturedPhotoWrap" style="display:none;"></div>
       </div>
       
       <div class="form-group">
@@ -475,6 +520,17 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         Send Approval Request
       </button>
+    </div>
+
+    <!-- PENDING APPROVALS (Resident View) -->
+    <div class="card" id="pendingApprovalsCard" style="border: 2px solid var(--marigold); display:none;">
+      <div class="card-title" style="color:var(--forest-dark);">
+        🔔 Visitor Approval Requests
+        <span style="font-size:11px; font-weight:600; color:var(--terracotta); background:#F5E1DC; padding:2px 8px; border-radius:10px;" id="pendingBadge">0</span>
+      </div>
+      <div id="pendingApprovalsList">
+        <!-- Filled dynamically -->
+      </div>
     </div>
 
     <div class="card">
@@ -639,43 +695,293 @@
     }
   }
 
-  // Simulate AI Biometric Face Scanning
-  function simulatePhotoCapture() {
-    const viewfinder = document.getElementById('camViewfinder');
-    const scanner = document.getElementById('camScanner');
-    const overlay = document.getElementById('camOverlay');
-    const placeholder = document.getElementById('cameraSvgAvatar');
-    const photoWrap = document.getElementById('capturedPhotoWrap');
+  // ===== REAL CAMERA FUNCTIONS =====
 
-    // Reset view
-    photoWrap.style.display = 'none';
-    placeholder.style.display = 'block';
-    scanner.style.display = 'block';
-    overlay.style.display = 'block';
-    viewfinder.classList.remove('captured');
+  let cameraStream = null;
 
-    // Scan animation for 1.2s
-    setTimeout(() => {
-      scanner.style.display = 'none';
-      overlay.style.display = 'none';
+  async function openLiveCamera() {
+    const video = document.getElementById('camVideo');
+    const placeholder = document.getElementById('cameraPlaceholder');
+    const capturedImg = document.getElementById('capturedPhotoImg');
+    const brackets = document.getElementById('camBrackets');
+    const liveLabel = document.getElementById('camLiveLabel');
+    const btnOpen = document.getElementById('btnOpenCamera');
+    const btnSnap = document.getElementById('btnSnapPhoto');
+    const btnRetake = document.getElementById('btnRetakePhoto');
+
+    // Stop any prior stream
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+    }
+
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      });
+
+      video.srcObject = cameraStream;
+      video.style.display = 'block';
       placeholder.style.display = 'none';
-      
-      const name = document.getElementById('visName').value.trim();
-      const isRahul = name.toLowerCase().includes('rahul');
-      capturedPhotoSvg = isRahul ? rahulPhotoSVG : defaultPhotoSVG;
-      
-      photoWrap.innerHTML = capturedPhotoSvg;
-      photoWrap.style.display = 'block';
-      viewfinder.classList.add('captured');
-    }, 1200);
+      capturedImg.style.display = 'none';
+      brackets.style.display = 'none';
+      liveLabel.style.display = 'block';
+
+      // Swap buttons
+      btnOpen.style.display = 'none';
+      btnSnap.style.display = 'flex';
+      btnRetake.style.display = 'none';
+
+      capturedPhotoSvg = null;
+
+    } catch (err) {
+      console.warn('Camera access denied or unavailable:', err);
+      alert('📷 Camera access denied by browser.\n\nPlease allow camera permission, or use "Pick from gallery" option below to upload a photo.');
+    }
   }
 
-  // Load visitors list
+  function snapPhotoFromCamera() {
+    const video = document.getElementById('camVideo');
+    const canvas = document.getElementById('camCanvas');
+    const capturedImg = document.getElementById('capturedPhotoImg');
+    const scanner = document.getElementById('camScanner');
+    const overlay = document.getElementById('camOverlay');
+    const brackets = document.getElementById('camBrackets');
+    const btnSnap = document.getElementById('btnSnapPhoto');
+    const btnRetake = document.getElementById('btnRetakePhoto');
+    const btnOpen = document.getElementById('btnOpenCamera');
+
+    if (!cameraStream) {
+      alert('Please open the camera first.');
+      return;
+    }
+
+    // Show scanning animation briefly
+    scanner.style.display = 'block';
+    overlay.style.display = 'block';
+
+    setTimeout(() => {
+      // Snap frame from video to canvas
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get data URL from canvas
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+      // Stop camera stream
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+      video.style.display = 'none';
+
+      // Show captured image
+      capturedImg.src = dataUrl;
+      capturedImg.style.display = 'block';
+      brackets.style.display = 'block';
+      scanner.style.display = 'none';
+      overlay.style.display = 'none';
+
+      // Store for approval flow
+      capturedPhotoSvg = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
+
+      // Also update legacy capturedPhotoWrap
+      document.getElementById('capturedPhotoWrap').innerHTML = capturedPhotoSvg;
+
+      // Swap buttons
+      btnSnap.style.display = 'none';
+      btnRetake.style.display = 'flex';
+      btnOpen.style.display = 'none';
+
+    }, 900);
+  }
+
+  function retakePhoto() {
+    const capturedImg = document.getElementById('capturedPhotoImg');
+    const brackets = document.getElementById('camBrackets');
+    const liveLabel = document.getElementById('camLiveLabel');
+    const btnOpen = document.getElementById('btnOpenCamera');
+    const btnRetake = document.getElementById('btnRetakePhoto');
+    const btnSnap = document.getElementById('btnSnapPhoto');
+    const placeholder = document.getElementById('cameraPlaceholder');
+
+    capturedImg.style.display = 'none';
+    brackets.style.display = 'none';
+    liveLabel.style.display = 'none';
+    placeholder.style.display = 'flex';
+    capturedPhotoSvg = null;
+
+    btnRetake.style.display = 'none';
+    btnSnap.style.display = 'none';
+    btnOpen.style.display = 'flex';
+  }
+
+  function handlePhotoFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Photo too large. Please select an image under 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const dataUrl = evt.target.result;
+
+      const capturedImg = document.getElementById('capturedPhotoImg');
+      const brackets = document.getElementById('camBrackets');
+      const placeholder = document.getElementById('cameraPlaceholder');
+      const video = document.getElementById('camVideo');
+      const btnOpen = document.getElementById('btnOpenCamera');
+      const btnSnap = document.getElementById('btnSnapPhoto');
+      const btnRetake = document.getElementById('btnRetakePhoto');
+
+      // Stop any live stream
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      video.style.display = 'none';
+      placeholder.style.display = 'none';
+
+      capturedImg.src = dataUrl;
+      capturedImg.style.display = 'block';
+      brackets.style.display = 'block';
+
+      capturedPhotoSvg = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
+      document.getElementById('capturedPhotoWrap').innerHTML = capturedPhotoSvg;
+
+      btnSnap.style.display = 'none';
+      btnRetake.style.display = 'flex';
+      btnOpen.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Legacy simulatePhotoCapture kept for backward compat but now just triggers openLiveCamera
+  function simulatePhotoCapture() {
+    openLiveCamera();
+  }
+
+  // Load visitors list — Firebase real-time listener
   let visitors = [];
+  let _visitorUnsub = null;
+  let _pendingUnsub = null;
+
   function initVisitors() {
     if (!currentUser) return;
-    visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
+
+    // Run one-time localStorage → Firebase migration
+    if (typeof migrateLocalStorageToFirebase === 'function') {
+      migrateLocalStorageToFirebase();
+    }
+
+    // Real-time listener for visitors
+    if (_visitorUnsub) _visitorUnsub();
+    _visitorUnsub = fbListen('society_visitors', function(arr) {
+      visitors = arr || [];
+      renderVisitors();
+    });
+
+    // Real-time listener for pending approvals
+    if (_pendingUnsub) _pendingUnsub();
+    _pendingUnsub = fbListen('society_pending_visitor_approvals', function() {
+      renderPendingApprovals();
+    });
+  }
+
+  // ===== Pending Visitor Approvals for Residents =====
+  function renderPendingApprovals() {
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];  // local cache
+
+    // Show only approvals that belong to current user's flat
+    const normalise = s => String(s).replace(/flat\s*/i, '').trim();
+    const myFlat = normalise(currentUser.flat || '');
+
+    const myPending = approvals.filter(p =>
+      normalise(p.flatNo) === myFlat && p.status === 'Pending'
+    );
+
+    const card = document.getElementById('pendingApprovalsCard');
+    const listEl = document.getElementById('pendingApprovalsList');
+    const badge = document.getElementById('pendingBadge');
+
+    if (myPending.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+
+    card.style.display = 'block';
+    badge.textContent = myPending.length;
+    listEl.innerHTML = '';
+
+    myPending.forEach(p => {
+      const item = document.createElement('div');
+      item.style.cssText = 'border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--paper); margin-bottom:10px;';
+
+      item.innerHTML = `
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:10px;">
+          <div style="width:52px; height:52px; border-radius:8px; overflow:hidden; background:#2c3e50; flex-shrink:0;">${p.photo}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:14px; color:var(--forest-dark);">${p.visitorName}</div>
+            <div style="font-size:11px; color:var(--muted); margin-top:2px;">${p.purpose} · ${p.count} person(s)</div>
+            <div style="font-size:10px; color:var(--muted);">${p.vehicle} · ${p.idType}: ${p.idNumber}</div>
+            <div style="font-size:10px; color:var(--muted);">📱 ${p.visitorPhone} · ${p.timestamp}</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button onclick="residentApproveFromPanel('${p.id}')"
+            style="flex:1; padding:10px; border:none; border-radius:8px; background:linear-gradient(135deg,var(--forest),var(--forest-dark)); color:white; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; cursor:pointer;">
+            ✅ Approve Entry
+          </button>
+          <button onclick="residentRejectFromPanel('${p.id}')"
+            style="flex:1; padding:10px; border:none; border-radius:8px; background:var(--terracotta); color:white; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; cursor:pointer;">
+            ❌ Reject Entry
+          </button>
+        </div>
+      `;
+      listEl.appendChild(item);
+    });
+  }
+
+  function residentApproveFromPanel(visId) {
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+    const idx = approvals.findIndex(p => p.id === visId);
+    if (idx === -1) return;
+
+    approvals[idx].status = 'Approved';
+    localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+
+    // Log as visitor inside
+    const p = approvals[idx];
+    const newV = {
+      name: p.visitorName,
+      details: `${p.purpose} · Flat ${p.flatNo} · Entered ${p.timestamp}`,
+      status: 'Inside',
+      type: 'Guest',
+      photo: p.photo,
+      exitTime: ''
+    };
+    visitors.unshift(newV);
+    localStorage.setItem('society_visitors', JSON.stringify(visitors));
+
+    renderPendingApprovals();
     renderVisitors();
+    alert(`✅ Entry Approved!\n\n${p.visitorName} has been allowed entry to Flat ${p.flatNo}.\nGate opened and visitor logged.`);
+  }
+
+  function residentRejectFromPanel(visId) {
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+    const idx = approvals.findIndex(p => p.id === visId);
+    if (idx === -1) return;
+
+    const p = approvals[idx];
+    approvals[idx].status = 'Rejected';
+    localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+
+    renderPendingApprovals();
+    alert(`❌ Entry Rejected!\n\n${p.visitorName}'s entry request has been denied.\nGate guard has been notified.`);
   }
 
   function renderVisitors() {
@@ -730,6 +1036,7 @@
     const purpose = document.getElementById('visPurpose').value;
     const vehicle = document.getElementById('visVehicle').value.trim() || 'No Vehicle';
     const flatInput = document.getElementById('visFlatNum').value.trim();
+    const count = document.getElementById('visCount').value || '1';
 
     if (!name || !phone || !idNum || !flatInput) {
       alert('Please fill out Visitor Name, Phone, ID Number, and Flat Number to Visit.');
@@ -747,21 +1054,61 @@
     }
 
     function showApprovalDialog() {
-      // Query users database to find flat owner
-      const usersList = JSON.parse(localStorage.getItem('users')) || [defaultUser];
-      const targetUser = usersList.find(u => u.flat === flatInput);
-      const ownerName = targetUser ? targetUser.name : "Resident";
+      // Lookup flat owner — check Firebase-cached society_users first
+      const usersList = JSON.parse(localStorage.getItem('society_users')) ||
+                        JSON.parse(localStorage.getItem('users')) || [defaultUser];
 
-      // Set values inside simulated resident modal
+      // Match flat number – support "302", "Flat 302", etc.
+      const normalise = s => String(s).replace(/flat\s*/i, '').trim();
+      const targetUser = usersList.find(u => normalise(u.flat) === normalise(flatInput));
+      const ownerName = targetUser ? targetUser.name : 'Resident of Flat ' + flatInput;
+      const ownerPhone = targetUser ? (targetUser.phone || 'N/A') : 'N/A';
+
+      const now = new Date();
+      const timestamp = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) +
+                        ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      // ----- Build enriched approval modal -----
       document.querySelector('#residentApprovalModal .modal-title').innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Flat ${flatInput} Gate Alert
+        Gate Alert → Flat ${flatInput}
       `;
-      document.querySelector('#residentApprovalModal div[style*="letter-spacing:0.5px"]').textContent = `Simulated Alert on ${ownerName}'s Device`;
+
+      // Resident identity banner
+      const subDiv = document.querySelector('#residentApprovalModal div[style*="letter-spacing:0.5px"]');
+      subDiv.innerHTML = `
+        Notification sent to <strong style="color:var(--forest-dark);">${ownerName}</strong>
+        <br><span style="font-size:10px; color:var(--muted);">📱 ${ownerPhone} · ${timestamp}</span>
+      `;
+
       document.getElementById('approvalVisitorName').textContent = name;
-      document.getElementById('approvalVisitorDetails').textContent = `${selectedVisTypeVal} · Flat ${flatInput} · Vehicle: ${vehicle}`;
+      document.getElementById('approvalVisitorDetails').textContent =
+        `${selectedVisTypeVal} · Flat ${flatInput} · ${count} person(s) · Vehicle: ${vehicle}`;
       document.getElementById('approvalVisitorPurpose').textContent = purpose;
-      document.getElementById('approvalVisitorPhoto').innerHTML = capturedPhotoSvg;
+      document.getElementById('approvalVisitorPhoto').innerHTML = capturedPhotoSvg || defaultPhotoSVG;
+
+      // ----- Save a pending approval notification → Firebase -----
+      const pendingEntry = {
+        id: 'VIS-' + Math.floor(10000 + Math.random() * 90000),
+        visitorName: name,
+        visitorPhone: phone,
+        idType: idType,
+        idNumber: idNum,
+        purpose: purpose,
+        vehicle: vehicle,
+        count: count,
+        flatNo: flatInput,
+        ownerName: ownerName,
+        status: 'Pending',
+        timestamp: timestamp,
+        photo: capturedPhotoSvg || defaultPhotoSVG
+      };
+
+      // Push to Firebase (also updates localStorage cache via fbPush)
+      fbPush('society_pending_visitor_approvals', pendingEntry);
+
+      // Refresh pending panel if visible
+      if (typeof renderPendingApprovals === 'function') renderPendingApprovals();
 
       // Show resident approval modal overlay
       document.getElementById('residentApprovalModal').classList.add('active');
@@ -814,7 +1161,8 @@
       };
 
       visitors.unshift(newVisObj);
-      localStorage.setItem('society_visitors', JSON.stringify(visitors));
+      // Write to Firebase
+      fbPush('society_visitors', newVisObj);
       renderVisitors();
 
       // Reset form
@@ -825,8 +1173,8 @@
       document.getElementById('visFlatNum').value = '';
       capturedPhotoSvg = null;
       document.getElementById('capturedPhotoWrap').style.display = 'none';
-      document.getElementById('cameraSvgAvatar').style.display = 'block';
-      document.getElementById('camViewfinder').classList.remove('captured');
+      // Reset camera UI
+      retakePhoto();
 
       // Close gate overlay
       gateOverlay.classList.remove('active');
@@ -850,10 +1198,9 @@
     
     visitors[idx].status = 'Left';
     visitors[idx].details = `${originalDetails} (Left at ${formattedTime})`;
-    
-    localStorage.setItem('society_visitors', JSON.stringify(visitors));
+    // Sync full visitors list to Firebase
+    fbSet('society_visitors', visitors);
     renderVisitors();
-    
     alert(`Exit recorded for ${visitors[idx].name} at ${formattedTime}.`);
   }
 

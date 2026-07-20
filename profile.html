@@ -542,8 +542,36 @@
     font-weight: 500;
     color: var(--ink);
   }
+
+  /* ─── Forgot Password Modal ─── */
+  .fp-overlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,.5);z-index:3000;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .fp-overlay.active{display:flex;}
+  .fp-sheet{
+    background:var(--card);border-radius:24px 24px 0 0;
+    width:100%;max-width:480px;padding:28px 22px 36px;
+  }
+  .fp-handle{width:38px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 22px;}
+  .fp-step{display:none;}
+  .fp-step.active{display:block;}
+  .fp-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--forest-dark);margin-bottom:6px;}
+  .fp-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.5;}
+  .fp-otp-row{display:flex;gap:10px;margin-bottom:16px;justify-content:center;}
+  .fp-otp-box{width:52px;height:56px;border:2px solid var(--line);border-radius:12px;font-size:22px;font-weight:700;text-align:center;font-family:'IBM Plex Mono',monospace;color:var(--forest-dark);background:var(--paper);outline:none;transition:border-color .2s;}
+  .fp-otp-box:focus{border-color:var(--forest);box-shadow:0 0 0 4px rgba(31,77,61,.12);}
+  .fp-back-link{text-align:center;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer;}
+  .fp-back-link span{color:var(--forest);font-weight:600;}
+  .fp-success-icon{width:72px;height:72px;background:#E4EEE8;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+  .fp-success-icon svg{width:36px;height:36px;stroke:var(--forest);}
 </style>
-</head>
+  <!-- ═══ Firebase SDK (Compat) ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script></head>
 <body>
 <div class="app">
 
@@ -594,7 +622,13 @@
             </div>
             <div id="loginPasswordFeedback" class="val-feedback"></div>
           </div>
-          <button class="btn btn-primary" onclick="processLogin()" id="btnLogin" style="margin-top: 8px;">Login</button>
+
+          <!-- Forgot Password link -->
+          <div style="text-align:right; margin-bottom:4px;">
+            <span onclick="openForgotPassword()" style="font-size:12.5px; color:var(--forest); font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Forgot Password?</span>
+          </div>
+
+          <button class="btn btn-primary" onclick="processLogin()" id="btnLogin" style="margin-top:6px;">Login</button>
         </div>
 
         <!-- Register Form -->
@@ -661,7 +695,121 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════ -->
+  <!--  FORGOT PASSWORD BOTTOM SHEET      -->
+  <!-- ═══════════════════════════════════ -->
+  <div class="fp-overlay" id="fpOverlay" onclick="fpOverlayClick(event)">
+    <div class="fp-sheet">
+      <div class="fp-handle"></div>
+
+      <!-- STEP 1: Enter Email / Phone -->
+      <div class="fp-step active" id="fpStep1">
+        <div style="font-size:36px; margin-bottom:14px; text-align:center;">🔐</div>
+        <div class="fp-title" style="text-align:center;">Forgot Password?</div>
+        <div class="fp-sub" style="text-align:center;">Enter your registered email address or phone number. We'll send a reset code.</div>
+
+        <div class="form-group">
+          <div class="form-label">Email or Phone Number</div>
+          <input type="text" class="form-input" id="fpEmail" placeholder="e.g. sujeet@email.com or +91 98765…"
+            oninput="fpClearError()" onkeydown="if(event.key==='Enter')sendFpCode()">
+          <div id="fpEmailError" style="font-size:11.5px;color:var(--terracotta);margin-top:5px;display:none;"></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="sendFpCode()" id="fpSendBtn"
+          style="background:linear-gradient(135deg,var(--forest),var(--forest-dark));">
+          Send Reset Code
+        </button>
+        <div class="fp-back-link" onclick="closeForgotPassword()">Back to <span>Login</span></div>
+      </div>
+
+      <!-- STEP 2: Enter OTP Code -->
+      <div class="fp-step" id="fpStep2">
+        <div style="font-size:36px; margin-bottom:14px; text-align:center;">📲</div>
+        <div class="fp-title" style="text-align:center;">Enter Reset Code</div>
+        <div class="fp-sub" style="text-align:center;">A 6-digit code has been sent to <strong id="fpSentTo"></strong>. Enter it below.</div>
+
+        <div class="fp-otp-row" id="fpOtpRow">
+          <input class="fp-otp-box" id="otp0" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(0)" onkeydown="fpOtpBack(event,0)">
+          <input class="fp-otp-box" id="otp1" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(1)" onkeydown="fpOtpBack(event,1)">
+          <input class="fp-otp-box" id="otp2" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(2)" onkeydown="fpOtpBack(event,2)">
+          <input class="fp-otp-box" id="otp3" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(3)" onkeydown="fpOtpBack(event,3)">
+          <input class="fp-otp-box" id="otp4" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(4)" onkeydown="fpOtpBack(event,4)">
+          <input class="fp-otp-box" id="otp5" maxlength="1" type="text" inputmode="numeric" oninput="fpOtpNext(5)" onkeydown="fpOtpBack(event,5)">
+        </div>
+        <div id="fpOtpError" style="font-size:11.5px;color:var(--terracotta);text-align:center;margin-bottom:12px;display:none;"></div>
+
+        <button class="btn btn-primary" onclick="verifyFpCode()"
+          style="background:linear-gradient(135deg,var(--forest),var(--forest-dark));">
+          Verify Code
+        </button>
+
+        <div class="fp-back-link" style="margin-top:10px;">
+          Didn't receive it?
+          <span onclick="fpResend()" id="fpResendBtn">Resend</span>
+          <span id="fpResendTimer" style="display:none; color:var(--muted);"></span>
+        </div>
+        <div class="fp-back-link" onclick="fpGoStep(1)">← Change Email / Phone</div>
+      </div>
+
+      <!-- STEP 3: Set New Password -->
+      <div class="fp-step" id="fpStep3">
+        <div style="font-size:36px; margin-bottom:14px; text-align:center;">🔑</div>
+        <div class="fp-title" style="text-align:center;">Set New Password</div>
+        <div class="fp-sub" style="text-align:center;">Create a strong new password for your account.</div>
+
+        <div class="form-group">
+          <div class="form-label">New Password</div>
+          <div class="pwd-input-wrap">
+            <input type="password" class="form-input" id="fpNewPwd" placeholder="Min 6 characters" oninput="fpCheckPwd()">
+            <div class="pwd-toggle-btn" onclick="togglePwdVisibility('fpNewPwd')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          <div id="fpPwdStrBar" style="display:none;margin-top:8px;">
+            <div style="font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Strength: <span id="fpPwdStrTxt">Weak</span></div>
+            <div style="display:flex;gap:4px;height:4px;">
+              <div id="fpBar1" style="flex:1;border-radius:2px;background:var(--line);transition:background .3s;"></div>
+              <div id="fpBar2" style="flex:1;border-radius:2px;background:var(--line);transition:background .3s;"></div>
+              <div id="fpBar3" style="flex:1;border-radius:2px;background:var(--line);transition:background .3s;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Confirm Password</div>
+          <div class="pwd-input-wrap">
+            <input type="password" class="form-input" id="fpConfirmPwd" placeholder="Re-enter password" oninput="fpCheckConfirm()">
+            <div class="pwd-toggle-btn" onclick="togglePwdVisibility('fpConfirmPwd')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          <div id="fpConfirmError" style="font-size:11.5px;color:var(--terracotta);margin-top:4px;display:none;">Passwords do not match</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="applyNewPassword()"
+          style="background:linear-gradient(135deg,var(--forest),var(--forest-dark));">
+          Update Password
+        </button>
+      </div>
+
+      <!-- STEP 4: Success -->
+      <div class="fp-step" id="fpStep4">
+        <div class="fp-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="fp-title" style="text-align:center;">Password Updated!</div>
+        <div class="fp-sub" style="text-align:center;">Your password has been reset successfully. You can now log in with your new password.</div>
+        <button class="btn btn-primary" onclick="fpDone()"
+          style="background:linear-gradient(135deg,var(--forest),var(--forest-dark));">
+          Go to Login
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- PROFILE DASHBOARD (shown when logged in) -->
+
   <div class="content" id="profileDashboard">
     <div class="profile-card">
       <div class="profile-avatar" onclick="triggerAvatarUpload()" style="cursor: pointer; position: relative; overflow: hidden;">

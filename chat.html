@@ -9,333 +9,116 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1B2420;
-    --paper:#F1F4EF;
-    --card:#FFFFFF;
-    --forest:#1F4D3D;
-    --forest-dark:#153529;
-    --marigold:#D9A62E;
-    --marigold-soft:#F4E4BC;
-    --terracotta:#C1503D;
-    --sky:#3E7CB1;
-    --line:#DDE3DA;
-    --muted:#6B7A70;
-    --radius:18px;
+    --ink:#1B2420; --paper:#F1F4EF; --card:#FFFFFF;
+    --forest:#1F4D3D; --forest-dark:#153529;
+    --marigold:#D9A62E; --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D; --sky:#3E7CB1;
+    --line:#DDE3DA; --muted:#6B7A70; --radius:18px;
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-    display:flex;
-    justify-content:center;
-    min-height:100vh;
-  }
-  .app{
-    width:100%;
-    max-width:480px;
-    min-height:100vh;
-    background:var(--paper);
-    position:relative;
-    padding-bottom:92px;
-  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;display:flex;justify-content:center;min-height:100vh;}
+  .app{width:100%;max-width:480px;min-height:100vh;background:var(--paper);position:relative;display:flex;flex-direction:column;}
 
-  /* ===== HEADER ===== */
-  .header{
-    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
-    color:#fff;
-    padding:22px 20px 34px;
-    border-radius:0 0 28px 28px;
-    position:relative;
-    overflow:hidden;
-  }
-  .header::after{
-    content:"";
-    position:absolute;
-    right:-40px; top:-40px;
-    width:160px; height:160px;
-    border:1px dashed rgba(255,255,255,.18);
-    border-radius:50%;
-  }
-  .header-top{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    position:relative;
-    z-index:1;
-  }
-  .back-btn{
-    width:38px; height:38px;
-    border-radius:50%;
-    background:rgba(255,255,255,.12);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer;
-    text-decoration:none;
-  }
-  .back-btn svg{width:18px; height:18px; stroke:#fff;}
-  .page-title{
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:18px;
-  }
+  /* ── HEADER ── */
+  .header{background:linear-gradient(160deg,var(--forest) 0%,var(--forest-dark) 100%);color:#fff;padding:20px 20px 28px;border-radius:0 0 24px 24px;position:relative;overflow:hidden;flex-shrink:0;}
+  .header::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border:1px dashed rgba(255,255,255,.18);border-radius:50%;}
+  .header-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
+  .back-btn svg{width:16px;height:16px;stroke:#fff;}
+  .page-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;flex:1;}
 
-  /* ===== CONTENT ===== */
-  .content{
-    padding:20px 16px;
-  }
-  .chat-list{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  .chat-item{
-    background:var(--card);
-    border-radius:var(--radius);
-    padding:16px;
-    border:1px solid var(--line);
-    display:flex;
-    gap:14px;
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  .chat-item:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(21,53,41,.08);
-  }
-  .avatar{
-    width:48px; height:48px;
-    border-radius:50%;
-    background:var(--forest);
-    display:flex; align-items:center; justify-content:center;
-    color:#fff;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:16px;
-    flex-shrink:0;
-  }
-  .avatar.group{
-    background:var(--sky);
-  }
-  .avatar.committee{
-    background:var(--marigold);
-    color:var(--forest-dark);
-  }
-  .chat-info{
-    flex:1;
-    min-width:0;
-  }
-  .chat-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:4px;
-  }
-  .chat-name{
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:14px;
-    color:var(--forest-dark);
-  }
-  .chat-time{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    color:var(--muted);
-  }
-  .chat-preview{
-    font-size:13px;
-    color:var(--muted);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .unread-badge{
-    background:var(--terracotta);
-    color:#fff;
-    font-size:11px;
-    font-weight:600;
-    padding:4px 8px;
-    border-radius:10px;
-    min-width:20px;
-    text-align:center;
-  }
-  .new-chat-btn{
-    background:var(--forest);
-    color:#fff;
-    border-radius:14px;
-    padding:16px;
-    text-align:center;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:15px;
-    cursor:pointer;
-    margin-bottom:16px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-  }
-  .modal-overlay{
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,.5);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
-  }
+  /* ── TABS ── */
+  .tab-row{display:flex;gap:0;padding:16px 16px 0;flex-shrink:0;}
+  .tab-btn{flex:1;padding:10px 8px;border:none;background:transparent;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;}
+  .tab-btn.active{color:var(--forest);border-bottom-color:var(--forest);}
+
+  /* ── CHAT LIST ── */
+  .content{flex:1;overflow-y:auto;padding:14px 14px 90px;}
+  .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 2px 8px;}
+  .chat-item{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--line);display:flex;gap:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;margin-bottom:8px;position:relative;}
+  .chat-item:active{transform:scale(.98);}
+  .chat-item:hover{box-shadow:0 6px 18px rgba(21,53,41,.08);}
+  .avatar{width:46px;height:46px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;flex-shrink:0;}
+  .avatar.group{background:var(--sky);}
+  .avatar.flat{background:linear-gradient(135deg,var(--marigold),#b8891a);color:var(--forest-dark);}
+  .chat-info{flex:1;min-width:0;}
+  .chat-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--forest-dark);}
+  .chat-preview{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;}
+  .chat-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+  .chat-time{font-size:11px;color:var(--muted);}
+  .unread-badge{background:var(--terracotta);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;flex-shrink:0;}
+  .member-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+  .member-chip{font-size:10px;background:#E4EEE8;color:var(--forest);padding:2px 7px;border-radius:6px;font-weight:600;}
+
+  /* ── FAB ── */
+  .fab{position:fixed;bottom:80px;right:50%;transform:translateX(calc(50% - 180px));width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--forest-dark));color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 6px 22px rgba(21,53,41,.3);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .2s;}
+  .fab:active{transform:translateX(calc(50% - 180px)) scale(.92);}
+
+  /* ── FULL-SCREEN CHAT WINDOW ── */
+  .chat-window{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:200;display:none;flex-direction:column;}
+  .cw-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));color:#fff;padding:16px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .cw-back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;}
+  .cw-back svg{width:15px;height:15px;stroke:#fff;}
+  .cw-avatar{width:38px;height:38px;border-radius:50%;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cw-info{flex:1;min-width:0;}
+  .cw-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cw-sub{font-size:10.5px;color:rgba(255,255,255,.65);margin-top:1px;}
+  .cw-more{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;}
+  .cw-more svg{width:16px;height:16px;stroke:#fff;}
+  .cw-stream{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;background:var(--paper);}
+  .chat-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.45;word-break:break-word;}
+  .chat-bubble.sent{background:var(--forest);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+  .chat-bubble.received{background:var(--card);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--line);}
+  .bubble-sender{font-size:10px;font-weight:700;color:var(--marigold);margin-bottom:3px;}
+  .bubble-time{font-size:9.5px;margin-top:4px;text-align:right;opacity:.7;}
+  .cw-input-bar{padding:10px 12px;background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .cw-input{flex:1;padding:11px 16px;border:1.5px solid var(--line);border-radius:22px;font-family:'Inter',sans-serif;font-size:13.5px;background:var(--paper);color:var(--ink);outline:none;}
+  .cw-input:focus{border-color:var(--forest);}
+  .cw-send{width:42px;height:42px;border-radius:50%;background:var(--forest);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s;}
+  .cw-send:active{transform:scale(.9);}
+  .cw-send svg{width:16px;height:16px;stroke:#fff;margin-left:2px;}
+  .typing-row{padding:0 16px 8px;font-size:12px;color:var(--muted);font-style:italic;display:none;}
+
+  /* ── MODALS ── */
+  .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:400;}
   .modal-overlay.active{display:flex;}
-  .modal{
-    background:var(--card);
-    border-radius:var(--radius);
-    width:90%;
-    max-width:400px;
-    padding:24px;
-  }
-  .modal-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-  }
-  .modal-title{
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:18px;
-    color:var(--forest-dark);
-  }
-  .modal-close{
-    width:32px; height:32px;
-    border-radius:50%;
-    background:var(--paper);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer;
-  }
-  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
-  .form-group{
-    margin-bottom:16px;
-  }
-  .form-label{
-    font-size:12px;
-    font-weight:500;
-    color:var(--muted);
-    margin-bottom:8px;
-    text-transform:uppercase;
-    letter-spacing:.3px;
-  }
-  .form-input, .form-select{
-    width:100%;
-    padding:14px 16px;
-    border:1px solid var(--line);
-    border-radius:12px;
-    font-family:'Inter',sans-serif;
-    font-size:14px;
-    background:var(--paper);
-    color:var(--ink);
-  }
-  .form-input:focus, .form-select:focus{
-    outline:none;
-    border-color:var(--forest);
-  }
-  .modal-btn{
-    width:100%;
-    padding:16px;
-    border-radius:14px;
-    border:none;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:15px;
-    cursor:pointer;
-    margin-top:8px;
-  }
-  .modal-btn-primary{
-    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
-    color:#fff;
-  }
+  .modal{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px;max-height:90vh;overflow-y:auto;}
+  .modal-handle{width:40px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 20px;}
+  .modal-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--forest-dark);margin-bottom:18px;}
+  .form-group{margin-bottom:14px;}
+  .form-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;display:block;}
+  .form-input,.form-select{width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;background:var(--paper);color:var(--ink);outline:none;}
+  .form-input:focus,.form-select:focus{border-color:var(--forest);}
+  .member-list-modal{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;margin-top:6px;}
+  .member-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--paper);border-radius:10px;border:1px solid var(--line);}
+  .member-row-avatar{width:36px;height:36px;border-radius:50%;background:var(--forest);color:#fff;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .member-row-info{flex:1;min-width:0;}
+  .member-row-name{font-weight:600;font-size:13px;color:var(--forest-dark);}
+  .member-row-flat{font-size:11px;color:var(--muted);}
+  .btn-primary{width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--forest),var(--forest-dark));color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:6px;}
+  .btn-danger{padding:6px 12px;border-radius:8px;border:none;background:var(--terracotta);color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
+  .btn-outline{padding:6px 12px;border-radius:8px;border:1.5px solid var(--forest);background:transparent;color:var(--forest);font-size:11px;font-weight:700;cursor:pointer;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty-state-icon{font-size:42px;margin-bottom:10px;}
 
-  /* ===== BOTTOM NAV ===== */
-  .bottom-nav{
-    position:fixed;
-    bottom:0; left:50%;
-    transform:translateX(-50%);
-    width:100%;
-    max-width:480px;
-    background:var(--card);
-    border-top:1px solid var(--line);
-    display:flex;
-    justify-content:space-around;
-    padding:10px 6px 14px;
-    box-shadow:0 -6px 20px rgba(21,53,41,.06);
-  }
-  .nav-item{
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:500;
-    cursor:pointer;
-    text-decoration:none;
-  }
-  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
+  /* ── GROUP SETTINGS PANEL ── */
+  .settings-panel{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:300;display:none;flex-direction:column;}
+  .sp-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));padding:16px 14px;display:flex;align-items:center;gap:10px;color:#fff;}
+  .sp-content{flex:1;overflow-y:auto;padding:16px;}
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 6px 14px;z-index:100;}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:10px;font-weight:500;cursor:pointer;text-decoration:none;}
+  .nav-item svg{width:19px;height:19px;stroke:var(--muted);}
   .nav-item.active{color:var(--forest);}
   .nav-item.active svg{stroke:var(--forest);}
-
-  @media (min-width:481px){
-    body{background:#E9ECE5;}
-    .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
-  }
-
-  .chat-window-overlay {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: var(--paper);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .chat-bubble {
-    max-width: 75%;
-    padding: 12px 16px;
-    border-radius: 16px;
-    font-size: 13.5px;
-    line-height: 1.4;
-    word-break: break-word;
-  }
-  
-  .chat-bubble.sent {
-    background: var(--forest);
-    color: white;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-  }
-  
-  .chat-bubble.received {
-    background: var(--card);
-    color: var(--ink);
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-    border: 1px solid var(--line);
-  }
-  
-  .chat-bubble-time {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9.5px;
-    margin-top: 4px;
-    text-align: right;
-    opacity: 0.75;
-  }
-  
-  .chat-bubble.received .chat-bubble-time {
-    color: var(--muted);
-  }
-  
-  .chat-bubble.sent .chat-bubble-time {
-    color: rgba(255,255,255,0.8);
-  }
+  @media(min-width:481px){body{background:#E9ECE5;}.app{margin:24px 0;border-radius:26px;box-shadow:0 24px 60px rgba(21,53,41,.14);overflow:hidden;}.fab{transform:translateX(202px);}.chat-window,.settings-panel{border-radius:26px;overflow:hidden;}}
 </style>
-</head>
+  <!-- ═══ Firebase SDK (Compat) ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script></head>
 <body>
 <div class="app">
 
@@ -343,51 +126,28 @@
   <div class="header">
     <div class="header-top">
       <a href="index.html" class="back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
-      <div class="page-title">Chat</div>
+      <div class="page-title">💬 Society Chat</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;">● Live</span>
     </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabIndividual" onclick="switchTab('individual')">Individual</button>
+    <button class="tab-btn" id="tabGroup" onclick="switchTab('group')">Groups</button>
   </div>
 
   <!-- CONTENT -->
-  <div class="content">
-    <div class="new-chat-btn" onclick="openModal('newChatModal')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Start New Chat
-    </div>
-
-    <div class="chat-list" id="chatList">
-      <!-- Chat items dyn populated -->
-    </div>
+  <div class="content" id="mainContent">
+    <!-- dynamically filled -->
   </div>
 
-  <!-- NEW CHAT MODAL -->
-  <div class="modal-overlay" id="newChatModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">Start New Chat</div>
-        <div class="modal-close" onclick="closeModal('newChatModal')">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Chat Type</div>
-        <select class="form-select" id="chatType">
-          <option value="individual">Individual</option>
-          <option value="group">Group</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Recipient Name</div>
-        <input type="text" class="form-input" id="recipientName" placeholder="Enter name">
-      </div>
-      <div class="form-group">
-        <div class="form-label">First Message</div>
-        <input type="text" class="form-input" id="firstMessage" placeholder="Type your message...">
-      </div>
-      <button class="modal-btn modal-btn-primary" onclick="startChat()">Start Chat</button>
-    </div>
-  </div>
+  <!-- FAB: New Chat / New Group -->
+  <button class="fab" id="fabBtn" onclick="onFabClick()" title="New chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
@@ -403,413 +163,668 @@
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Notices
     </a>
+    <a href="chat.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat
+    </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
     </a>
   </div>
 
-  <!-- SLIDING CHAT WINDOW OVERLAY -->
-  <div class="chat-window-overlay" id="chatWindow" style="display:none;">
-    <!-- Chat Header -->
-    <div style="background: linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%); color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 0 18px 18px; position: sticky; top: 0; z-index: 10;">
-      <div onclick="closeChatWindow()" style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.12);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </div>
-      <div class="avatar" id="activeChatAvatar" style="width: 38px; height: 38px; font-size: 14px; background:var(--marigold); color:var(--forest-dark); font-weight:600; display:flex; align-items:center; justify-content:center;">SC</div>
-      <div style="flex: 1;">
-        <div class="chat-name" id="activeChatName" style="color: white; font-size: 15px; font-family:'Space Grotesk',sans-serif; font-weight:600;">Society Committee</div>
-        <div style="font-size: 10px; color: rgba(255,255,255,0.65);" id="activeChatStatus">Online</div>
-      </div>
-    </div>
+</div>
 
-    <!-- Chat Messages Stream -->
-    <div class="chat-messages-stream" id="chatMsgStream" style="flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px;">
-      <!-- Messages go here -->
+<!-- ════════════ FULL-SCREEN CHAT WINDOW ════════════ -->
+<div class="chat-window" id="chatWindow">
+  <div class="cw-header">
+    <button class="cw-back" onclick="closeChatWindow()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <div class="cw-avatar" id="cwAvatar" style="background:var(--forest);color:#fff;">S</div>
+    <div class="cw-info">
+      <div class="cw-name" id="cwName">Chat</div>
+      <div class="cw-sub" id="cwSub">Online</div>
     </div>
-
-    <!-- Typing Indicator -->
-    <div id="typingIndicator" style="display: none; padding: 0 20px 10px; font-size: 12px; color: var(--muted); font-style: italic;">
-      <span id="typingName">Committee</span> is typing...
-    </div>
-
-    <!-- Chat Input Area -->
-    <div style="padding: 12px 16px; background: var(--card); border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; position: sticky; bottom: 0;">
-      <input type="text" class="form-input" id="chatInputMessage" placeholder="Type a message..." style="flex: 1; padding: 12px 16px; border-radius: 20px;" onkeydown="handleChatKeydown(event)">
-      <button class="btn btn-primary" onclick="sendChatMessage()" style="width: 44px; height: 44px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; min-width: auto; flex-shrink: 0; background: var(--forest);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; margin-left: 2px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
+    <button class="cw-more" id="cwMoreBtn" onclick="openGroupSettings()" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </button>
   </div>
+  <div class="cw-stream" id="cwStream"></div>
+  <div class="typing-row" id="typingRow">typing…</div>
+  <div class="cw-input-bar">
+    <input class="cw-input" id="cwInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="cw-send" onclick="sendMsg()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
 
+<!-- ════════════ GROUP SETTINGS PANEL ════════════ -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="sp-header">
+    <button class="cw-back" onclick="closeGroupSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;">Group Info</div>
+  </div>
+  <div class="sp-content" id="settingsContent"></div>
+</div>
+
+<!-- ════════════ MODAL: New Individual Chat ════════════ -->
+<div class="modal-overlay" id="modalIndividual">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 New Individual Chat</div>
+    <div class="form-group">
+      <label class="form-label">Flat Number to Chat With</label>
+      <input class="form-input" id="indFlatNo" placeholder="e.g. 302, 104, 501…">
+    </div>
+    <div id="flatResidentPreview" style="display:none; background:var(--paper); border-radius:10px; padding:12px; border:1px solid var(--line); margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Flat Resident</div>
+      <div id="flatResidentName" style="font-weight:700;font-size:14px;color:var(--forest-dark);"></div>
+      <div id="flatResidentPhone" style="font-size:12px;color:var(--muted);"></div>
+    </div>
+    <button class="btn-outline" style="width:100%;margin-bottom:10px;" onclick="lookupFlat()">🔍 Find Resident</button>
+    <div class="form-group">
+      <label class="form-label">First Message</label>
+      <input class="form-input" id="indFirstMsg" placeholder="Type your message…">
+    </div>
+    <button class="btn-primary" onclick="startIndividualChat()">Start Chat</button>
+    <button onclick="closeModal('modalIndividual')" style="width:100%;padding:12px;border:none;background:transparent;color:var(--muted);font-size:14px;cursor:pointer;margin-top:6px;">Cancel</button>
+  </div>
+</div>
+
+<!-- ════════════ MODAL: New Group ════════════ -->
+<div class="modal-overlay" id="modalGroup">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👥 Create New Group</div>
+    <div class="form-group">
+      <label class="form-label">Group Name</label>
+      <input class="form-input" id="grpName" placeholder="e.g. Tower B Residents, Party Planners…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Add Members (select flat numbers)</label>
+      <div class="member-list-modal" id="grpMemberPickList">
+        <!-- populated from society_users -->
+      </div>
+    </div>
+    <button class="btn-primary" onclick="createGroup()">Create Group</button>
+    <button onclick="closeModal('modalGroup')" style="width:100%;padding:12px;border:none;background:transparent;color:var(--muted);font-size:14px;cursor:pointer;margin-top:6px;">Cancel</button>
+  </div>
 </div>
 
 <script>
-  // Auth control
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
+// ══════════════════════════════════════════════
+//  BOOTSTRAP
+// ══════════════════════════════════════════════
+const defaultUser = {
+  name:"Sujeet Sharma", phone:"+91 98765 43210", email:"sujeet@email.com",
+  role:"Super Admin", tower:"Tower A", flat:"201",
+  memberSince:"Jan 2024", flatType:"3 BHK", password:"password123",
+  privacy:{showPhone:true,showEmail:false,allowVisitors:true,profileVisible:true},
+  notifications:{maintenance:true,visitor:true,notice:true,complaint:true,chat:true,payment:true}
+};
 
-  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    }
+let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+if (!currentUser) { currentUser = defaultUser; localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
+
+// ── sample flat directory (used when society_users is empty) ──
+const sampleUsers = [
+  { name:"Sujeet Sharma",  flat:"201", phone:"+91 98765 43210", email:"sujeet@email.com"  },
+  { name:"Priya Mehta",    flat:"202", phone:"+91 98888 11111", email:"priya@email.com"   },
+  { name:"Amit Singh",     flat:"301", phone:"+91 97777 22222", email:"amit@email.com"    },
+  { name:"Rajesh Kumar",   flat:"302", phone:"+91 96666 33333", email:"rajesh@email.com"  },
+  { name:"Neha Verma",     flat:"401", phone:"+91 95555 44444", email:"neha@email.com"    },
+  { name:"Suresh Patil",   flat:"402", phone:"+91 94444 55555", email:"suresh@email.com"  },
+  { name:"Deepa Shah",     flat:"501", phone:"+91 93333 66666", email:"deepa@email.com"   },
+  { name:"Kiran Joshi",    flat:"502", phone:"+91 92222 77777", email:"kiran@email.com"   },
+];
+
+let allUsers = JSON.parse(localStorage.getItem('society_users')) || sampleUsers;
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentTab    = 'individual';
+let activeThreadId = null;
+let threads        = {};   // local mirror of Firebase /chat_threads
+let unsub          = null; // Firebase listener unsubscribe
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabIndividual').classList.toggle('active', tab === 'individual');
+  document.getElementById('tabGroup').classList.toggle('active',      tab === 'group');
+  renderChatList();
+}
+
+function onFabClick() {
+  if (currentTab === 'individual') openModal('modalIndividual');
+  else { populateGroupMemberPicker(); openModal('modalGroup'); }
+}
+
+// ══════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('active');    }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ══════════════════════════════════════════════
+//  THREAD HELPERS
+// ══════════════════════════════════════════════
+function myFlatKey()  { return `flat_${currentUser.flat}`; }
+
+/** Individual thread id: sorted pair of flat numbers */
+function indThreadId(flatA, flatB) {
+  return ['flat_' + flatA, 'flat_' + flatB].sort().join('__');
+}
+
+/** Return display name for a thread from the perspective of currentUser */
+function threadDisplayName(t) {
+  if (t.type === 'group') return t.name || 'Group';
+  // individual: show other party
+  const other = (t.members || []).find(m => String(m.flat) !== String(currentUser.flat));
+  return other ? `Flat ${other.flat} · ${other.name}` : t.name || 'Chat';
+}
+
+function threadAvatarText(t) {
+  if (t.type === 'group') return (t.name||'G').substring(0,2).toUpperCase();
+  const other = (t.members||[]).find(m=>String(m.flat)!==String(currentUser.flat));
+  return other ? `F${other.flat}` : 'CH';
+}
+
+function isThreadMine(t) {
+  if (!t.members) return false;
+  return t.members.some(m => String(m.flat) === String(currentUser.flat));
+}
+
+function lastMsg(t) {
+  const msgs = t.messages ? Object.values(t.messages) : [];
+  return msgs.length ? msgs[msgs.length - 1] : null;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER CHAT LIST
+// ══════════════════════════════════════════════
+function renderChatList() {
+  const el = document.getElementById('mainContent');
+  el.innerHTML = '';
+
+  const myThreads = Object.entries(threads).filter(([id, t]) =>
+    t.type === currentTab && isThreadMine(t)
+  );
+
+  if (myThreads.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">${currentTab==='individual'?'💬':'👥'}</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;margin-bottom:6px;">No ${currentTab} chats yet</div>
+      <div style="font-size:13px;">Tap <strong>+</strong> to start ${currentTab==='individual'?'a flat-to-flat chat':'a group'}</div>
+    </div>`;
+    return;
   }
 
-  function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
-  }
-
-  function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-  }
-
-  // Chats Data System
-  let chatThreads = {};
-  let currentActiveThread = null;
-
-  function loadChatSystem() {
-    if (!currentUser) return;
-
-    chatThreads = JSON.parse(localStorage.getItem('society_chats'));
-    
-    // Seed default chats if empty
-    if (!chatThreads) {
-      chatThreads = {
-        "Society Committee": {
-          type: "committee",
-          unread: 0,
-          messages: [
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Welcome to the new digital portal! Please check the notice board for updates.", time: "10:00 AM" },
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Reminder: The monthly committee meeting is today at 6 PM in the community hall.", time: "10:15 AM" },
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Meeting rescheduled to 6 PM. Agenda: Security and Water billing.", time: "10:30 AM" }
-          ]
-        },
-        "Tower B Residents": {
-          type: "group",
-          unread: 0,
-          messages: [
-            { sender: "rahul@email.com", senderName: "Rahul Sharma", text: "Is anyone facing water pressure issues in Tower B?", time: "09:00 AM" },
-            { sender: "priya@email.com", senderName: "Priya Sharma", text: "Yes, 4th floor has very low pressure today.", time: "09:05 AM" },
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Water supply issue discussed with plumber. Should be fixed by noon.", time: "09:15 AM" }
-          ]
-        },
-        "Priya Sharma <-> Sujeet Sharma": {
-          type: "individual",
-          unread: 0,
-          messages: [
-            { sender: "sujeet@email.com", senderName: "Sujeet Sharma", text: "Hi Priya, could you share the electrician contact?", time: "Yesterday" },
-            { sender: "priya@email.com", senderName: "Priya Sharma", text: "Sure! Rajesh Electrician: +91 98989 77777", time: "Yesterday" },
-            { sender: "sujeet@email.com", senderName: "Sujeet Sharma", text: "Thanks for the help!", time: "Yesterday" }
-          ]
-        },
-        "Tower A Residents": {
-          type: "group",
-          unread: 0,
-          messages: [
-            { sender: "amit@email.com", senderName: "Amit Singh", text: "Lift A1 is undergoing servicing today.", time: "Yesterday" },
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Lift maintenance completed. Both lifts are fully functional.", time: "Yesterday" }
-          ]
-        },
-        "Rajesh Kumar <-> Sujeet Sharma": {
-          type: "individual",
-          unread: 0,
-          messages: [
-            { sender: "rajesh@email.com", senderName: "Rajesh Kumar", text: "Is the parking available?", time: "Jul 18" }
-          ]
-        },
-        "Management Group": {
-          type: "committee",
-          unread: 0,
-          messages: [
-            { sender: "committee@email.com", senderName: "Society Committee", text: "Budget approval pending", time: "Jul 17" }
-          ]
-        },
-        "Amit Singh <-> Sujeet Sharma": {
-          type: "individual",
-          unread: 0,
-          messages: [
-            { sender: "amit@email.com", senderName: "Amit Singh", text: "Garden maintenance query", time: "Jul 15" }
-          ]
-        }
-      };
-      localStorage.setItem('society_chats', JSON.stringify(chatThreads));
-    }
-
-    renderChatList();
-  }
-
-  function getThreadDisplayName(threadKey) {
-    if (threadKey.includes(' <-> ')) {
-      const parts = threadKey.split(' <-> ');
-      return parts[0] === currentUser.name ? parts[1] : parts[0];
-    }
-    return threadKey;
-  }
-
-  function isThreadVisible(threadKey) {
-    if (threadKey.includes(' <-> ')) {
-      const parts = threadKey.split(' <-> ');
-      return parts.includes(currentUser.name);
-    }
-    return true; // Groups are visible to all
-  }
-
-  function renderChatList() {
-    const chatListContainer = document.getElementById('chatList');
-    chatListContainer.innerHTML = '';
-
-    Object.keys(chatThreads).forEach(threadKey => {
-      if (!isThreadVisible(threadKey)) return;
-
-      const thread = chatThreads[threadKey];
-      const displayTitle = getThreadDisplayName(threadKey);
-      
-      const lastMsgObj = thread.messages[thread.messages.length - 1];
-      const lastMsgText = lastMsgObj ? lastMsgObj.text : 'No messages';
-      const lastMsgTime = lastMsgObj ? lastMsgObj.time : '';
-      
-      const initials = displayTitle.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-      
-      let avatarClass = '';
-      if (thread.type === 'group') avatarClass = 'group';
-      if (thread.type === 'committee') avatarClass = 'committee';
-
-      const unreadBadgeHtml = thread.unread > 0 ? `<div class="unread-badge">${thread.unread}</div>` : '';
-
-      const chatItem = document.createElement('div');
-      chatItem.className = 'chat-item';
-      chatItem.onclick = function() { openChat(threadKey); };
-      chatItem.innerHTML = `
-        <div class="avatar ${avatarClass}">${initials}</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">${displayTitle}</div>
-            <div class="chat-time">${lastMsgTime}</div>
-          </div>
-          <div class="chat-preview">${lastMsgText}</div>
-        </div>
-        ${unreadBadgeHtml}
-      `;
-      chatListContainer.appendChild(chatItem);
-    });
-  }
-
-  // Open Chat overlay window
-  function openChat(threadKey) {
-    currentActiveThread = threadKey;
-    
-    // Clear unread flag
-    chatThreads[threadKey].unread = 0;
-    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
-    renderChatList();
-
-    // Populate active thread info
-    const thread = chatThreads[threadKey];
-    const displayTitle = getThreadDisplayName(threadKey);
-    document.getElementById('activeChatName').textContent = displayTitle;
-    
-    const initials = displayTitle.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    const activeChatAvatar = document.getElementById('activeChatAvatar');
-    activeChatAvatar.textContent = initials;
-    activeChatAvatar.className = 'avatar';
-    if (thread.type === 'group') activeChatAvatar.classList.add('group');
-    if (thread.type === 'committee') activeChatAvatar.classList.add('committee');
-
-    document.getElementById('activeChatStatus').textContent = thread.type === 'individual' ? 'Online' : 'Group Channel';
-
-    // Populate messages stream
-    renderMessagesStream();
-
-    // Show panel
-    document.getElementById('chatWindow').style.display = 'flex';
-  }
-
-  function renderMessagesStream() {
-    const stream = document.getElementById('chatMsgStream');
-    stream.innerHTML = '';
-
-    const messages = chatThreads[currentActiveThread].messages;
-    messages.forEach(m => {
-      const isMe = m.sender === currentUser.email;
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble ${isMe ? 'sent' : 'received'}`;
-      
-      // If it's a group/committee chat and not sent by me, show sender name
-      const showSenderName = (chatThreads[currentActiveThread].type !== 'individual') && !isMe;
-      const senderNameHtml = showSenderName ? `<div style="font-size: 10px; font-weight: 600; color: var(--forest); margin-bottom: 2px;">${m.senderName}</div>` : '';
-      
-      bubble.innerHTML = `
-        ${senderNameHtml}
-        <div>${m.text}</div>
-        <div class="chat-bubble-time">${m.time}</div>
-      `;
-      stream.appendChild(bubble);
-    });
-
-    // Scroll to bottom
-    stream.scrollTop = stream.scrollHeight;
-  }
-
-  function closeChatWindow() {
-    document.getElementById('chatWindow').style.display = 'none';
-    currentActiveThread = null;
-  }
-
-  // Send message
-  function sendChatMessage() {
-    const inputEl = document.getElementById('chatInputMessage');
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    const now = new Date();
-    const time = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    // Append message
-    const msg = { sender: currentUser.email, senderName: currentUser.name, text, time };
-    chatThreads[currentActiveThread].messages.push(msg);
-    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
-    
-    // Clear input & re-render messages
-    inputEl.value = '';
-    renderMessagesStream();
-    renderChatList();
-
-    // Trigger auto-reply
-    triggerSimulationReply(text);
-  }
-
-  function handleChatKeydown(e) {
-    if (e.key === 'Enter') {
-      sendChatMessage();
-    }
-  }
-
-  // Simulated auto-replies logic
-  function triggerSimulationReply(userText) {
-    const typingIndicator = document.getElementById('typingIndicator');
-    const typingName = document.getElementById('typingName');
-    
-    const displayTitle = getThreadDisplayName(currentActiveThread);
-    typingName.textContent = displayTitle;
-    
-    // Show typing indicator after 500ms
-    setTimeout(() => {
-      if (currentActiveThread) {
-        typingIndicator.style.display = 'block';
-        document.getElementById('chatMsgStream').scrollTop = document.getElementById('chatMsgStream').scrollHeight;
-      }
-    }, 400);
-
-    // Answer after 1.8 seconds
-    setTimeout(() => {
-      // If user closed chat in between, ignore
-      if (!currentActiveThread) return;
-
-      typingIndicator.style.display = 'none';
-
-      let responseText = "Thanks for the details! We are looking into this.";
-      const lowerText = userText.toLowerCase();
-
-      if (lowerText.includes('water')) {
-        responseText = "Yes, plumbers are currently working near the overhead tank of Tower B. Expect fix by 3 PM.";
-      } else if (lowerText.includes('lift') || lowerText.includes('elevator')) {
-        responseText = "We have escalated this to Otis technicians. They are on their way to examine the controller.";
-      } else if (lowerText.includes('hi') || lowerText.includes('hello') || lowerText.includes('hey')) {
-        responseText = `Hello! How can I assist you today regarding ${displayTitle}?`;
-      } else if (lowerText.includes('thanks') || lowerText.includes('thank you')) {
-        responseText = "You're welcome! Let us know if you need anything else.";
-      } else if (lowerText.includes('parking')) {
-        responseText = "Please contact our Security Gate admin regarding parking slot allocations. Slot logs are synced daily.";
-      }
-
-      const replyMsg = {
-        sender: "auto-reply@email.com",
-        senderName: displayTitle,
-        text: responseText,
-        time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-      };
-
-      chatThreads[currentActiveThread].messages.push(replyMsg);
-      localStorage.setItem('society_chats', JSON.stringify(chatThreads));
-      
-      renderMessagesStream();
-      renderChatList();
-    }, 1800);
-  }
-
-  // Start new chat modal
-  function startChat() {
-    const type = document.getElementById('chatType').value;
-    const name = document.getElementById('recipientName').value.trim();
-    const message = document.getElementById('firstMessage').value.trim();
-    
-    if (!name) {
-      alert('Please enter recipient name');
-      return;
-    }
-    if (!message) {
-      alert('Please enter a message');
-      return;
-    }
-
-    let threadKey = name;
-    if (type === 'individual') {
-      threadKey = [currentUser.name, name].sort().join(' <-> ');
-    }
-
-    if (chatThreads[threadKey]) {
-      alert('A chat thread with this recipient already exists.');
-      return;
-    }
-
-    const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    chatThreads[threadKey] = {
-      type: type,
-      unread: 0,
-      messages: [{ sender: currentUser.email, senderName: currentUser.name, text: message, time: time }]
-    };
-
-    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
-    
-    // Clear inputs
-    document.getElementById('recipientName').value = '';
-    document.getElementById('firstMessage').value = '';
-    document.getElementById('chatType').value = 'individual';
-    
-    closeModal('newChatModal');
-    renderChatList();
-    
-    // Open the newly created chat
-    openChat(threadKey);
-  }
-
-  // Close modals clicking outside
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        overlay.classList.remove('active');
-      }
-    });
+  // Sort by last message time desc
+  myThreads.sort(([,a],[,b]) => {
+    const ta = lastMsg(a)?.timestamp || 0;
+    const tb = lastMsg(b)?.timestamp || 0;
+    return tb - ta;
   });
 
-  // Initial load
-  loadChatSystem();
+  myThreads.forEach(([tid, t]) => {
+    const displayName = threadDisplayName(t);
+    const avatarText  = threadAvatarText(t);
+    const lm          = lastMsg(t);
+    const membersList = t.type === 'group' ? (t.members||[]).map(m=>`Flat ${m.flat}`).join(', ') : '';
+
+    const avatarClass = t.type === 'group' ? 'group' : 'flat';
+    const timeLabel   = lm ? fmtTime(lm.timestamp) : '';
+    const preview     = lm ? lm.text : 'Start chatting…';
+
+    const card = document.createElement('div');
+    card.className = 'chat-item';
+    card.onclick = () => openChat(tid);
+    card.innerHTML = `
+      <div class="avatar ${avatarClass}">${avatarText}</div>
+      <div class="chat-info">
+        <div class="chat-meta">
+          <div class="chat-name">${displayName}</div>
+          <div class="chat-time">${timeLabel}</div>
+        </div>
+        <div class="chat-preview">${escHtml(preview)}</div>
+        ${t.type==='group' && membersList ? `<div style="font-size:10px;color:var(--muted);margin-top:3px;">👥 ${membersList}</div>` : ''}
+      </div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  FIREBASE LISTENER — load all threads
+// ══════════════════════════════════════════════
+function startThreadsListener() {
+  if (unsub) unsub();
+  const ref = firebase.database().ref('/chat_threads');
+  ref.on('value', snap => {
+    threads = snap.val() || {};
+    renderChatList();
+    if (activeThreadId && threads[activeThreadId]) {
+      renderMessages();
+    }
+  });
+  unsub = () => ref.off('value');
+}
+
+// ══════════════════════════════════════════════
+//  OPEN / CLOSE CHAT
+// ══════════════════════════════════════════════
+function openChat(tid) {
+  activeThreadId = tid;
+  const t = threads[tid] || {};
+  const displayName = threadDisplayName(t);
+  const avatarText  = threadAvatarText(t);
+
+  const cw = document.getElementById('chatWindow');
+  document.getElementById('cwName').textContent    = displayName;
+  document.getElementById('cwSub').textContent     = t.type === 'group'
+    ? `${(t.members||[]).length} members` : `Flat ${t.members?.find(m=>String(m.flat)!==String(currentUser.flat))?.flat||''}`;
+
+  const av = document.getElementById('cwAvatar');
+  av.textContent = avatarText;
+  av.style.background = t.type === 'group' ? 'var(--sky)' : 'linear-gradient(135deg,var(--marigold),#b8891a)';
+  av.style.color       = t.type === 'group' ? '#fff' : 'var(--forest-dark)';
+
+  document.getElementById('cwMoreBtn').style.display = t.type === 'group' ? 'flex' : 'none';
+
+  cw.style.display = 'flex';
+  renderMessages();
+}
+
+function closeChatWindow() {
+  document.getElementById('chatWindow').style.display = 'none';
+  activeThreadId = null;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER MESSAGES
+// ══════════════════════════════════════════════
+function renderMessages() {
+  const stream = document.getElementById('cwStream');
+  const t = threads[activeThreadId];
+  if (!t) return;
+
+  const msgs = t.messages ? Object.values(t.messages) : [];
+  msgs.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+
+  stream.innerHTML = '';
+
+  if (msgs.length === 0) {
+    stream.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px;">👋 Say hello!</div>`;
+    return;
+  }
+
+  msgs.forEach(m => {
+    const isMe = String(m.senderFlat) === String(currentUser.flat);
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${isMe ? 'sent' : 'received'}`;
+    const showSender = !isMe && t.type === 'group';
+    bubble.innerHTML = `
+      ${showSender ? `<div class="bubble-sender">Flat ${m.senderFlat} · ${m.senderName}</div>` : ''}
+      <div>${escHtml(m.text)}</div>
+      <div class="bubble-time">${fmtTime(m.timestamp)}</div>
+    `;
+    stream.appendChild(bubble);
+  });
+
+  stream.scrollTop = stream.scrollHeight;
+}
+
+// ══════════════════════════════════════════════
+//  SEND MESSAGE
+// ══════════════════════════════════════════════
+function sendMsg() {
+  const inputEl = document.getElementById('cwInput');
+  const text = inputEl.value.trim();
+  if (!text || !activeThreadId) return;
+
+  const msg = {
+    text: text,
+    senderFlat: currentUser.flat,
+    senderName: currentUser.name,
+    senderEmail: currentUser.email,
+    timestamp: Date.now()
+  };
+
+  firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).push(msg);
+  inputEl.value = '';
+}
+
+// ══════════════════════════════════════════════
+//  INDIVIDUAL CHAT — FLAT LOOKUP
+// ══════════════════════════════════════════════
+let foundResident = null;
+
+function lookupFlat() {
+  const flat = document.getElementById('indFlatNo').value.trim();
+  if (!flat) { alert('Enter a flat number.'); return; }
+  if (String(flat) === String(currentUser.flat)) { alert('That is your own flat!'); return; }
+
+  const norm = s => String(s).replace(/flat\s*/i,'').trim();
+  const res = allUsers.find(u => norm(u.flat) === norm(flat));
+
+  const preview = document.getElementById('flatResidentPreview');
+  if (res) {
+    foundResident = res;
+    document.getElementById('flatResidentName').textContent  = `${res.name} (Flat ${res.flat})`;
+    document.getElementById('flatResidentPhone').textContent = res.phone || '';
+    preview.style.display = 'block';
+  } else {
+    foundResident = null;
+    preview.style.display = 'block';
+    document.getElementById('flatResidentName').textContent  = `Flat ${flat} — resident details pending`;
+    document.getElementById('flatResidentPhone').textContent = 'They can reply once they open the app';
+    // Create a stub user for that flat
+    foundResident = { name: `Flat ${flat} Resident`, flat: flat, email: `flat${flat}@society.app` };
+  }
+}
+
+function startIndividualChat() {
+  const flat = document.getElementById('indFlatNo').value.trim();
+  const firstMsg = document.getElementById('indFirstMsg').value.trim();
+
+  if (!flat) { alert('Enter the flat number.'); return; }
+  if (String(flat) === String(currentUser.flat)) { alert('You cannot chat with yourself.'); return; }
+  if (!firstMsg) { alert('Enter a first message.'); return; }
+  if (!foundResident) { lookupFlat(); if (!foundResident) return; }
+
+  const tid = indThreadId(currentUser.flat, flat);
+
+  const thread = threads[tid] || {
+    type: 'individual',
+    name: `Flat ${currentUser.flat} ↔ Flat ${flat}`,
+    members: [
+      { flat: currentUser.flat, name: currentUser.name, email: currentUser.email },
+      { flat: foundResident.flat, name: foundResident.name, email: foundResident.email }
+    ],
+    createdAt: Date.now()
+  };
+
+  const msg = { text: firstMsg, senderFlat: currentUser.flat, senderName: currentUser.name, senderEmail: currentUser.email, timestamp: Date.now() };
+
+  const ref = firebase.database().ref(`/chat_threads/${tid}`);
+  ref.set({ ...thread, messages: { [Date.now()]: msg } }).then(() => {
+    closeModal('modalIndividual');
+    document.getElementById('indFlatNo').value  = '';
+    document.getElementById('indFirstMsg').value = '';
+    document.getElementById('flatResidentPreview').style.display = 'none';
+    foundResident = null;
+    openChat(tid);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  GROUP CHAT — CREATE
+// ══════════════════════════════════════════════
+let selectedGroupMembers = new Set(); // flat numbers
+
+function populateGroupMemberPicker() {
+  selectedGroupMembers.clear();
+  const el = document.getElementById('grpMemberPickList');
+  el.innerHTML = '';
+
+  allUsers.forEach(u => {
+    if (String(u.flat) === String(currentUser.flat)) return; // skip self
+
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.id = `pick_${u.flat}`;
+    row.style.cursor = 'pointer';
+    row.onclick = () => toggleGroupMember(u.flat, u.name, row);
+    row.innerHTML = `
+      <div class="member-row-avatar">${u.name.substring(0,2).toUpperCase()}</div>
+      <div class="member-row-info">
+        <div class="member-row-name">${u.name}</div>
+        <div class="member-row-flat">Flat ${u.flat}</div>
+      </div>
+      <input type="checkbox" id="chk_${u.flat}" style="width:18px;height:18px;accent-color:var(--forest);" onclick="toggleGroupMember('${u.flat}','${u.name}',document.getElementById('pick_${u.flat}'))">
+    `;
+    el.appendChild(row);
+  });
+}
+
+function toggleGroupMember(flat, name, row) {
+  const chk = document.getElementById(`chk_${flat}`);
+  if (selectedGroupMembers.has(String(flat))) {
+    selectedGroupMembers.delete(String(flat));
+    chk.checked = false;
+    row.style.background = 'var(--paper)';
+  } else {
+    selectedGroupMembers.add(String(flat));
+    chk.checked = true;
+    row.style.background = '#E4EEE8';
+  }
+}
+
+function createGroup() {
+  const name = document.getElementById('grpName').value.trim();
+  if (!name) { alert('Enter a group name.'); return; }
+  if (selectedGroupMembers.size === 0) { alert('Select at least one member.'); return; }
+
+  const members = [
+    { flat: currentUser.flat, name: currentUser.name, email: currentUser.email, role: 'admin' }
+  ];
+  selectedGroupMembers.forEach(flat => {
+    const u = allUsers.find(u => String(u.flat) === flat);
+    if (u) members.push({ flat: u.flat, name: u.name, email: u.email, role: 'member' });
+  });
+
+  const tid  = 'grp_' + Date.now();
+  const thread = {
+    type: 'group',
+    name: name,
+    members: members,
+    adminFlat: currentUser.flat,
+    createdAt: Date.now(),
+    messages: {}
+  };
+
+  firebase.database().ref(`/chat_threads/${tid}`).set(thread).then(() => {
+    closeModal('modalGroup');
+    document.getElementById('grpName').value = '';
+    selectedGroupMembers.clear();
+    switchTab('group');
+    openChat(tid);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  GROUP SETTINGS PANEL
+// ══════════════════════════════════════════════
+function openGroupSettings() {
+  if (!activeThreadId) return;
+  const t = threads[activeThreadId];
+  if (!t) return;
+
+  const isAdmin = String(t.adminFlat) === String(currentUser.flat);
+  const members = t.members || [];
+
+  let html = `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="avatar group" style="width:64px;height:64px;font-size:22px;margin:0 auto 10px;">${(t.name||'G').substring(0,2).toUpperCase()}</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--forest-dark);">${t.name}</div>
+      <div style="font-size:12px;color:var(--muted);">${members.length} members · Created ${fmtTime(t.createdAt)}</div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">Members</div>
+    <div id="settingsMemberList" style="display:flex;flex-direction:column;gap:8px;">
+  `;
+
+  members.forEach(m => {
+    const isAdminMember = String(m.flat) === String(t.adminFlat);
+    const isMe = String(m.flat) === String(currentUser.flat);
+    html += `
+      <div class="member-row">
+        <div class="member-row-avatar">${m.name.substring(0,2).toUpperCase()}</div>
+        <div class="member-row-info">
+          <div class="member-row-name">${m.name} ${isMe ? '(You)' : ''}</div>
+          <div class="member-row-flat">Flat ${m.flat} ${isAdminMember ? '· 👑 Admin' : ''}</div>
+        </div>
+        ${isAdmin && !isMe && !isAdminMember
+          ? `<button class="btn-danger" onclick="removeMemberFromGroup('${activeThreadId}','${m.flat}')">Remove</button>`
+          : ''}
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  if (isAdmin) {
+    html += `
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 10px;">Add Member</div>
+      <div id="settingsAddList" style="display:flex;flex-direction:column;gap:8px;">
+    `;
+    const memberFlats = new Set(members.map(m => String(m.flat)));
+    allUsers.filter(u => !memberFlats.has(String(u.flat))).forEach(u => {
+      html += `
+        <div class="member-row">
+          <div class="member-row-avatar">${u.name.substring(0,2).toUpperCase()}</div>
+          <div class="member-row-info">
+            <div class="member-row-name">${u.name}</div>
+            <div class="member-row-flat">Flat ${u.flat}</div>
+          </div>
+          <button class="btn-outline" onclick="addMemberToGroup('${activeThreadId}','${u.flat}','${u.name}','${u.email}')">Add</button>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (!isAdmin) {
+    html += `
+      <button onclick="leaveGroup('${activeThreadId}')" style="margin-top:24px;width:100%;padding:14px;border:none;border-radius:12px;background:#f5e1dc;color:var(--terracotta);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">
+        🚪 Leave Group
+      </button>`;
+  }
+
+  document.getElementById('settingsContent').innerHTML = html;
+  document.getElementById('settingsPanel').style.display = 'flex';
+}
+
+function closeGroupSettings() {
+  document.getElementById('settingsPanel').style.display = 'none';
+}
+
+function addMemberToGroup(tid, flat, name, email) {
+  const t = threads[tid];
+  if (!t) return;
+  const members = [...(t.members || []), { flat, name, email, role: 'member' }];
+  firebase.database().ref(`/chat_threads/${tid}/members`).set(members).then(() => {
+    openGroupSettings();
+  });
+}
+
+function removeMemberFromGroup(tid, flat) {
+  if (!confirm(`Remove Flat ${flat} from this group?`)) return;
+  const t = threads[tid];
+  if (!t) return;
+  const members = (t.members || []).filter(m => String(m.flat) !== String(flat));
+  firebase.database().ref(`/chat_threads/${tid}/members`).set(members).then(() => {
+    openGroupSettings();
+  });
+}
+
+function leaveGroup(tid) {
+  if (!confirm('Leave this group?')) return;
+  const t = threads[tid];
+  if (!t) return;
+  const members = (t.members || []).filter(m => String(m.flat) !== String(currentUser.flat));
+  firebase.database().ref(`/chat_threads/${tid}/members`).set(members).then(() => {
+    closeGroupSettings();
+    closeChatWindow();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+  if (diff < 86400000) return d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
+  if (diff < 604800000) {
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    return days[d.getDay()];
+  }
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════
+//  SEED default threads on first open
+// ══════════════════════════════════════════════
+async function seedDefaultThreads() {
+  const snap = await firebase.database().ref('/chat_threads').once('value');
+  if (snap.val()) return; // already has data
+
+  const now = Date.now();
+  const defaults = {
+    ['flat_201__flat_202']: {
+      type:'individual', name:'Flat 201 ↔ Flat 202',
+      members:[
+        { flat:'201', name:'Sujeet Sharma', email:'sujeet@email.com' },
+        { flat:'202', name:'Priya Mehta', email:'priya@email.com' }
+      ],
+      createdAt: now - 86400000,
+      messages: {
+        a1: { text:'Hi Priya, could you share the electrician contact?', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 },
+        a2: { text:'Sure! Rajesh Electrician: +91 98989 77777', senderFlat:'202', senderName:'Priya Mehta', timestamp: now - 86000000 },
+        a3: { text:'Thanks!', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 85000000 }
+      }
+    },
+    ['grp_default_committee']: {
+      type:'group', name:'Society Committee',
+      adminFlat:'201',
+      members: sampleUsers.map(u => ({ flat:u.flat, name:u.name, email:u.email, role:'member' })),
+      createdAt: now - 7*86400000,
+      messages: {
+        b1:{ text:'Welcome to the new digital portal! Check the notice board for updates.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 172800000 },
+        b2:{ text:'Monthly committee meeting is today at 6 PM in community hall.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 }
+      }
+    },
+    ['grp_default_towera']: {
+      type:'group', name:'Tower A Residents',
+      adminFlat:'201',
+      members: sampleUsers.slice(0,4).map(u => ({ flat:u.flat, name:u.name, email:u.email, role:'member' })),
+      createdAt: now - 3*86400000,
+      messages: {
+        c1:{ text:'Lift A1 is undergoing servicing today.', senderFlat:'301', senderName:'Amit Singh', timestamp: now - 172800000 },
+        c2:{ text:'Maintenance completed. Both lifts are functional.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 }
+      }
+    }
+  };
+
+  await firebase.database().ref('/chat_threads').set(defaults);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+seedDefaultThreads().then(() => {
+  startThreadsListener();
+});
+
+// Close modals tapping backdrop
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+});
 </script>
 </body>
 </html>
