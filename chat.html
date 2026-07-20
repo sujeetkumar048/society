@@ -284,6 +284,56 @@
     body{background:#E9ECE5;}
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
   }
+
+  .chat-window-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--paper);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  
+  .chat-bubble.sent {
+    background: var(--forest);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .chat-bubble.received {
+    background: var(--card);
+    color: var(--ink);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--line);
+  }
+  
+  .chat-bubble-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    margin-top: 4px;
+    text-align: right;
+    opacity: 0.75;
+  }
+  
+  .chat-bubble.received .chat-bubble-time {
+    color: var(--muted);
+  }
+  
+  .chat-bubble.sent .chat-bubble-time {
+    color: rgba(255,255,255,0.8);
+  }
 </style>
 </head>
 <body>
@@ -307,85 +357,7 @@
     </div>
 
     <div class="chat-list" id="chatList">
-      <div class="chat-item" onclick="openChat('Society Committee', 'Meeting rescheduled to 6 PM')">
-        <div class="avatar committee">SC</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Society Committee</div>
-            <div class="chat-time">10:30 AM</div>
-          </div>
-          <div class="chat-preview">Meeting rescheduled to 6 PM</div>
-        </div>
-        <div class="unread-badge">3</div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Tower B Residents', 'Water supply issue discussed')">
-        <div class="avatar group">TB</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Tower B Residents</div>
-            <div class="chat-time">09:15 AM</div>
-          </div>
-          <div class="chat-preview">Water supply issue discussed</div>
-        </div>
-        <div class="unread-badge">12</div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Priya Sharma', 'Thanks for the help!')">
-        <div class="avatar">PS</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Priya Sharma</div>
-            <div class="chat-time">Yesterday</div>
-          </div>
-          <div class="chat-preview">Thanks for the help!</div>
-        </div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Tower A Residents', 'Lift maintenance completed')">
-        <div class="avatar group">TA</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Tower A Residents</div>
-            <div class="chat-time">Yesterday</div>
-          </div>
-          <div class="chat-preview">Lift maintenance completed</div>
-        </div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Rajesh Kumar', 'Is the parking available?')">
-        <div class="avatar">RK</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Rajesh Kumar</div>
-            <div class="chat-time">Jul 18</div>
-          </div>
-          <div class="chat-preview">Is the parking available?</div>
-        </div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Management Group', 'Budget approval pending')">
-        <div class="avatar committee">MG</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Management Group</div>
-            <div class="chat-time">Jul 17</div>
-          </div>
-          <div class="chat-preview">Budget approval pending</div>
-        </div>
-        <div class="unread-badge">5</div>
-      </div>
-
-      <div class="chat-item" onclick="openChat('Amit Singh', 'Garden maintenance query')">
-        <div class="avatar">AS</div>
-        <div class="chat-info">
-          <div class="chat-header">
-            <div class="chat-name">Amit Singh</div>
-            <div class="chat-time">Jul 15</div>
-          </div>
-          <div class="chat-preview">Garden maintenance query</div>
-        </div>
-      </div>
+      <!-- Chat items dyn populated -->
     </div>
   </div>
 
@@ -437,9 +409,68 @@
     </a>
   </div>
 
+  <!-- SLIDING CHAT WINDOW OVERLAY -->
+  <div class="chat-window-overlay" id="chatWindow" style="display:none;">
+    <!-- Chat Header -->
+    <div style="background: linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%); color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 0 18px 18px; position: sticky; top: 0; z-index: 10;">
+      <div onclick="closeChatWindow()" style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </div>
+      <div class="avatar" id="activeChatAvatar" style="width: 38px; height: 38px; font-size: 14px; background:var(--marigold); color:var(--forest-dark); font-weight:600; display:flex; align-items:center; justify-content:center;">SC</div>
+      <div style="flex: 1;">
+        <div class="chat-name" id="activeChatName" style="color: white; font-size: 15px; font-family:'Space Grotesk',sans-serif; font-weight:600;">Society Committee</div>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.65);" id="activeChatStatus">Online</div>
+      </div>
+    </div>
+
+    <!-- Chat Messages Stream -->
+    <div class="chat-messages-stream" id="chatMsgStream" style="flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <!-- Messages go here -->
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="typingIndicator" style="display: none; padding: 0 20px 10px; font-size: 12px; color: var(--muted); font-style: italic;">
+      <span id="typingName">Committee</span> is typing...
+    </div>
+
+    <!-- Chat Input Area -->
+    <div style="padding: 12px 16px; background: var(--card); border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; position: sticky; bottom: 0;">
+      <input type="text" class="form-input" id="chatInputMessage" placeholder="Type a message..." style="flex: 1; padding: 12px 16px; border-radius: 20px;" onkeydown="handleChatKeydown(event)">
+      <button class="btn btn-primary" onclick="sendChatMessage()" style="width: 44px; height: 44px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; min-width: auto; flex-shrink: 0; background: var(--forest);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; margin-left: 2px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <script>
+  // Auth control
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    if (localStorage.getItem('loggedOutFlag')) {
+      alert('Please login to continue.');
+      window.location.href = 'profile.html';
+    } else {
+      currentUser = defaultUser;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+  }
+
   function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
   }
@@ -448,10 +479,285 @@
     document.getElementById(modalId).classList.remove('active');
   }
 
+  // Chats Data System
+  let chatThreads = {};
+  let currentActiveThread = null;
+
+  function loadChatSystem() {
+    if (!currentUser) return;
+
+    chatThreads = JSON.parse(localStorage.getItem('society_chats'));
+    
+    // Seed default chats if empty
+    if (!chatThreads) {
+      chatThreads = {
+        "Society Committee": {
+          type: "committee",
+          unread: 0,
+          messages: [
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Welcome to the new digital portal! Please check the notice board for updates.", time: "10:00 AM" },
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Reminder: The monthly committee meeting is today at 6 PM in the community hall.", time: "10:15 AM" },
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Meeting rescheduled to 6 PM. Agenda: Security and Water billing.", time: "10:30 AM" }
+          ]
+        },
+        "Tower B Residents": {
+          type: "group",
+          unread: 0,
+          messages: [
+            { sender: "rahul@email.com", senderName: "Rahul Sharma", text: "Is anyone facing water pressure issues in Tower B?", time: "09:00 AM" },
+            { sender: "priya@email.com", senderName: "Priya Sharma", text: "Yes, 4th floor has very low pressure today.", time: "09:05 AM" },
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Water supply issue discussed with plumber. Should be fixed by noon.", time: "09:15 AM" }
+          ]
+        },
+        "Priya Sharma <-> Sujeet Sharma": {
+          type: "individual",
+          unread: 0,
+          messages: [
+            { sender: "sujeet@email.com", senderName: "Sujeet Sharma", text: "Hi Priya, could you share the electrician contact?", time: "Yesterday" },
+            { sender: "priya@email.com", senderName: "Priya Sharma", text: "Sure! Rajesh Electrician: +91 98989 77777", time: "Yesterday" },
+            { sender: "sujeet@email.com", senderName: "Sujeet Sharma", text: "Thanks for the help!", time: "Yesterday" }
+          ]
+        },
+        "Tower A Residents": {
+          type: "group",
+          unread: 0,
+          messages: [
+            { sender: "amit@email.com", senderName: "Amit Singh", text: "Lift A1 is undergoing servicing today.", time: "Yesterday" },
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Lift maintenance completed. Both lifts are fully functional.", time: "Yesterday" }
+          ]
+        },
+        "Rajesh Kumar <-> Sujeet Sharma": {
+          type: "individual",
+          unread: 0,
+          messages: [
+            { sender: "rajesh@email.com", senderName: "Rajesh Kumar", text: "Is the parking available?", time: "Jul 18" }
+          ]
+        },
+        "Management Group": {
+          type: "committee",
+          unread: 0,
+          messages: [
+            { sender: "committee@email.com", senderName: "Society Committee", text: "Budget approval pending", time: "Jul 17" }
+          ]
+        },
+        "Amit Singh <-> Sujeet Sharma": {
+          type: "individual",
+          unread: 0,
+          messages: [
+            { sender: "amit@email.com", senderName: "Amit Singh", text: "Garden maintenance query", time: "Jul 15" }
+          ]
+        }
+      };
+      localStorage.setItem('society_chats', JSON.stringify(chatThreads));
+    }
+
+    renderChatList();
+  }
+
+  function getThreadDisplayName(threadKey) {
+    if (threadKey.includes(' <-> ')) {
+      const parts = threadKey.split(' <-> ');
+      return parts[0] === currentUser.name ? parts[1] : parts[0];
+    }
+    return threadKey;
+  }
+
+  function isThreadVisible(threadKey) {
+    if (threadKey.includes(' <-> ')) {
+      const parts = threadKey.split(' <-> ');
+      return parts.includes(currentUser.name);
+    }
+    return true; // Groups are visible to all
+  }
+
+  function renderChatList() {
+    const chatListContainer = document.getElementById('chatList');
+    chatListContainer.innerHTML = '';
+
+    Object.keys(chatThreads).forEach(threadKey => {
+      if (!isThreadVisible(threadKey)) return;
+
+      const thread = chatThreads[threadKey];
+      const displayTitle = getThreadDisplayName(threadKey);
+      
+      const lastMsgObj = thread.messages[thread.messages.length - 1];
+      const lastMsgText = lastMsgObj ? lastMsgObj.text : 'No messages';
+      const lastMsgTime = lastMsgObj ? lastMsgObj.time : '';
+      
+      const initials = displayTitle.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      
+      let avatarClass = '';
+      if (thread.type === 'group') avatarClass = 'group';
+      if (thread.type === 'committee') avatarClass = 'committee';
+
+      const unreadBadgeHtml = thread.unread > 0 ? `<div class="unread-badge">${thread.unread}</div>` : '';
+
+      const chatItem = document.createElement('div');
+      chatItem.className = 'chat-item';
+      chatItem.onclick = function() { openChat(threadKey); };
+      chatItem.innerHTML = `
+        <div class="avatar ${avatarClass}">${initials}</div>
+        <div class="chat-info">
+          <div class="chat-header">
+            <div class="chat-name">${displayTitle}</div>
+            <div class="chat-time">${lastMsgTime}</div>
+          </div>
+          <div class="chat-preview">${lastMsgText}</div>
+        </div>
+        ${unreadBadgeHtml}
+      `;
+      chatListContainer.appendChild(chatItem);
+    });
+  }
+
+  // Open Chat overlay window
+  function openChat(threadKey) {
+    currentActiveThread = threadKey;
+    
+    // Clear unread flag
+    chatThreads[threadKey].unread = 0;
+    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
+    renderChatList();
+
+    // Populate active thread info
+    const thread = chatThreads[threadKey];
+    const displayTitle = getThreadDisplayName(threadKey);
+    document.getElementById('activeChatName').textContent = displayTitle;
+    
+    const initials = displayTitle.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    const activeChatAvatar = document.getElementById('activeChatAvatar');
+    activeChatAvatar.textContent = initials;
+    activeChatAvatar.className = 'avatar';
+    if (thread.type === 'group') activeChatAvatar.classList.add('group');
+    if (thread.type === 'committee') activeChatAvatar.classList.add('committee');
+
+    document.getElementById('activeChatStatus').textContent = thread.type === 'individual' ? 'Online' : 'Group Channel';
+
+    // Populate messages stream
+    renderMessagesStream();
+
+    // Show panel
+    document.getElementById('chatWindow').style.display = 'flex';
+  }
+
+  function renderMessagesStream() {
+    const stream = document.getElementById('chatMsgStream');
+    stream.innerHTML = '';
+
+    const messages = chatThreads[currentActiveThread].messages;
+    messages.forEach(m => {
+      const isMe = m.sender === currentUser.email;
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${isMe ? 'sent' : 'received'}`;
+      
+      // If it's a group/committee chat and not sent by me, show sender name
+      const showSenderName = (chatThreads[currentActiveThread].type !== 'individual') && !isMe;
+      const senderNameHtml = showSenderName ? `<div style="font-size: 10px; font-weight: 600; color: var(--forest); margin-bottom: 2px;">${m.senderName}</div>` : '';
+      
+      bubble.innerHTML = `
+        ${senderNameHtml}
+        <div>${m.text}</div>
+        <div class="chat-bubble-time">${m.time}</div>
+      `;
+      stream.appendChild(bubble);
+    });
+
+    // Scroll to bottom
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  function closeChatWindow() {
+    document.getElementById('chatWindow').style.display = 'none';
+    currentActiveThread = null;
+  }
+
+  // Send message
+  function sendChatMessage() {
+    const inputEl = document.getElementById('chatInputMessage');
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    const now = new Date();
+    const time = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    // Append message
+    const msg = { sender: currentUser.email, senderName: currentUser.name, text, time };
+    chatThreads[currentActiveThread].messages.push(msg);
+    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
+    
+    // Clear input & re-render messages
+    inputEl.value = '';
+    renderMessagesStream();
+    renderChatList();
+
+    // Trigger auto-reply
+    triggerSimulationReply(text);
+  }
+
+  function handleChatKeydown(e) {
+    if (e.key === 'Enter') {
+      sendChatMessage();
+    }
+  }
+
+  // Simulated auto-replies logic
+  function triggerSimulationReply(userText) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    const typingName = document.getElementById('typingName');
+    
+    const displayTitle = getThreadDisplayName(currentActiveThread);
+    typingName.textContent = displayTitle;
+    
+    // Show typing indicator after 500ms
+    setTimeout(() => {
+      if (currentActiveThread) {
+        typingIndicator.style.display = 'block';
+        document.getElementById('chatMsgStream').scrollTop = document.getElementById('chatMsgStream').scrollHeight;
+      }
+    }, 400);
+
+    // Answer after 1.8 seconds
+    setTimeout(() => {
+      // If user closed chat in between, ignore
+      if (!currentActiveThread) return;
+
+      typingIndicator.style.display = 'none';
+
+      let responseText = "Thanks for the details! We are looking into this.";
+      const lowerText = userText.toLowerCase();
+
+      if (lowerText.includes('water')) {
+        responseText = "Yes, plumbers are currently working near the overhead tank of Tower B. Expect fix by 3 PM.";
+      } else if (lowerText.includes('lift') || lowerText.includes('elevator')) {
+        responseText = "We have escalated this to Otis technicians. They are on their way to examine the controller.";
+      } else if (lowerText.includes('hi') || lowerText.includes('hello') || lowerText.includes('hey')) {
+        responseText = `Hello! How can I assist you today regarding ${displayTitle}?`;
+      } else if (lowerText.includes('thanks') || lowerText.includes('thank you')) {
+        responseText = "You're welcome! Let us know if you need anything else.";
+      } else if (lowerText.includes('parking')) {
+        responseText = "Please contact our Security Gate admin regarding parking slot allocations. Slot logs are synced daily.";
+      }
+
+      const replyMsg = {
+        sender: "auto-reply@email.com",
+        senderName: displayTitle,
+        text: responseText,
+        time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      chatThreads[currentActiveThread].messages.push(replyMsg);
+      localStorage.setItem('society_chats', JSON.stringify(chatThreads));
+      
+      renderMessagesStream();
+      renderChatList();
+    }, 1800);
+  }
+
+  // Start new chat modal
   function startChat() {
     const type = document.getElementById('chatType').value;
-    const name = document.getElementById('recipientName').value;
-    const message = document.getElementById('firstMessage').value;
+    const name = document.getElementById('recipientName').value.trim();
+    const message = document.getElementById('firstMessage').value.trim();
     
     if (!name) {
       alert('Please enter recipient name');
@@ -462,40 +768,38 @@
       return;
     }
 
-    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    const avatarClass = type === 'group' ? 'group' : '';
-    const currentTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    let threadKey = name;
+    if (type === 'individual') {
+      threadKey = [currentUser.name, name].sort().join(' <-> ');
+    }
 
-    const chatList = document.getElementById('chatList');
-    const newChat = document.createElement('div');
-    newChat.className = 'chat-item';
-    newChat.onclick = function() { openChat(name, message); };
-    newChat.innerHTML = `
-      <div class="avatar ${avatarClass}">${initials}</div>
-      <div class="chat-info">
-        <div class="chat-header">
-          <div class="chat-name">${name}</div>
-          <div class="chat-time">${currentTime}</div>
-        </div>
-        <div class="chat-preview">${message.substring(0, 40)}${message.length > 40 ? '...' : ''}</div>
-      </div>
-    `;
-    chatList.insertBefore(newChat, chatList.firstChild);
+    if (chatThreads[threadKey]) {
+      alert('A chat thread with this recipient already exists.');
+      return;
+    }
+
+    const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    chatThreads[threadKey] = {
+      type: type,
+      unread: 0,
+      messages: [{ sender: currentUser.email, senderName: currentUser.name, text: message, time: time }]
+    };
+
+    localStorage.setItem('society_chats', JSON.stringify(chatThreads));
     
-    // Reset form
+    // Clear inputs
     document.getElementById('recipientName').value = '';
     document.getElementById('firstMessage').value = '';
     document.getElementById('chatType').value = 'individual';
     
     closeModal('newChatModal');
-    alert(`Chat started with ${name}!`);
+    renderChatList();
+    
+    // Open the newly created chat
+    openChat(threadKey);
   }
 
-  function openChat(name, preview) {
-    alert(`Opening chat with ${name}\n\nLast message: ${preview}`);
-  }
-
-  // Close modal when clicking outside
+  // Close modals clicking outside
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
@@ -503,6 +807,9 @@
       }
     });
   });
+
+  // Initial load
+  loadChatSystem();
 </script>
 </body>
 </html>

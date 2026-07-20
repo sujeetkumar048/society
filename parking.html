@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parking Desk - SR Gold Society</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1F4D3D;
+    --forest-dark: #123026;
+    --marigold: #F5C453;
+    --marigold-soft: #FEF9EB;
+    --terracotta: #D36B53;
+    --sky: #4A90E2;
+    --ink: #1B2420;
+    --muted: #62726B;
+    --paper: #F6F8F6;
+    --line: #E2E8E5;
+    --card: #FFFFFF;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAFBF9;
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #FAFBF9;
+    min-height: 100vh;
+    position: relative;
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    box-shadow: 0 0 40px rgba(0,0,0,.03);
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 24px 20px;
+    color: #fff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 160px; height: 160px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  /* ===== TAB BAR ===== */
+  .tab-container {
+    display: flex;
+    background: var(--line);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 20px 16px 12px;
+  }
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--forest);
+    color: white;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    padding: 10px 16px 20px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--forest-dark);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+
+  /* ===== FLAT SLOT ROW ===== */
+  .flat-slot-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--paper);
+  }
+  .flat-slot-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--forest-dark);
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .vehicle-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .vehicle-row:last-child { border: none; }
+  .vehicle-type {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .vehicle-details {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* ===== SLOTS GRID ===== */
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .slot-box {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--paper);
+  }
+  .slot-box.occupied {
+    background: #F5E1DC;
+    border-color: var(--terracotta);
+    color: var(--terracotta);
+  }
+  .slot-box.available {
+    background: #E4EEE8;
+    border-color: var(--forest);
+    color: var(--forest);
+  }
+  .slot-box-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .slot-box-status {
+    font-size: 8px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ===== FORMS ===== */
+  .form-group {
+    margin-bottom: 12px;
+  }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color: white;
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 6px 14px;
+    box-shadow: 0 -6px 20px rgba(21,53,41,.06);
+    z-index: 999;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-item svg { width: 19px; height: 19px; stroke: var(--muted); }
+  .nav-item.active { color: var(--forest); }
+  .nav-item.active svg { stroke: var(--forest); }
+
+  @media (min-width: 481px) {
+    body { background: #E9ECE5; }
+    .app { margin: 24px auto; border-radius: 26px; overflow: hidden; height: calc(100vh - 48px); min-height: 0; }
+    .bottom-nav { position: absolute; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Parking Management Desk</div>
+    </div>
+  </div>
+
+  <!-- TAB CONTROL -->
+  <div class="tab-container">
+    <div class="tab-btn active" id="tabResidentBtn" onclick="switchParkingTab('resident')">Resident Vehicles</div>
+    <div class="tab-btn" id="tabVisitorBtn" onclick="switchParkingTab('visitor')">Visitor Parking</div>
+  </div>
+
+  <!-- CONTENT VIEW -->
+  <div class="content">
+
+    <!-- RESIDENT VEHICLES TAB -->
+    <div id="residentTab">
+      <div class="card">
+        <div class="card-title">Resident Vehicle Directory <span class="eyebrow" id="residentCount">4 flats</span></div>
+        <div id="residentVehiclesList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- VISITOR PARKING TAB -->
+    <div id="visitorTab" style="display:none;">
+      <!-- AUTO ALLOCATION BOX -->
+      <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
+        <div class="card-title">Auto-Allocation Console</div>
+        
+        <div class="form-group">
+          <div class="form-label">Visitor Vehicle Number</div>
+          <input type="text" class="form-input" id="visPlate" placeholder="e.g. MH-12-AB-9876">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Visiting Flat</div>
+          <input type="text" class="form-input" id="visFlat" placeholder="e.g. 302">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Vehicle Type</div>
+          <select class="form-input" id="visType">
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Cycle">Cycle</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="allocateVisitorParking()" style="margin-top:8px;">Auto Allocate Parking Slot</button>
+      </div>
+
+      <!-- VISUAL VISITOR SLOTS LAYOUT -->
+      <div class="card">
+        <div class="card-title">Visitor Parking Slots <span class="eyebrow" id="visitorAvailLabel">7 slots free</span></div>
+        <div class="slots-grid" id="visitorSlotsGrid">
+          <!-- Dynamically drawn slot grid boxes -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  let residents = [];
+  let visitorSlots = [];
+
+  function initParkingDesk() {
+    residents = JSON.parse(localStorage.getItem('society_parking_residents'));
+    visitorSlots = JSON.parse(localStorage.getItem('society_parking_visitors'));
+
+    // Seed Resident vehicle database if empty
+    if (!residents) {
+      residents = [
+        {
+          flat: "Flat 302",
+          vehicles: [
+            { type: "Car", plate: "MH-12-AA-3020", sticker: "ST-CAR-302", rfid: "RF-302-C", status: "Parked" },
+            { type: "Bike", plate: "MH-12-BB-3021", sticker: "ST-BIK-302", rfid: "RF-302-B", status: "Out" },
+            { type: "Cycle", plate: "CY-302-A", sticker: "ST-CYC-302", rfid: "RF-302-Y", status: "Parked" }
+          ]
+        },
+        {
+          flat: "Flat 201",
+          vehicles: [
+            { type: "Car", plate: "MH-12-XY-2010", sticker: "ST-CAR-201", rfid: "RF-201-C", status: "Parked" }
+          ]
+        },
+        {
+          flat: "Flat 405",
+          vehicles: [
+            { type: "Car", plate: "MH-12-ZZ-4050", sticker: "ST-CAR-405", rfid: "RF-405-C", status: "Out" },
+            { type: "Bike", plate: "MH-12-YY-4051", sticker: "ST-BIK-405", rfid: "RF-405-B", status: "Parked" }
+          ]
+        },
+        {
+          flat: "Flat 102",
+          vehicles: [
+            { type: "Bike", plate: "MH-12-QQ-1020", sticker: "ST-BIK-102", rfid: "RF-102-B", status: "Parked" }
+          ]
+        }
+      ];
+      localStorage.setItem('society_parking_residents', JSON.stringify(residents));
+    }
+
+    // Seed Visitor Slots (V-01 to V-08) if empty
+    if (!visitorSlots) {
+      visitorSlots = [
+        { slotId: "V-01", occupied: true, plate: "MH-12-HH-4455", flat: "102", time: "10:30 AM" },
+        { slotId: "V-02", occupied: false, plate: "", flat: "", time: "" },
+        { slotId: "V-03", occupied: false, plate: "", flat: "", time: "" },
+        { slotId: "V-04", occupied: true, plate: "MH-14-KK-8900", flat: "302", time: "11:45 AM" },
+        { slotId: "V-05", occupied: false, plate: "", flat: "", time: "" },
+        { slotId: "V-06", occupied: false, plate: "", flat: "", time: "" },
+        { slotId: "V-07", occupied: false, plate: "", flat: "", time: "" },
+        { slotId: "V-08", occupied: false, plate: "", flat: "", time: "" }
+      ];
+      localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+    }
+
+    renderResidents();
+    renderVisitorSlots();
+  }
+
+  function switchParkingTab(tab) {
+    document.getElementById('residentTab').style.display = tab === 'resident' ? 'block' : 'none';
+    document.getElementById('visitorTab').style.display = tab === 'visitor' ? 'block' : 'none';
+
+    document.getElementById('tabResidentBtn').classList.toggle('active', tab === 'resident');
+    document.getElementById('tabVisitorBtn').classList.toggle('active', tab === 'visitor');
+  }
+
+  function renderResidents() {
+    const listWrap = document.getElementById('residentVehiclesList');
+    listWrap.innerHTML = '';
+    document.getElementById('residentCount').textContent = `${residents.length} flats`;
+
+    residents.forEach(res => {
+      const card = document.createElement('div');
+      card.className = 'flat-slot-item';
+
+      let vehiclesHtml = '';
+      res.vehicles.forEach(v => {
+        vehiclesHtml += `
+          <div class="vehicle-row">
+            <div class="vehicle-type">
+              ${v.type === 'Car' ? '🚗' : v.type === 'Bike' ? '🏍️' : '🚲'} ${v.plate}
+            </div>
+            <div class="vehicle-details">
+              Sticker: ${v.sticker}<br>
+              RFID: ${v.rfid} · <span style="font-weight:700; color:${v.status === 'Parked' ? 'var(--forest)' : 'var(--muted)'};">${v.status}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="flat-slot-header">
+          <div>${res.flat}</div>
+          <div style="font-size:11px; font-weight:500; color:var(--muted);">${res.vehicles.length} vehicle(s)</div>
+        </div>
+        <div>
+          ${vehiclesHtml}
+        </div>
+      `;
+      listWrap.appendChild(card);
+    });
+  }
+
+  function renderVisitorSlots() {
+    const gridWrap = document.getElementById('visitorSlotsGrid');
+    gridWrap.innerHTML = '';
+
+    let freeCount = 0;
+
+    visitorSlots.forEach(slot => {
+      if (!slot.occupied) freeCount++;
+
+      const box = document.createElement('div');
+      box.className = `slot-box ${slot.occupied ? 'occupied' : 'available'}`;
+      box.onclick = () => handleSlotClick(slot);
+
+      box.innerHTML = `
+        <div class="slot-box-name">${slot.slotId}</div>
+        <div class="slot-box-status">${slot.occupied ? 'Occupied' : 'Free'}</div>
+      `;
+      gridWrap.appendChild(box);
+    });
+
+    document.getElementById('visitorAvailLabel').textContent = `${freeCount} slots free`;
+  }
+
+  function allocateVisitorParking() {
+    const plate = document.getElementById('visPlate').value.trim().toUpperCase();
+    const flat = document.getElementById('visFlat').value.trim();
+    const type = document.getElementById('visType').value;
+
+    if (!plate) {
+      alert("Please enter the visitor's vehicle registration number.");
+      return;
+    }
+    if (!flat) {
+      alert("Please enter the flat number they are visiting.");
+      return;
+    }
+
+    // Auto find the next available visitor slot
+    const freeSlot = visitorSlots.find(s => !s.occupied);
+    if (!freeSlot) {
+      alert("Parking full! No visitor slots available currently.");
+      return;
+    }
+
+    // Allocate slot
+    const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    freeSlot.occupied = true;
+    freeSlot.plate = plate;
+    freeSlot.flat = flat;
+    freeSlot.time = timeStr;
+
+    localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+    
+    renderVisitorSlots();
+
+    // Reset inputs
+    document.getElementById('visPlate').value = '';
+    document.getElementById('visFlat').value = '';
+
+    const stickerNum = 'ST-VIS-' + Math.floor(100 + Math.random() * 900);
+    const rfidNum = 'RF-VIS-' + Math.floor(1000 + Math.random() * 9000);
+
+    alert(`Auto-Allocation Successful! 🚗\n\nAllocated Slot: ${freeSlot.slotId}\nVisitor Pass Details:\nSticker: ${stickerNum}\nRFID tag: ${rfidNum}\nCheck-in Time: ${timeStr}`);
+  }
+
+  function handleSlotClick(slot) {
+    if (!slot.occupied) {
+      alert(`Slot ${slot.slotId} is currently empty and available for allocation.`);
+      return;
+    }
+
+    const checkOut = confirm(`Visitor Spot ${slot.slotId} Details:\n\nVehicle Plate: ${slot.plate}\nVisiting Flat: ${slot.flat}\nCheck-in Time: ${slot.time}\n\nDo you want to CHECK OUT this vehicle and free up the slot?`);
+    
+    if (checkOut) {
+      slot.occupied = false;
+      slot.plate = "";
+      slot.flat = "";
+      slot.time = "";
+
+      localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+      renderVisitorSlots();
+      alert(`Slot ${slot.slotId} has been successfully checked out and is now available.`);
+    }
+  }
+
+  initParkingDesk();
+</script>
+</body>
+</html>

@@ -103,6 +103,10 @@
     font-size:28px;
     margin:0 auto 16px;
     border:3px solid var(--marigold);
+    transition: all 0.2s ease;
+  }
+  .profile-avatar:hover .upload-overlay {
+    opacity: 1 !important;
   }
   .profile-name{
     font-family:'Space Grotesk',sans-serif;
@@ -370,6 +374,174 @@
     body{background:#E9ECE5;}
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
   }
+  
+  /* Premium auth styling */
+  .auth-tabs {
+    display: flex;
+    position: relative;
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+  }
+  .auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    color: var(--muted);
+    z-index: 2;
+    transition: color 0.3s ease;
+  }
+  .auth-tab.active {
+    color: var(--forest-dark);
+  }
+  .tab-slider {
+    position: absolute;
+    top: 4px; left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: var(--card);
+    border-radius: 11px;
+    box-shadow: 0 4px 12px rgba(21,53,41,0.08);
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .auth-form-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-form {
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+  }
+  .auth-form.hidden {
+    opacity: 0;
+    transform: translateX(-30px);
+    position: absolute;
+    pointer-events: none;
+  }
+  .auth-form.hidden-right {
+    opacity: 0;
+    transform: translateX(30px);
+    position: absolute;
+    pointer-events: none;
+  }
+  .pwd-input-wrap {
+    position: relative;
+  }
+  .pwd-toggle-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pwd-toggle-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--muted);
+  }
+  .val-feedback {
+    font-size: 11px;
+    margin-top: 4px;
+    display: none;
+  }
+  .val-feedback.error {
+    color: var(--terracotta);
+    display: block;
+  }
+  .val-feedback.success {
+    color: var(--forest);
+    display: block;
+  }
+  
+  /* Password strength bars */
+  .pwd-strength-container {
+    margin-top: 8px;
+    display: none;
+  }
+  .pwd-strength-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .pwd-strength-bars {
+    display: flex;
+    gap: 4px;
+    height: 4px;
+  }
+  .pwd-strength-bar {
+    flex: 1;
+    background: var(--line);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+  
+  /* Form input container focus changes */
+  .form-input, .form-select {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--forest);
+    background-color: var(--card);
+    box-shadow: 0 0 0 4px rgba(31, 77, 61, 0.12);
+  }
+  
+  /* Toast styles */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--card);
+    border-left: 4px solid var(--forest);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(21,53,41,0.15);
+    padding: 14px 20px;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 90%;
+    max-width: 400px;
+  }
+  .toast-container.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }
+  .toast-icon.success { background: #E4EEE8; color: var(--forest); }
+  .toast-icon.success svg { stroke: var(--forest); width: 14px; height: 14px; fill: none; }
+  .toast-icon.error { background: #F5E1DC; color: var(--terracotta); }
+  .toast-icon.error svg { stroke: var(--terracotta); width: 14px; height: 14px; fill: none; }
+  
+  .toast-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
 </style>
 </head>
 <body>
@@ -386,9 +558,118 @@
   </div>
 
   <!-- CONTENT -->
-  <div class="content">
+  <!-- AUTH SCREEN (shown when logged out) -->
+  <div class="content" id="authScreen" style="display:none;">
+    <div class="card" style="padding: 24px 20px; box-shadow: 0 10px 30px rgba(21,53,41,0.06); border-radius: 18px;">
+      <div class="brand" style="justify-content: center; margin-bottom: 24px; align-items: center; gap: 12px;">
+        <div class="seal" style="width: 44px; height: 44px; font-size: 16px;">SS</div>
+        <div>
+          <div class="brand-name" style="color: var(--forest-dark); font-size: 20px; font-weight: 700; font-family:'Space Grotesk',sans-serif;">Surakshit Society</div>
+          <div class="brand-sub" style="color: var(--muted); font-size: 11px;">Digital Resident Portal</div>
+        </div>
+      </div>
+      
+      <!-- Sliding Tab Selector -->
+      <div class="auth-tabs">
+        <div id="tabLogin" class="auth-tab active" onclick="toggleAuthTab('login')">Login</div>
+        <div id="tabRegister" class="auth-tab" onclick="toggleAuthTab('register')">Register</div>
+        <div class="tab-slider" id="tabSlider"></div>
+      </div>
+
+      <div class="auth-form-container" id="authFormContainer">
+        <!-- Login Form -->
+        <div id="loginForm" class="auth-form">
+          <div class="form-group">
+            <div class="form-label">Email or Phone</div>
+            <input type="text" class="form-input" id="loginId" placeholder="e.g., sujeet@email.com" oninput="validateLoginField()">
+            <div id="loginIdFeedback" class="val-feedback"></div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Password</div>
+            <div class="pwd-input-wrap">
+              <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" oninput="validateLoginPassword()">
+              <div class="pwd-toggle-btn" onclick="togglePwdVisibility('loginPassword')">
+                <svg id="loginPasswordEye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+            </div>
+            <div id="loginPasswordFeedback" class="val-feedback"></div>
+          </div>
+          <button class="btn btn-primary" onclick="processLogin()" id="btnLogin" style="margin-top: 8px;">Login</button>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="auth-form hidden-right">
+          <div class="form-group">
+            <div class="form-label">Full Name</div>
+            <input type="text" class="form-input" id="regName" placeholder="e.g., Priya Sharma" oninput="validateRegName()">
+            <div id="regNameFeedback" class="val-feedback"></div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Phone Number</div>
+            <input type="tel" class="form-input" id="regPhone" placeholder="e.g., +91 99999 88888" oninput="validateRegPhone()">
+            <div id="regPhoneFeedback" class="val-feedback"></div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Email Address</div>
+            <input type="email" class="form-input" id="regEmail" placeholder="e.g., priya@email.com" oninput="validateRegEmail()">
+            <div id="regEmailFeedback" class="val-feedback"></div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Password</div>
+            <div class="pwd-input-wrap">
+              <input type="password" class="form-input" id="regPassword" placeholder="Create password" oninput="checkRegPasswordStrength()">
+              <div class="pwd-toggle-btn" onclick="togglePwdVisibility('regPassword')">
+                <svg id="regPasswordEye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+            </div>
+            <!-- Password Strength Meter -->
+            <div class="pwd-strength-container" id="pwdStrengthContainer">
+              <div class="pwd-strength-label">Password Strength: <span id="pwdStrengthTxt" style="font-weight:600;">Weak</span></div>
+              <div class="pwd-strength-bars">
+                <div class="pwd-strength-bar" id="bar1"></div>
+                <div class="pwd-strength-bar" id="bar2"></div>
+                <div class="pwd-strength-bar" id="bar3"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <div class="form-label">Tower</div>
+              <select class="form-select" id="regTower">
+                <option value="Tower A">Tower A</option>
+                <option value="Tower B">Tower B</option>
+                <option value="Tower C">Tower C</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <div class="form-label">Flat No</div>
+              <input type="text" class="form-input" id="regFlat" placeholder="e.g., 302" oninput="validateRegFlat()">
+              <div id="regFlatFeedback" class="val-feedback"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Role</div>
+            <select class="form-select" id="regRole">
+              <option value="Resident">Resident</option>
+              <option value="Committee Member">Committee Member</option>
+              <option value="Super Admin">Super Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="processRegister()" id="btnRegister" style="margin-top: 8px;">Register Profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE DASHBOARD (shown when logged in) -->
+  <div class="content" id="profileDashboard">
     <div class="profile-card">
-      <div class="profile-avatar">SS</div>
+      <div class="profile-avatar" onclick="triggerAvatarUpload()" style="cursor: pointer; position: relative; overflow: hidden;">
+        <span id="avatarInitials">SS</span>
+        <img id="avatarImage" style="width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0;">
+        <div style="position: absolute; bottom: 0; width: 100%; height: 24px; background: rgba(0,0,0,0.5); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" class="upload-overlay">Edit</div>
+      </div>
+      <input type="file" id="avatarInput" style="display:none;" accept="image/*" onchange="handleAvatarChange(event)">
       <div class="profile-name">Sujeet Sharma</div>
       <div class="profile-role">Super Admin · Tower A, Flat 201</div>
       <div class="profile-details">
@@ -411,9 +692,9 @@
       </div>
     </div>
 
-    <div class="add-user-btn" onclick="openModal('addUserModal')">
+    <div class="add-user-btn" onclick="openModal('addUserModal')" style="display:none;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add New User
+      Add New User (Admin)
     </div>
 
     <div class="menu-card">
@@ -464,7 +745,7 @@
       </div>
     </div>
 
-    <div class="logout-btn" onclick="alert('Logged out successfully!')">
+    <div class="logout-btn" onclick="processLogout()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Logout
     </div>
@@ -481,36 +762,37 @@
       </div>
       <div class="form-group">
         <div class="form-label">Full Name</div>
-        <input type="text" class="form-input" placeholder="Enter full name">
+        <input type="text" class="form-input" id="addName" placeholder="Enter full name">
       </div>
       <div class="form-group">
         <div class="form-label">Phone Number</div>
-        <input type="tel" class="form-input" placeholder="Enter phone number">
+        <input type="tel" class="form-input" id="addPhone" placeholder="Enter phone number">
       </div>
       <div class="form-group">
         <div class="form-label">Email</div>
-        <input type="email" class="form-input" placeholder="Enter email address">
+        <input type="email" class="form-input" id="addEmail" placeholder="Enter email address">
       </div>
       <div class="form-group">
         <div class="form-label">Role</div>
-        <select class="form-select">
-          <option>Resident</option>
-          <option>Committee Member</option>
-          <option>Staff</option>
-          <option>Admin</option>
+        <select class="form-select" id="addRole">
+          <option value="Resident">Resident</option>
+          <option value="Committee Member">Committee Member</option>
+          <option value="Super Admin">Super Admin</option>
         </select>
       </div>
-      <div class="form-group">
-        <div class="form-label">Tower</div>
-        <select class="form-select">
-          <option>Tower A</option>
-          <option>Tower B</option>
-          <option>Tower C</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Flat Number</div>
-        <input type="text" class="form-input" placeholder="Enter flat number">
+      <div class="form-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <div class="form-label">Tower</div>
+          <select class="form-select" id="addTower">
+            <option value="Tower A">Tower A</option>
+            <option value="Tower B">Tower B</option>
+            <option value="Tower C">Tower C</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <div class="form-label">Flat Number</div>
+          <input type="text" class="form-input" id="addFlat" placeholder="Flat No.">
+        </div>
       </div>
       <button class="modal-btn modal-btn-primary" onclick="addUser()">Add User</button>
     </div>
@@ -527,15 +809,15 @@
       </div>
       <div class="form-group">
         <div class="form-label">Full Name</div>
-        <input type="text" class="form-input" value="Sujeet Sharma">
+        <input type="text" class="form-input" id="editName" value="">
       </div>
       <div class="form-group">
         <div class="form-label">Phone Number</div>
-        <input type="tel" class="form-input" value="+91 98765 43210">
+        <input type="tel" class="form-input" id="editPhone" value="">
       </div>
       <div class="form-group">
         <div class="form-label">Email</div>
-        <input type="email" class="form-input" value="sujeet@email.com">
+        <input type="email" class="form-input" id="editEmail" value="">
       </div>
       <button class="modal-btn modal-btn-primary" onclick="saveProfile()">Save Changes</button>
     </div>
@@ -552,15 +834,15 @@
       </div>
       <div class="form-group">
         <div class="form-label">Current Password</div>
-        <input type="password" class="form-input" placeholder="Enter current password">
+        <input type="password" class="form-input" id="curPassword" placeholder="Enter current password">
       </div>
       <div class="form-group">
         <div class="form-label">New Password</div>
-        <input type="password" class="form-input" placeholder="Enter new password">
+        <input type="password" class="form-input" id="newPassword" placeholder="Enter new password">
       </div>
       <div class="form-group">
         <div class="form-label">Confirm New Password</div>
-        <input type="password" class="form-input" placeholder="Confirm new password">
+        <input type="password" class="form-input" id="confPassword" placeholder="Confirm new password">
       </div>
       <button class="modal-btn modal-btn-primary" onclick="changePassword()">Update Password</button>
     </div>
@@ -577,19 +859,19 @@
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Show phone number to residents</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleShowPhone" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Show email to residents</div>
-        <div class="toggle-input" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input" id="toggleShowEmail" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Allow visitors to see my flat</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleAllowVisitors" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Profile visible in directory</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleProfileVisible" onclick="this.classList.toggle('active')"></div>
       </div>
       <button class="modal-btn modal-btn-primary" onclick="savePrivacy()">Save Settings</button>
     </div>
@@ -606,27 +888,27 @@
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Maintenance reminders</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleMaint" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Visitor notifications</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleVisitor" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Notice board updates</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleNotice" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Complaint updates</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleComplaint" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Chat messages</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="toggleChat" onclick="this.classList.toggle('active')"></div>
       </div>
       <div class="toggle-switch">
         <div class="toggle-label">Payment reminders</div>
-        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+        <div class="toggle-input active" id="togglePayment" onclick="this.classList.toggle('active')"></div>
       </div>
       <button class="modal-btn modal-btn-primary" onclick="saveNotifications()">Save Settings</button>
     </div>
@@ -643,21 +925,21 @@
       </div>
       <div class="form-group">
         <div class="form-label">How can we help you?</div>
-        <select class="form-select">
-          <option>Technical Issue</option>
-          <option>Billing Question</option>
-          <option>Feature Request</option>
-          <option>Report a Bug</option>
-          <option>Other</option>
+        <select class="form-select" id="helpTopic">
+          <option value="Technical Issue">Technical Issue</option>
+          <option value="Billing Question">Billing Question</option>
+          <option value="Feature Request">Feature Request</option>
+          <option value="Report a Bug">Report a Bug</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div class="form-group">
         <div class="form-label">Describe your issue</div>
-        <textarea class="form-input" style="min-height:100px; resize:vertical;" placeholder="Please describe your issue in detail..."></textarea>
+        <textarea class="form-input" id="helpDesc" style="min-height:100px; resize:vertical;" placeholder="Please describe your issue in detail..."></textarea>
       </div>
       <div class="form-group">
         <div class="form-label">Contact Email (Optional)</div>
-        <input type="email" class="form-input" placeholder="your@email.com">
+        <input type="email" class="form-input" id="helpEmail" placeholder="your@email.com">
       </div>
       <button class="modal-btn modal-btn-primary" onclick="submitHelp()">Submit Request</button>
     </div>
@@ -686,6 +968,444 @@
 </div>
 
 <script>
+  // Initial state helper
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: {
+      showPhone: true,
+      showEmail: false,
+      allowVisitors: true,
+      profileVisible: true
+    },
+    notifications: {
+      maintenance: true,
+      visitor: true,
+      notice: true,
+      complaint: true,
+      chat: true,
+      payment: true
+    }
+  };
+
+  // Ensure default structure
+  let users = JSON.parse(localStorage.getItem('users')) || [defaultUser];
+  localStorage.setItem('users', JSON.stringify(users));
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser && !localStorage.getItem('loggedOutFlag')) {
+    currentUser = defaultUser;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  }
+
+  // Auth toggle
+  function toggleAuthTab(type) {
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const tabSlider = document.getElementById('tabSlider');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    if (type === 'login') {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      tabSlider.style.transform = 'translateX(0)';
+      
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden-right');
+    } else {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      tabSlider.style.transform = 'translateX(100%)';
+      
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden-right');
+    }
+  }
+
+  // Show / Hide Password Toggle
+  function togglePwdVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    const eye = document.getElementById(inputId + 'Eye');
+    if (input.type === 'password') {
+      input.type = 'text';
+      eye.style.stroke = 'var(--forest)';
+    } else {
+      input.type = 'password';
+      eye.style.stroke = 'var(--muted)';
+    }
+  }
+
+  // Real-time validations
+  function validateLoginField() {
+    const val = document.getElementById('loginId').value.trim();
+    const feedback = document.getElementById('loginIdFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(\+91[\-\s]?)?[0-9]{10}$/;
+    
+    if (emailRegex.test(val) || phoneRegex.test(val)) {
+      feedback.textContent = 'Valid email or phone format';
+      feedback.className = 'val-feedback success';
+      return true;
+    } else {
+      feedback.textContent = 'Please enter a valid email or 10-digit number';
+      feedback.className = 'val-feedback error';
+      return false;
+    }
+  }
+
+  function validateLoginPassword() {
+    const val = document.getElementById('loginPassword').value;
+    const feedback = document.getElementById('loginPasswordFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    if (val.length < 6) {
+      feedback.textContent = 'Password must be at least 6 characters';
+      feedback.className = 'val-feedback error';
+      return false;
+    } else {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return true;
+    }
+  }
+
+  function validateRegName() {
+    const val = document.getElementById('regName').value.trim();
+    const feedback = document.getElementById('regNameFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    if (val.length < 3) {
+      feedback.textContent = 'Name should be at least 3 characters long';
+      feedback.className = 'val-feedback error';
+      return false;
+    } else {
+      feedback.textContent = 'Looks good!';
+      feedback.className = 'val-feedback success';
+      return true;
+    }
+  }
+
+  function validateRegPhone() {
+    const val = document.getElementById('regPhone').value.trim();
+    const feedback = document.getElementById('regPhoneFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    const phoneRegex = /^(\+91[\-\s]?)?[0-9]{10}$/;
+    if (phoneRegex.test(val)) {
+      feedback.textContent = 'Valid phone format';
+      feedback.className = 'val-feedback success';
+      return true;
+    } else {
+      feedback.textContent = 'Enter a valid 10-digit number';
+      feedback.className = 'val-feedback error';
+      return false;
+    }
+  }
+
+  function validateRegEmail() {
+    const val = document.getElementById('regEmail').value.trim();
+    const feedback = document.getElementById('regEmailFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(val)) {
+      feedback.textContent = 'Valid email address';
+      feedback.className = 'val-feedback success';
+      return true;
+    } else {
+      feedback.textContent = 'Enter a valid email';
+      feedback.className = 'val-feedback error';
+      return false;
+    }
+  }
+
+  function checkRegPasswordStrength() {
+    const val = document.getElementById('regPassword').value;
+    const container = document.getElementById('pwdStrengthContainer');
+    const label = document.getElementById('pwdStrengthTxt');
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+    const bar3 = document.getElementById('bar3');
+    
+    if (!val) {
+      container.style.display = 'none';
+      return 0;
+    }
+    
+    container.style.display = 'block';
+    let score = 0;
+    if (val.length >= 6) score++;
+    if (/[0-9]/.test(val) && /[a-zA-Z]/.test(val)) score++;
+    if (/[^a-zA-Z0-9]/.test(val)) score++;
+    
+    // Reset colors
+    bar1.style.backgroundColor = 'var(--line)';
+    bar2.style.backgroundColor = 'var(--line)';
+    bar3.style.backgroundColor = 'var(--line)';
+    
+    if (score === 1) {
+      label.textContent = 'Weak';
+      label.style.color = 'var(--terracotta)';
+      bar1.style.backgroundColor = 'var(--terracotta)';
+    } else if (score === 2) {
+      label.textContent = 'Medium';
+      label.style.color = 'var(--marigold)';
+      bar1.style.backgroundColor = 'var(--marigold)';
+      bar2.style.backgroundColor = 'var(--marigold)';
+    } else if (score === 3) {
+      label.textContent = 'Strong';
+      label.style.color = 'var(--forest)';
+      bar1.style.backgroundColor = 'var(--forest)';
+      bar2.style.backgroundColor = 'var(--forest)';
+      bar3.style.backgroundColor = 'var(--forest)';
+    }
+    
+    return score;
+  }
+
+  function validateRegFlat() {
+    const val = document.getElementById('regFlat').value.trim();
+    const feedback = document.getElementById('regFlatFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    if (!/^\d{1,4}[a-zA-Z]?$/.test(val)) {
+      feedback.textContent = 'Invalid Flat Number';
+      feedback.className = 'val-feedback error';
+      return false;
+    } else {
+      feedback.textContent = 'Looks good!';
+      feedback.className = 'val-feedback success';
+      return true;
+    }
+  }
+
+  // Toast Functionality
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toastBox');
+    const text = document.getElementById('toastText');
+    const icon = document.getElementById('toastIcon');
+    const svg = document.getElementById('toastIconSvg');
+    
+    text.textContent = msg;
+    icon.className = `toast-icon ${type}`;
+    
+    if (type === 'success') {
+      svg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+      toast.style.borderLeftColor = 'var(--forest)';
+    } else {
+      svg.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+      toast.style.borderLeftColor = 'var(--terracotta)';
+    }
+    
+    toast.classList.add('active');
+    setTimeout(() => {
+      toast.classList.remove('active');
+    }, 3000);
+  }
+
+  // Process Login
+  function processLogin() {
+    const loginId = document.getElementById('loginId').value.trim();
+    const loginPass = document.getElementById('loginPassword').value;
+
+    if (!validateLoginField() || !loginPass) {
+      showToast('Please fill out all login fields correctly', 'error');
+      return;
+    }
+
+    const matchedUser = users.find(u => (u.email === loginId || u.phone === loginId) && u.password === loginPass);
+
+    if (matchedUser) {
+      localStorage.removeItem('loggedOutFlag');
+      localStorage.setItem('currentUser', JSON.stringify(matchedUser));
+      showToast('Logged in successfully! Redirecting...', 'success');
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      showToast('Invalid credentials. If you are new, register first.', 'error');
+    }
+  }
+
+  // Process Register
+  function processRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const tower = document.getElementById('regTower').value;
+    const flat = document.getElementById('regFlat').value.trim();
+    const role = document.getElementById('regRole').value;
+
+    if (!validateRegName() || !validateRegPhone() || !validateRegEmail() || !password || !validateRegFlat()) {
+      showToast('Please fix validation errors before registering', 'error');
+      return;
+    }
+
+    if (users.some(u => u.email === email || u.phone === phone)) {
+      showToast('A profile with this email or phone already exists.', 'error');
+      return;
+    }
+
+    const newUser = {
+      name,
+      phone,
+      email,
+      password,
+      tower,
+      flat,
+      role,
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      flatType: "3 BHK",
+      privacy: {
+        showPhone: true,
+        showEmail: true,
+        allowVisitors: true,
+        profileVisible: true
+      },
+      notifications: {
+        maintenance: true,
+        visitor: true,
+        notice: true,
+        complaint: true,
+        chat: true,
+        payment: true
+      }
+    };
+
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.removeItem('loggedOutFlag');
+    localStorage.setItem('currentUser', JSON.stringify(newUser));
+
+    showToast('Profile registered successfully! Logging you in...', 'success');
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
+  }
+
+  // Process Logout
+  function processLogout() {
+    if (confirm('Are you sure you want to log out?')) {
+      localStorage.removeItem('currentUser');
+      localStorage.setItem('loggedOutFlag', 'true');
+      alert('Logged out successfully!');
+      location.reload();
+    }
+  }
+
+  // Update UI and load data
+  function updateProfileUI() {
+    const profileDashboard = document.getElementById('profileDashboard');
+    const authScreen = document.getElementById('authScreen');
+    const bottomNav = document.querySelector('.bottom-nav');
+    const addUserBtn = document.querySelector('.add-user-btn');
+
+    if (currentUser) {
+      profileDashboard.style.display = 'block';
+      authScreen.style.display = 'none';
+      bottomNav.style.display = 'flex';
+
+      // Populate avatar, name, and meta
+      if (currentUser.photo) {
+        document.getElementById('avatarInitials').style.display = 'none';
+        const img = document.getElementById('avatarImage');
+        img.src = currentUser.photo;
+        img.style.display = 'block';
+      } else {
+        const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        document.getElementById('avatarInitials').textContent = initials;
+        document.getElementById('avatarInitials').style.display = 'inline';
+        document.getElementById('avatarImage').style.display = 'none';
+      }
+      document.querySelector('.profile-name').textContent = currentUser.name;
+      document.querySelector('.profile-role').textContent = `${currentUser.role} · ${currentUser.tower}, Flat ${currentUser.flat}`;
+
+      // Populate details
+      const detailValues = document.querySelectorAll('.detail-value');
+      detailValues[0].textContent = currentUser.phone;
+      detailValues[1].textContent = currentUser.email;
+      detailValues[2].textContent = currentUser.memberSince || "Jul 2026";
+      detailValues[3].textContent = currentUser.flatType || "3 BHK";
+
+      // Show/hide "Add New User" button based on role
+      if (currentUser.role === 'Super Admin') {
+        addUserBtn.style.display = 'flex';
+      } else {
+        addUserBtn.style.display = 'none';
+      }
+
+      // Populate Modal edit fields with current values
+      document.getElementById('editName').value = currentUser.name;
+      document.getElementById('editPhone').value = currentUser.phone;
+      document.getElementById('editEmail').value = currentUser.email;
+
+      // Populate Privacy toggles
+      setToggleState('toggleShowPhone', currentUser.privacy?.showPhone);
+      setToggleState('toggleShowEmail', currentUser.privacy?.showEmail);
+      setToggleState('toggleAllowVisitors', currentUser.privacy?.allowVisitors);
+      setToggleState('toggleProfileVisible', currentUser.privacy?.profileVisible);
+
+      // Populate Notification toggles
+      setToggleState('toggleMaint', currentUser.notifications?.maintenance);
+      setToggleState('toggleVisitor', currentUser.notifications?.visitor);
+      setToggleState('toggleNotice', currentUser.notifications?.notice);
+      setToggleState('toggleComplaint', currentUser.notifications?.complaint);
+      setToggleState('toggleChat', currentUser.notifications?.chat);
+      setToggleState('togglePayment', currentUser.notifications?.payment);
+
+    } else {
+      profileDashboard.style.display = 'none';
+      authScreen.style.display = 'block';
+      bottomNav.style.display = 'none';
+    }
+  }
+
+  function setToggleState(id, isActive) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isActive) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  }
+
+  function getToggleState(id) {
+    const el = document.getElementById(id);
+    return el && el.classList.contains('active');
+  }
+
+  // Modals operations
   function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
   }
@@ -694,35 +1414,243 @@
     document.getElementById(modalId).classList.remove('active');
   }
 
-  function addUser() {
-    alert('User added successfully!');
-    closeModal('addUserModal');
-  }
-
+  // Save profile changes
   function saveProfile() {
+    const name = document.getElementById('editName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+
+    if (!name || !phone || !email) {
+      alert('All fields must be filled');
+      return;
+    }
+
+    // Update in users database
+    const idx = users.findIndex(u => u.email === currentUser.email || u.phone === currentUser.phone);
+    if (idx !== -1) {
+      users[idx].name = name;
+      users[idx].phone = phone;
+      users[idx].email = email;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    currentUser.name = name;
+    currentUser.phone = phone;
+    currentUser.email = email;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
     alert('Profile updated successfully!');
     closeModal('editProfileModal');
+    updateProfileUI();
   }
 
+  // Change Password
   function changePassword() {
-    alert('Password changed successfully!');
+    const curPass = document.getElementById('curPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confPass = document.getElementById('confPassword').value;
+
+    if (!curPass || !newPass || !confPass) {
+      alert('All fields are required');
+      return;
+    }
+
+    if (curPass !== currentUser.password) {
+      alert('Incorrect current password');
+      return;
+    }
+
+    if (newPass !== confPass) {
+      alert('New password and confirm password do not match');
+      return;
+    }
+
+    // Save
+    const idx = users.findIndex(u => u.email === currentUser.email && u.phone === currentUser.phone);
+    if (idx !== -1) {
+      users[idx].password = newPass;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    currentUser.password = newPass;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+    alert('Password updated successfully!');
+    document.getElementById('curPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confPassword').value = '';
     closeModal('changePasswordModal');
   }
 
+  // Save Privacy
   function savePrivacy() {
-    alert('Privacy settings saved!');
+    const privacy = {
+      showPhone: getToggleState('toggleShowPhone'),
+      showEmail: getToggleState('toggleShowEmail'),
+      allowVisitors: getToggleState('toggleAllowVisitors'),
+      profileVisible: getToggleState('toggleProfileVisible')
+    };
+
+    const idx = users.findIndex(u => u.email === currentUser.email && u.phone === currentUser.phone);
+    if (idx !== -1) {
+      users[idx].privacy = privacy;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    currentUser.privacy = privacy;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+    alert('Privacy settings updated successfully!');
     closeModal('privacyModal');
   }
 
+  // Save Notifications
   function saveNotifications() {
-    alert('Notification settings saved!');
+    const notifications = {
+      maintenance: getToggleState('toggleMaint'),
+      visitor: getToggleState('toggleVisitor'),
+      notice: getToggleState('toggleNotice'),
+      complaint: getToggleState('toggleComplaint'),
+      chat: getToggleState('toggleChat'),
+      payment: getToggleState('togglePayment')
+    };
+
+    const idx = users.findIndex(u => u.email === currentUser.email && u.phone === currentUser.phone);
+    if (idx !== -1) {
+      users[idx].notifications = notifications;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    currentUser.notifications = notifications;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+    alert('Notification settings updated successfully!');
     closeModal('notificationsModal');
   }
 
+  // Submit help ticket
   function submitHelp() {
-    alert('Support request submitted! We will get back to you soon.');
+    const topic = document.getElementById('helpTopic').value;
+    const desc = document.getElementById('helpDesc').value.trim();
+    const email = document.getElementById('helpEmail').value.trim() || currentUser.email;
+
+    if (!desc) {
+      alert('Please describe your issue');
+      return;
+    }
+
+    const tickets = JSON.parse(localStorage.getItem('support_tickets')) || [];
+    const ticketId = 'TKT-' + Math.floor(10000 + Math.random() * 90000);
+    const newTicket = {
+      id: ticketId,
+      user: currentUser.email,
+      topic,
+      desc,
+      email,
+      timestamp: new Date().toISOString()
+    };
+
+    tickets.push(newTicket);
+    localStorage.setItem('support_tickets', JSON.stringify(tickets));
+
+    alert(`Help request submitted successfully!\nTicket Ref: ${ticketId}`);
+    document.getElementById('helpDesc').value = '';
     closeModal('helpModal');
   }
+
+  // Super Admin: Add New User
+  function addUser() {
+    const name = document.getElementById('addName').value.trim();
+    const phone = document.getElementById('addPhone').value.trim();
+    const email = document.getElementById('addEmail').value.trim();
+    const role = document.getElementById('addRole').value;
+    const tower = document.getElementById('addTower').value;
+    const flat = document.getElementById('addFlat').value.trim();
+
+    if (!name || !phone || !email || !flat) {
+      alert('All fields must be filled out');
+      return;
+    }
+
+    if (users.some(u => u.email === email || u.phone === phone)) {
+      alert('A user with this email or phone already exists.');
+      return;
+    }
+
+    const newUser = {
+      name,
+      phone,
+      email,
+      role,
+      tower,
+      flat,
+      password: 'password123', // default
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      flatType: "3 BHK",
+      privacy: {
+        showPhone: true,
+        showEmail: false,
+        allowVisitors: true,
+        profileVisible: true
+      },
+      notifications: {
+        maintenance: true,
+        visitor: true,
+        notice: true,
+        complaint: true,
+        chat: true,
+        payment: true
+      }
+    };
+
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+
+    alert(`Resident ${name} registered successfully with default password 'password123'!`);
+    
+    // Clear fields
+    document.getElementById('addName').value = '';
+    document.getElementById('addPhone').value = '';
+    document.getElementById('addEmail').value = '';
+    document.getElementById('addFlat').value = '';
+    closeModal('addUserModal');
+  }
+
+  // Avatar upload functions
+  function triggerAvatarUpload() {
+    document.getElementById('avatarInput').click();
+  }
+
+  function handleAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Image is too large. Please select a photo under 2MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const dataUrl = event.target.result;
+      
+      currentUser.photo = dataUrl;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+      const uIndex = users.findIndex(u => u.email === currentUser.email);
+      if (uIndex > -1) {
+        users[uIndex].photo = dataUrl;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+
+      showToast('Profile photo updated successfully!');
+      updateProfileUI();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Initial Run
+  updateProfileUI();
 
   // Close modal when clicking outside
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -733,5 +1661,13 @@
     });
   });
 </script>
+<!-- CUSTOM TOAST NOTIFICATION CONTAINER -->
+<div class="toast-container" id="toastBox">
+  <div class="toast-icon" id="toastIcon">
+    <svg id="toastIconSvg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+  </div>
+  <div class="toast-text" id="toastText">Success message!</div>
+</div>
 </body>
 </html>
+

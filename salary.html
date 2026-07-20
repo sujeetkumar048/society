@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salary Desk - SR Gold Society</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1F4D3D;
+    --forest-dark: #123026;
+    --marigold: #F5C453;
+    --marigold-soft: #FEF9EB;
+    --terracotta: #D36B53;
+    --sky: #4A90E2;
+    --ink: #1B2420;
+    --muted: #62726B;
+    --paper: #F6F8F6;
+    --line: #E2E8E5;
+    --card: #FFFFFF;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAFBF9;
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #FAFBF9;
+    min-height: 100vh;
+    position: relative;
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    box-shadow: 0 0 40px rgba(0,0,0,.03);
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 24px 20px;
+    color: #fff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 160px; height: 160px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  /* ===== TABS ===== */
+  .tab-container {
+    display: flex;
+    background: var(--line);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 20px 16px 12px;
+  }
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--forest);
+    color: white;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    padding: 10px 16px 20px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--forest-dark);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+
+  /* ===== EMPLOYEE ITEM ===== */
+  .emp-item {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    background: var(--paper);
+    margin-bottom: 12px;
+  }
+  .emp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .emp-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--forest-dark);
+  }
+  .emp-desig {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  .emp-salary-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .emp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .emp-grid span { font-weight: 500; color: var(--ink); }
+
+  /* ===== ACTION BUTTONS ===== */
+  .action-row {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color: white;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--forest);
+    color: var(--forest);
+  }
+
+  /* ===== ADJUST MODAL ===== */
+  .form-group {
+    margin-bottom: 12px;
+  }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* ===== RECEIPT SHEET ===== */
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .detail-label {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .detail-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ===== MODALS ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    width: 92%;
+    max-width: 400px;
+    padding: 20px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--forest-dark);
+  }
+  .modal-close {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .modal-close svg { width: 16px; height: 16px; stroke: var(--muted); }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 6px 14px;
+    box-shadow: 0 -6px 20px rgba(21,53,41,.06);
+    z-index: 999;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-item svg { width: 19px; height: 19px; stroke: var(--muted); }
+  .nav-item.active { color: var(--forest); }
+  .nav-item.active svg { stroke: var(--forest); }
+
+  @media (min-width: 481px) {
+    body { background: #E9ECE5; }
+    .app { margin: 24px auto; border-radius: 26px; overflow: hidden; height: calc(100vh - 48px); min-height: 0; }
+    .bottom-nav { position: absolute; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Salary Management Desk</div>
+    </div>
+  </div>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-container" style="margin: 20px 16px 0;">
+    <div class="tab-btn active" id="tabSalaryBtn" onclick="switchSalaryTab('salary')">Salaries</div>
+    <div class="tab-btn" id="tabAttendanceBtn" onclick="switchSalaryTab('attendance')">Punches</div>
+    <div class="tab-btn" id="tabTasksBtn" onclick="switchSalaryTab('tasks')">Daily Tasks</div>
+  </div>
+
+  <div class="content">
+    
+    <!-- SALARY DISBURSAL TAB -->
+    <div id="salaryTab">
+      <div class="card">
+        <div class="card-title">Staff Employee List <span class="eyebrow" id="staffCount">4 active</span></div>
+        <div id="employeeListWrap">
+          <!-- Dyn. populated staff cards -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE PUNCH TAB -->
+    <div id="attendanceTab" style="display:none;">
+      <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
+        <div class="card-title">Staff Punch Console</div>
+        
+        <div class="form-group">
+          <div class="form-label">Select Employee</div>
+          <select class="form-input" id="punchEmployeeSelect" onchange="updatePunchStatusView()">
+            <!-- Dynamic dropdown options -->
+          </select>
+        </div>
+
+        <div style="text-align:center; padding: 20px; background:var(--paper); border-radius:12px; margin-bottom:16px;">
+          <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Today's Punch Status</div>
+          <div style="font-size:16px; font-weight:700; color:var(--forest-dark); margin-top:4px;" id="punchStatusText">Punched Out</div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="performPunchIn()" style="flex:1; height:46px;">Punch In</button>
+          <button class="btn btn-outline" onclick="performPunchOut()" style="flex:1; height:46px; border-color:var(--terracotta); color:var(--terracotta);">Punch Out</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent Shift Activity Logs</div>
+        <div style="overflow-x:auto;">
+          <table class="report-table" style="font-size:11.5px; width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1.5px solid var(--line); color:var(--muted); text-transform:uppercase; font-size:10px;">
+                <th style="padding:8px 4px;">Employee</th>
+                <th style="padding:8px 4px;">Date</th>
+                <th style="padding:8px 4px;">In</th>
+                <th style="padding:8px 4px;">Out</th>
+                <th style="padding:8px 4px; text-align:right;">Hours</th>
+              </tr>
+            </thead>
+            <tbody id="punchLogsList">
+              <!-- Chronological shift logs populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY TASKS TAB -->
+    <div id="tasksTab" style="display:none;">
+      <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
+        <div class="card-title">Daily Duty Tasks <span class="eyebrow" id="dutyDateLabel">Today</span></div>
+        
+        <div class="form-group">
+          <div class="form-label">Select Staff Member</div>
+          <select class="form-input" id="taskEmployeeSelect" onchange="renderDutyTasks()">
+            <!-- Dynamic dropdown options -->
+          </select>
+        </div>
+
+        <div style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px;">Tasks Checklist</div>
+        <div id="dutyChecklistWrap">
+          <!-- Dyn. checkboxes checklist -->
+        </div>
+        <div style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:18px; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px;">Task Completion Proof</div>
+        
+        <div class="form-group" style="text-align:center;">
+          <div id="taskPhotoUploadWrap" style="border:2px dashed var(--line); border-radius:12px; padding:16px; background:var(--paper); cursor:pointer; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;" onclick="document.getElementById('taskPhotoFile').click()">
+            <span id="taskPhotoPlaceholder" style="font-size:12px; color:var(--muted); font-weight:500;">
+              📸 Click to upload task completion proof photo
+            </span>
+            <img id="taskPhotoPreview" style="display:none; width:100%; height:120px; object-fit:cover; position:absolute; top:0; left:0;">
+          </div>
+          <input type="file" id="taskPhotoFile" style="display:none;" accept="image/*" onchange="handleTaskPhotoUpload(event)">
+        </div>
+
+        <button class="btn btn-primary" onclick="submitDailyTaskReport()" style="margin-top:10px;">Submit Daily Task Report</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADJUST STATS MODAL -->
+  <div class="modal-overlay" id="adjustModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Adjust Attendance Details</div>
+        <div class="modal-close" onclick="closeModal('adjustModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <input type="hidden" id="adjustEmpIdx">
+      <div class="form-group">
+        <div class="form-label">Attendance (Days Present out of 30)</div>
+        <input type="number" class="form-input" id="adjAtt" min="0" max="30">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Leaves Taken</div>
+        <input type="number" class="form-input" id="adjLeaves" min="0" max="30">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Overtime Hours</div>
+        <input type="number" class="form-input" id="adjOt" min="0">
+      </div>
+      <button class="btn btn-primary" onclick="saveAdjustments()" style="margin-top: 10px;">Save Adjustments</button>
+    </div>
+  </div>
+
+  <!-- PAYSLIP MODAL -->
+  <div class="modal-overlay" id="payslipModal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <div class="modal-title">Employee Payslip</div>
+        <div class="modal-close" onclick="closeModal('payslipModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+
+      <div style="border: 1px dashed var(--line); border-radius: 12px; padding: 16px; background: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 1.6;" id="payslipDetailsBody">
+        <!-- Payslip details template filled via JS -->
+      </div>
+
+      <button class="btn btn-primary" onclick="downloadPayslipPdf()" style="width: 100%; margin-top: 14px;">Download Payslip PDF</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  let employees = [];
+  let punches = [];
+  let dailyTasks = {};
+  let uploadedTaskPhotoBase64 = "";
+
+  function initSalaryDesk() {
+    employees = JSON.parse(localStorage.getItem('society_employees'));
+    punches = JSON.parse(localStorage.getItem('society_punches')) || [];
+    dailyTasks = JSON.parse(localStorage.getItem('society_daily_tasks')) || {};
+
+    // Seed default employee list if empty
+    if (!employees) {
+      employees = [
+        { name: "Ramesh Kumar", designation: "Security Guard", joiningDate: "12 Jan 2024", salary: 15000, attendance: 29, leaves: 1, overtime: 10, payoutStatus: "Unpaid" },
+        { name: "Suresh Patil", designation: "Facility Manager", joiningDate: "05 Mar 2023", salary: 28000, attendance: 30, leaves: 0, overtime: 4, payoutStatus: "Unpaid" },
+        { name: "Sunita Devi", designation: "Housekeeping Supervisor", joiningDate: "18 Jun 2024", salary: 12000, attendance: 26, leaves: 4, overtime: 0, payoutStatus: "Unpaid" },
+        { name: "Rajesh Shinde", designation: "Lift Technician", joiningDate: "01 Nov 2024", salary: 18000, attendance: 28, leaves: 2, overtime: 15, payoutStatus: "Unpaid" }
+      ];
+      localStorage.setItem('society_employees', JSON.stringify(employees));
+    }
+
+    // Seed default punches if empty
+    if (punches.length === 0) {
+      punches = [
+        { empName: "Ramesh Kumar", date: "20 Jul 2026", inTime: "08:00 AM", outTime: "05:00 PM", hours: 9, timestamp: Date.now() },
+        { empName: "Suresh Patil", date: "20 Jul 2026", inTime: "09:00 AM", outTime: "05:30 PM", hours: 8.5, timestamp: Date.now() },
+        { empName: "Rajesh Shinde", date: "19 Jul 2026", inTime: "08:30 AM", outTime: "07:30 PM", hours: 11, timestamp: Date.now() }
+      ];
+      localStorage.setItem('society_punches', JSON.stringify(punches));
+    }
+
+    renderEmployees();
+    populateEmployeeDropdowns();
+    updatePunchStatusView();
+    renderPunchesLog();
+    initDutyTasksForToday();
+    renderDutyTasks();
+  }
+
+  function switchSalaryTab(tab) {
+    document.getElementById('salaryTab').style.display = tab === 'salary' ? 'block' : 'none';
+    document.getElementById('attendanceTab').style.display = tab === 'attendance' ? 'block' : 'none';
+    document.getElementById('tasksTab').style.display = tab === 'tasks' ? 'block' : 'none';
+
+    document.getElementById('tabSalaryBtn').classList.toggle('active', tab === 'salary');
+    document.getElementById('tabAttendanceBtn').classList.toggle('active', tab === 'attendance');
+    document.getElementById('tabTasksBtn').classList.toggle('active', tab === 'tasks');
+    
+    if (tab === 'salary') {
+      renderEmployees();
+    } else if (tab === 'attendance') {
+      updatePunchStatusView();
+      renderPunchesLog();
+    } else if (tab === 'tasks') {
+      renderDutyTasks();
+    }
+  }
+
+  function populateEmployeeDropdowns() {
+    const punchSelect = document.getElementById('punchEmployeeSelect');
+    const taskSelect = document.getElementById('taskEmployeeSelect');
+    
+    punchSelect.innerHTML = '';
+    taskSelect.innerHTML = '';
+
+    employees.forEach(emp => {
+      const opt1 = document.createElement('option');
+      opt1.value = emp.name;
+      opt1.textContent = `${emp.name} (${emp.designation})`;
+      punchSelect.appendChild(opt1);
+
+      const opt2 = document.createElement('option');
+      opt2.value = emp.name;
+      opt2.textContent = `${emp.name} (${emp.designation})`;
+      taskSelect.appendChild(opt2);
+    });
+  }
+
+  // Attendance Punch logic
+  function updatePunchStatusView() {
+    const empName = document.getElementById('punchEmployeeSelect').value;
+    if (!empName) return;
+
+    const activePunch = punches.find(p => p.empName === empName && p.outTime === "");
+    const statusText = document.getElementById('punchStatusText');
+
+    if (activePunch) {
+      statusText.innerHTML = `<span style="color:var(--forest); font-weight:700;">PUNCHED IN</span><br><span style="font-size:11px; font-weight:500; color:var(--muted);">Since ${activePunch.inTime}</span>`;
+    } else {
+      statusText.innerHTML = `<span style="color:var(--terracotta); font-weight:700;">PUNCHED OUT</span>`;
+    }
+  }
+
+  function performPunchIn() {
+    const empName = document.getElementById('punchEmployeeSelect').value;
+    if (!empName) return;
+
+    const activePunch = punches.find(p => p.empName === empName && p.outTime === "");
+    if (activePunch) {
+      alert(`${empName} is already Punched In!`);
+      return;
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const inTimeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newPunch = {
+      empName: empName,
+      date: dateStr,
+      inTime: inTimeStr,
+      outTime: "",
+      hours: 0,
+      timestamp: now.getTime()
+    };
+
+    punches.unshift(newPunch);
+    localStorage.setItem('society_punches', JSON.stringify(punches));
+
+    updatePunchStatusView();
+    renderPunchesLog();
+    alert(`Attendance Success!\n\n${empName} Punched In at ${inTimeStr}.`);
+  }
+
+  function performPunchOut() {
+    const empName = document.getElementById('punchEmployeeSelect').value;
+    if (!empName) return;
+
+    const activeIdx = punches.findIndex(p => p.empName === empName && p.outTime === "");
+    if (activeIdx === -1) {
+      alert(`${empName} has not Punched In yet today.`);
+      return;
+    }
+
+    const now = new Date();
+    const outTimeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const elapsedMs = now.getTime() - punches[activeIdx].timestamp;
+    let hoursWorked = Number((elapsedMs / (1000 * 60 * 60)).toFixed(2));
+    if (elapsedMs < 30000) {
+      hoursWorked = 8.5; // default shift for fast testing
+    }
+
+    punches[activeIdx].outTime = outTimeStr;
+    punches[activeIdx].hours = hoursWorked;
+    localStorage.setItem('society_punches', JSON.stringify(punches));
+
+    const empIdx = employees.findIndex(e => e.name === empName);
+    if (empIdx !== -1) {
+      if (employees[empIdx].payoutStatus !== 'Paid') {
+        employees[empIdx].attendance = Math.min(30, employees[empIdx].attendance + 1);
+        if (hoursWorked > 8) {
+          const otExtra = Number((hoursWorked - 8).toFixed(1));
+          employees[empIdx].overtime += otExtra;
+        }
+        localStorage.setItem('society_employees', JSON.stringify(employees));
+      }
+    }
+
+    updatePunchStatusView();
+    renderPunchesLog();
+    alert(`Attendance Success!\n\n${empName} Punched Out at ${outTimeStr}.\nShift Hours: ${hoursWorked} hrs.\nEmployee stats updated.`);
+  }
+
+  function renderPunchesLog() {
+    const tbody = document.getElementById('punchLogsList');
+    tbody.innerHTML = '';
+
+    punches.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--paper)';
+      tr.innerHTML = `
+        <td style="padding:10px 4px; font-weight:600; color:var(--forest-dark);">${p.empName}</td>
+        <td style="padding:10px 4px; color:var(--muted);">${p.date}</td>
+        <td style="padding:10px 4px;">${p.inTime}</td>
+        <td style="padding:10px 4px;">${p.outTime || '<span style="color:var(--forest); font-weight:600; font-size:10px;">Working</span>'}</td>
+        <td style="padding:10px 4px; text-align:right; font-family:\'IBM Plex Mono\',monospace; font-weight:600;">${p.hours > 0 ? `${p.hours} hrs` : '-'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Daily Tasks checklist logic
+  const taskNames = [
+    "Gate Cleaning",
+    "Visitor Register",
+    "Parking Check",
+    "Generator Check",
+    "CCTV Check",
+    "Water Tank",
+    "Garbage",
+    "Lights",
+    "Lift",
+    "Club House"
+  ];
+
+  function initDutyTasksForToday() {
+    const todayKey = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    
+    employees.forEach(emp => {
+      const key = `${emp.name}_${todayKey}`;
+      if (!dailyTasks[key]) {
+        dailyTasks[key] = taskNames.map(name => ({ name, completed: false, time: "" }));
+      }
+    });
+
+    localStorage.setItem('society_daily_tasks', JSON.stringify(dailyTasks));
+  }
+
+  function renderDutyTasks() {
+    const empName = document.getElementById('taskEmployeeSelect').value;
+    if (!empName) return;
+
+    const todayKey = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const key = `${empName}_${todayKey}`;
+    const tasks = dailyTasks[key] || [];
+
+    const checklistContainer = document.getElementById('dutyChecklistWrap');
+    checklistContainer.innerHTML = '';
+
+    tasks.forEach((t, index) => {
+      const item = document.createElement('div');
+      item.style = "display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; background:var(--card);";
+      
+      const badgeColor = t.completed ? 'var(--forest)' : 'var(--terracotta)';
+      const badgeBg = t.completed ? '#E4EEE8' : '#F5E1DC';
+      const badgeText = t.completed ? 'Completed' : 'Pending';
+      const timestampText = t.completed ? `<span style="font-size:9.5px; color:var(--muted); margin-left:6px;">(${t.time})</span>` : '';
+
+      item.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${t.completed ? 'checked' : ''} onchange="toggleDutyTask(${index})">
+          <span style="font-size:13px; font-weight:500; text-decoration: ${t.completed ? 'line-through' : 'none'}; color: ${t.completed ? 'var(--muted)' : 'var(--ink)'};">${t.name}</span>
+          ${timestampText}
+        </div>
+        <div style="font-size:10px; font-weight:700; color:${badgeColor}; background:${badgeBg}; border-radius:4px; padding:2px 8px;">${badgeText}</div>
+      `;
+      checklistContainer.appendChild(item);
+    });
+  }
+
+  function toggleDutyTask(index) {
+    const empName = document.getElementById('taskEmployeeSelect').value;
+    if (!empName) return;
+
+    const todayKey = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const key = `${empName}_${todayKey}`;
+    
+    const isCompleted = dailyTasks[key][index].completed;
+    dailyTasks[key][index].completed = !isCompleted;
+    
+    if (!isCompleted) {
+      const now = new Date();
+      dailyTasks[key][index].time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    } else {
+      dailyTasks[key][index].time = "";
+    }
+
+    localStorage.setItem('society_daily_tasks', JSON.stringify(dailyTasks));
+    renderDutyTasks();
+  }
+
+  // Handle Photo proof upload
+  function handleTaskPhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size should be under 2MB!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      uploadedTaskPhotoBase64 = evt.target.result;
+      
+      const preview = document.getElementById('taskPhotoPreview');
+      preview.src = uploadedTaskPhotoBase64;
+      preview.style.display = 'block';
+      document.getElementById('taskPhotoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Submit Daily Task Report
+  function submitDailyTaskReport() {
+    const empName = document.getElementById('taskEmployeeSelect').value;
+    if (!empName) return;
+
+    const todayKey = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const key = `${empName}_${todayKey}`;
+    const tasks = dailyTasks[key] || [];
+
+    const completedCount = tasks.filter(t => t.completed).length;
+    if (completedCount === 0) {
+      alert("Please complete at least one task before submitting your report.");
+      return;
+    }
+
+    if (!uploadedTaskPhotoBase64) {
+      alert("Please upload a completion proof photo before submitting.");
+      return;
+    }
+
+    const reportSubmit = {
+      empName,
+      date: todayKey,
+      completedCount,
+      photo: uploadedTaskPhotoBase64,
+      timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+    };
+
+    const submissions = JSON.parse(localStorage.getItem('society_daily_task_submissions')) || [];
+    submissions.unshift(reportSubmit);
+    localStorage.setItem('society_daily_task_submissions', JSON.stringify(submissions));
+
+    alert(`Daily Task Report submitted successfully!\n\nStaff: ${empName}\nTasks completed: ${completedCount}/${tasks.length}\nPhoto proof verified.\nReport recorded in logs. 📸`);
+
+    // Reset photo upload preview
+    uploadedTaskPhotoBase64 = "";
+    document.getElementById('taskPhotoPreview').style.display = 'none';
+    document.getElementById('taskPhotoPlaceholder').style.display = 'block';
+    document.getElementById('taskPhotoFile').value = '';
+  }
+
+  function renderEmployees() {
+    const listContainer = document.getElementById('employeeListWrap');
+    listContainer.innerHTML = '';
+    document.getElementById('staffCount').textContent = `${employees.length} active`;
+
+    employees.forEach((emp, idx) => {
+      const isPaid = emp.payoutStatus === 'Paid';
+      const actionBtn = isPaid 
+        ? `<button class="btn btn-outline" onclick="viewPayslip(${idx})">View Payslip</button>`
+        : `<button class="btn btn-primary" onclick="disburseSalary(${idx})">Disburse Salary</button>`;
+
+      const card = document.createElement('div');
+      card.className = 'emp-item';
+      card.innerHTML = `
+        <div class="emp-header">
+          <div>
+            <div class="emp-name">${emp.name}</div>
+            <div class="emp-desig">${emp.designation}</div>
+          </div>
+          <div class="emp-salary-val">₹${emp.salary.toLocaleString()}/mo</div>
+        </div>
+        <div class="emp-grid">
+          <div>Joining Date: <span>${emp.joiningDate}</span></div>
+          <div>Attendance: <span>${emp.attendance}/30 days</span></div>
+          <div>Leaves Taken: <span>${emp.leaves} days</span></div>
+          <div>Overtime: <span>${emp.overtime} hrs</span></div>
+          <div>Status: <span style="color:${isPaid ? 'var(--forest)' : 'var(--terracotta)'}; font-weight:700;">${emp.payoutStatus}</span></div>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-outline" style="border-color:var(--line); color:var(--muted); flex:1;" onclick="openAdjustModal(${idx})" ${isPaid ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Adjust Stats</button>
+          <div style="flex:1;">
+            ${actionBtn}
+          </div>
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  }
+
+  function openAdjustModal(idx) {
+    const emp = employees[idx];
+    document.getElementById('adjustEmpIdx').value = idx;
+    document.getElementById('adjAtt').value = emp.attendance;
+    document.getElementById('adjLeaves').value = emp.leaves;
+    document.getElementById('adjOt').value = emp.overtime;
+    openModal('adjustModal');
+  }
+
+  function saveAdjustments() {
+    const idx = Number(document.getElementById('adjustEmpIdx').value);
+    const attendance = Number(document.getElementById('adjAtt').value);
+    const leaves = Number(document.getElementById('adjLeaves').value);
+    const overtime = Number(document.getElementById('adjOt').value);
+
+    if (attendance + leaves > 30) {
+      alert('Sum of attendance present days and leaves taken cannot exceed 30 days.');
+      return;
+    }
+
+    employees[idx].attendance = attendance;
+    employees[idx].leaves = leaves;
+    employees[idx].overtime = overtime;
+
+    localStorage.setItem('society_employees', JSON.stringify(employees));
+    closeModal('adjustModal');
+    renderEmployees();
+    alert(`Adjustments saved successfully for ${employees[idx].name}!`);
+  }
+
+  function disburseSalary(idx) {
+    const emp = employees[idx];
+    
+    const base = emp.salary;
+    const dailyRate = Math.round(base / 30);
+    const leafDeduction = emp.leaves * dailyRate;
+    const otRate = 120;
+    const otBonus = emp.overtime * otRate;
+    const netSalary = base - leafDeduction + otBonus;
+
+    const confirmPay = confirm(`Confirm Salary Payout for ${emp.name} (${emp.designation})?\n\nBase Salary: ₹${base.toLocaleString()}\nLeaves Deduction: -₹${leafDeduction.toLocaleString()}\nOvertime Bonus: +₹${otBonus.toLocaleString()}\n\nNet Disbursal: ₹${netSalary.toLocaleString()}`);
+    if (!confirmPay) return;
+
+    employees[idx].payoutStatus = 'Paid';
+    employees[idx].payoutDetails = {
+      base,
+      deductions: leafDeduction,
+      otBonus,
+      net: netSalary,
+      txId: 'TXN-' + Math.floor(10000000 + Math.random() * 90000000),
+      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+    };
+
+    localStorage.setItem('society_employees', JSON.stringify(employees));
+
+    const currentExpenses = JSON.parse(localStorage.getItem('society_expenses')) || [];
+    const newExpense = {
+      id: 'EXP-' + Math.floor(100 + Math.random() * 900),
+      head: 'Salary',
+      amount: netSalary,
+      vendor: emp.name,
+      mode: 'Bank Transfer',
+      date: employees[idx].payoutDetails.date,
+      note: `Staff salary payout to ${emp.name} (${emp.designation})`
+    };
+    currentExpenses.unshift(newExpense);
+    localStorage.setItem('society_expenses', JSON.stringify(currentExpenses));
+
+    renderEmployees();
+    alert(`Salary Payout Disbursed successfully!\n\nReference: ${employees[idx].payoutDetails.txId}`);
+  }
+
+  let activePayslipTxId = "";
+  function viewPayslip(idx) {
+    const emp = employees[idx];
+    const p = emp.payoutDetails;
+    activePayslipTxId = p.txId;
+
+    document.getElementById('payslipDetailsBody').innerHTML = `
+      <div style="text-align:center; border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px;">
+        <h4 style="font-family:\'Space Grotesk\',sans-serif; font-size:14px; color:var(--forest-dark); margin-bottom:2px;">SR GOLD SOCIETY</h4>
+        <span style="font-size:9px; color:var(--muted); letter-spacing:0.5px;">SALARY DISBURSAL PAYSLIP</span>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Payslip ID</div>
+        <div class="detail-value">${p.txId.replace('TXN', 'PSLP')}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Employee</div>
+        <div class="detail-value">${emp.name}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Designation</div>
+        <div class="detail-value">${emp.designation}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Disbursal Date</div>
+        <div class="detail-value" style="font-size:10px;">${p.date}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Attendance Present</div>
+        <div class="detail-value">${emp.attendance}/30 days</div>
+      </div>
+      
+      <div style="border-top:1px dashed var(--line); padding:6px 0; margin-top:6px;">
+        <div class="detail-row" style="border:none; padding:3px 0;">
+          <div class="detail-label">Base Salary</div>
+          <div class="detail-value">₹${p.base.toLocaleString()}</div>
+        </div>
+        <div class="detail-row" style="border:none; padding:3px 0; color:var(--terracotta);">
+          <div class="detail-label">Leave Deductions (-${emp.leaves} days)</div>
+          <div class="detail-value">-₹${p.deductions.toLocaleString()}</div>
+        </div>
+        <div class="detail-row" style="border:none; padding:3px 0; color:var(--forest);">
+          <div class="detail-label">Overtime Bonus (${emp.overtime} hrs)</div>
+          <div class="detail-value">+₹${p.otBonus.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--line); border-bottom:1px dashed var(--line); padding:8px 0; margin-top:8px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; color:var(--forest-dark);">
+        <div>Net Salary Credited</div>
+        <div>₹${p.net.toLocaleString()}</div>
+      </div>
+      <div class="detail-row" style="border:none; padding-top:10px;">
+        <div class="detail-label">Status</div>
+        <div class="detail-value" style="color:var(--forest);">SUCCESSFUL</div>
+      </div>
+    `;
+
+    openModal('payslipModal');
+  }
+
+  function downloadPayslipPdf() {
+    alert(`Payslip PDF generated!\n\nReference: ${activePayslipTxId.replace('TXN', 'PSLP')}\nSaving file locally to your downloads folder.`);
+  }
+
+  initSalaryDesk();
+</script>
+</body>
+</html>

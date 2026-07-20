@@ -326,6 +326,32 @@
 </div>
 
 <script>
+  // Auth control
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    if (localStorage.getItem('loggedOutFlag')) {
+      alert('Please login to continue.');
+      window.location.href = 'profile.html';
+    } else {
+      currentUser = defaultUser;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+  }
+
   let selectedCategory = null;
   let selectedPriority = null;
 
@@ -345,9 +371,48 @@
     });
   });
 
+  // Load Complaints
+  let complaints = [];
+  function loadComplaints() {
+    if (!currentUser) return;
+    complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+    renderRecentComplaints();
+  }
+
+  function renderRecentComplaints() {
+    const complaintsContainer = document.getElementById('recentComplaints');
+    complaintsContainer.innerHTML = '';
+
+    const list = [...complaints];
+    if (list.length === 0) {
+      list.push(
+        { title: "Lift not working", desc: "Lift in Tower A is not responding...", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
+        { title: "Water leakage", desc: "Water leakage in corridor ceiling...", location: "Tower B", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" }
+      );
+    }
+
+    list.forEach(c => {
+      const isResolved = c.status === 'Resolved';
+      const statusColor = isResolved ? 'var(--forest)' : 'var(--marigold)';
+      const statusBg = isResolved ? '#E4EEE8' : 'var(--marigold-soft)';
+      
+      const newComplaint = document.createElement('div');
+      newComplaint.className = 'history-item';
+      newComplaint.style = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);';
+      newComplaint.innerHTML = `
+        <div>
+          <div style="font-size:13px; font-weight:500;">${c.title}</div>
+          <div style="font-size:11px; color:var(--muted);">${c.location} · ${c.time}</div>
+        </div>
+        <div style="font-size:11px; color:${statusColor}; background:${statusBg}; padding:4px 10px; border-radius:12px;">${c.status}</div>
+      `;
+      complaintsContainer.appendChild(newComplaint);
+    });
+  }
+
   function submitComplaint() {
-    const location = document.querySelector('.form-input').value;
-    const description = document.querySelector('.form-textarea').value;
+    const location = document.querySelector('.form-input').value.trim();
+    const description = document.querySelector('.form-textarea').value.trim();
     
     if (!selectedCategory) {
       alert('Please select a category');
@@ -369,19 +434,25 @@
     // Generate complaint ID
     const complaintId = 'CMP-2026-' + String(Math.floor(Math.random() * 900) + 100);
     
-    // Add to recent complaints
-    const complaintsContainer = document.getElementById('recentComplaints');
-    const newComplaint = document.createElement('div');
-    newComplaint.className = 'history-item';
-    newComplaint.style = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);';
-    newComplaint.innerHTML = `
-      <div>
-        <div style="font-size:13px; font-weight:500;">${selectedCategory} - ${description.substring(0, 30)}...</div>
-        <div style="font-size:11px; color:var(--muted);">${location} · Just now</div>
-      </div>
-      <div style="font-size:11px; color:var(--marigold); background:var(--marigold-soft); padding:4px 10px; border-radius:12px;">Pending</div>
-    `;
-    complaintsContainer.insertBefore(newComplaint, complaintsContainer.firstChild);
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newC = {
+      id: complaintId,
+      title: `${selectedCategory} - ${description.substring(0, 20)}...`,
+      desc: description,
+      category: selectedCategory,
+      priority: selectedPriority,
+      location: location,
+      time: formattedTime,
+      status: "Pending"
+    };
+
+    complaints.unshift(newC);
+    localStorage.setItem('society_complaints', JSON.stringify(complaints));
+    
+    // Reload UI
+    renderRecentComplaints();
     
     // Reset form
     document.querySelectorAll('.category-item').forEach(i=>i.classList.remove('selected'));
@@ -393,6 +464,8 @@
     
     alert(`Complaint ${complaintId} submitted successfully! You will be notified when it's resolved.`);
   }
+
+  loadComplaints();
 </script>
 </body>
 </html>

@@ -224,6 +224,144 @@
   .nav-item.active{color:var(--forest);}
   .nav-item.active svg{stroke:var(--forest);}
 
+  /* Gate Barrier Animation styling */
+  .gate-simulation-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(21, 53, 41, 0.95);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .gate-simulation-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .gate-box {
+    width: 280px;
+    height: 200px;
+    position: relative;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    background: var(--forest-dark);
+    overflow: hidden;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+  .gate-light {
+    position: absolute;
+    top: 20px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ff3b30;
+    box-shadow: 0 0 15px #ff3b30;
+    transition: all 0.3s ease;
+  }
+  .gate-light.green {
+    background: #34c759;
+    box-shadow: 0 0 15px #34c759;
+  }
+  .gate-post {
+    width: 20px;
+    height: 100px;
+    background: #8e8e93;
+    border-radius: 4px 4px 0 0;
+    position: absolute;
+    bottom: 20px;
+    left: 40px;
+  }
+  .gate-arm {
+    width: 160px;
+    height: 10px;
+    background: repeating-linear-gradient(
+      45deg,
+      #ffcc00,
+      #ffcc00 10px,
+      #1c1c1e 10px,
+      #1c1c1e 20px
+    );
+    position: absolute;
+    bottom: 90px;
+    left: 50px;
+    transform-origin: left center;
+    transform: rotate(0deg);
+    transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 6px;
+  }
+  .gate-arm.open {
+    transform: rotate(-75deg);
+  }
+  .gate-road {
+    width: 100%;
+    height: 20px;
+    background: #3a3a3c;
+    position: absolute;
+    bottom: 0;
+  }
+
+  /* Camera styles */
+  .camera-viewfinder {
+    width: 100%;
+    height: 160px;
+    background: #1c1c1e;
+    border-radius: 12px;
+    border: 2px dashed var(--line);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .camera-viewfinder.captured {
+    border-style: solid;
+    border-color: var(--forest);
+  }
+  .scanner-line {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 3px;
+    background: var(--forest);
+    opacity: 0.7;
+    box-shadow: 0 0 10px var(--forest);
+    animation: scan 2s linear infinite;
+  }
+  @keyframes scan {
+    0% { top: 0%; }
+    50% { top: 100%; }
+    100% { top: 0%; }
+  }
+  .camera-overlay-box {
+    width: 90px;
+    height: 90px;
+    border: 2px dashed var(--forest);
+    border-radius: 8px;
+    position: absolute;
+    opacity: 0.5;
+  }
+  .camera-placeholder-avatar {
+    width: 80px;
+    height: 80px;
+    z-index: 5;
+  }
+  .camera-captured-img {
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    display: none;
+  }
+
   @media (min-width:481px){
     body{background:#E9ECE5;}
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
@@ -245,76 +383,103 @@
 
   <!-- CONTENT -->
   <div class="content">
-    <div class="card">
-      <div class="card-title">Register New Visitor</div>
+    <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>AI Visitor Management</span>
+        <span style="font-size:10px; background:#E4EEE8; color:var(--forest); padding:4px 8px; border-radius:8px; font-weight:600; text-transform:uppercase;">Guard Console</span>
+      </div>
+
+      <!-- Biometric camera scan -->
+      <div class="form-group">
+        <div class="form-label">AI Biometric Face Scan</div>
+        <div class="camera-viewfinder" id="camViewfinder">
+          <div class="scanner-line" id="camScanner" style="display:none;"></div>
+          <div class="camera-overlay-box" id="camOverlay" style="display:none;"></div>
+          <svg viewBox="0 0 100 100" class="camera-placeholder-avatar" id="cameraSvgAvatar">
+            <circle cx="50" cy="35" r="20" fill="var(--muted)"/>
+            <path d="M50 60c-20 0-35 12-35 25h70c0-13-15-25-35-25z" fill="var(--muted)"/>
+          </svg>
+          <div id="capturedPhotoWrap" style="width:100%; height:100%; display:none;"></div>
+        </div>
+        <button class="btn" id="btnCapturePhoto" onclick="simulatePhotoCapture()" style="background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:10px; height:auto; font-size:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Capture Biometric Photo
+        </button>
+      </div>
       
       <div class="form-group">
         <div class="form-label">Visitor Type</div>
         <div class="visitor-type">
-          <div class="type-item selected">Guest</div>
-          <div class="type-item">Delivery</div>
-          <div class="type-item">Service</div>
+          <div class="type-item selected" onclick="selectVisType('Guest')">Guest</div>
+          <div class="type-item" onclick="selectVisType('Delivery')">Delivery</div>
+          <div class="type-item" onclick="selectVisType('Service')">Service</div>
         </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label">Visitor Name</div>
-        <input type="text" class="form-input" placeholder="Enter full name">
+      <div class="form-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <div class="form-label">Visitor Name</div>
+          <input type="text" class="form-input" id="visName" placeholder="Enter full name" oninput="suggestMockDetails()">
+        </div>
+        <div style="flex: 1;">
+          <div class="form-label">Phone Number</div>
+          <input type="tel" class="form-input" id="visPhone" placeholder="Enter mobile">
+        </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label">Phone Number</div>
-        <input type="tel" class="form-input" placeholder="Enter phone number">
+      <div class="form-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <div class="form-label">ID Verification</div>
+          <select class="form-input" id="visIdType">
+            <option value="Aadhaar Card">Aadhaar Card</option>
+            <option value="PAN Card">PAN Card</option>
+            <option value="Driving License">Driving License</option>
+            <option value="Voter ID">Voter ID</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <div class="form-label">ID Number</div>
+          <input type="text" class="form-input" id="visIdNum" placeholder="e.g., 9012 3456 7890">
+        </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label">Purpose</div>
-        <select class="form-input">
-          <option>Personal Visit</option>
-          <option>Delivery</option>
-          <option>Service/Maintenance</option>
-          <option>Meeting</option>
-          <option>Other</option>
-        </select>
+      <div class="form-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <div class="form-label">Flat No. to Visit</div>
+          <input type="text" class="form-input" id="visFlatNum" placeholder="e.g. 201, 405">
+        </div>
+        <div style="flex: 1;">
+          <div class="form-label">Visitors Count</div>
+          <input type="number" class="form-input" id="visCount" value="1" min="1">
+        </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label">Number of Visitors</div>
-        <input type="number" class="form-input" placeholder="1" value="1" min="1">
+      <div class="form-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <div class="form-label">Purpose</div>
+          <select class="form-input" id="visPurpose">
+            <option value="Personal Visit">Personal Visit</option>
+            <option value="Delivery / Courier">Delivery / Courier</option>
+            <option value="Home Service / Repair">Home Service / Repair</option>
+            <option value="Society Meeting">Society Meeting</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <div class="form-label">Vehicle No</div>
+          <input type="text" class="form-input" id="visVehicle" placeholder="e.g., MH 12 AB 1234">
+        </div>
       </div>
 
-      <div class="form-group">
-        <div class="form-label">Vehicle Number (Optional)</div>
-        <input type="text" class="form-input" placeholder="Enter vehicle number">
-      </div>
-
-      <button class="btn btn-primary" onclick="generatePass()">Generate Pass</button>
+      <button class="btn btn-primary" onclick="requestEntryApproval()" style="height: 52px; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Approval Request
+      </button>
     </div>
 
     <div class="card">
       <div class="card-title">Today's Visitors</div>
       <div id="visitorsList">
-        <div class="visitor-item">
-          <div class="visitor-info">
-            <div class="visitor-name">Rahul Sharma</div>
-            <div class="visitor-details">Guest · Tower A, Flat 201 · 10:30 AM</div>
-          </div>
-          <div class="visitor-status status-in">Inside</div>
-        </div>
-        <div class="visitor-item">
-          <div class="visitor-info">
-            <div class="visitor-name">Amazon Delivery</div>
-            <div class="visitor-details">Delivery · Tower B · 09:15 AM</div>
-          </div>
-          <div class="visitor-status status-out">Left</div>
-        </div>
-        <div class="visitor-item">
-          <div class="visitor-info">
-            <div class="visitor-name">Electrician - Rajesh</div>
-            <div class="visitor-details">Service · Common Area · 08:45 AM</div>
-          </div>
-          <div class="visitor-status status-out">Left</div>
-        </div>
       </div>
     </div>
   </div>
@@ -339,60 +504,370 @@
     </a>
   </div>
 
+  <!-- RESIDENT APPROVAL SIMULATED POPUP OVERLAY -->
+  <div class="modal-overlay" id="residentApprovalModal">
+    <div class="modal" style="border: 2px solid var(--forest); box-shadow: 0 10px 40px rgba(31, 77, 61, 0.25); max-width: 380px;">
+      <div class="modal-header" style="background: var(--forest); color: white; margin: -20px -20px 20px -20px; padding: 16px 20px; border-radius: 12px 12px 0 0;">
+        <div class="modal-title" style="color:white; display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Gate Request: Approve Entrance?
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--muted); letter-spacing:0.5px;">Simulated Flat Owner Alert</div>
+      </div>
+      
+      <div style="display: flex; gap: 14px; background: var(--paper); padding: 14px; border-radius: 12px; border: 1px solid var(--line); margin-bottom: 20px; align-items: center;">
+        <div id="approvalVisitorPhoto" style="width: 70px; height: 70px; border-radius: 8px; overflow: hidden; background: #2c3e50; flex-shrink:0;">
+          <!-- Photo SVG will go here dynamically -->
+        </div>
+        <div style="flex: 1; text-align: left; display: flex; flex-direction: column;">
+          <div id="approvalVisitorName" style="font-size: 15px; font-weight: 600; color: var(--forest-dark);">Rahul Kumar</div>
+          <div id="approvalVisitorDetails" style="font-size: 11px; color: var(--muted); margin-top: 2px;">Guest · Tower A · 10:30 AM</div>
+          <div id="approvalVisitorPurpose" style="font-size: 11px; font-weight: 600; color: var(--forest); margin-top: 6px; background: #E4EEE8; padding: 4px 8px; border-radius: 6px; display: inline-block; align-self: flex-start;">Courier Delivery</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn btn-primary" onclick="approveResidentRequest()" style="height: 48px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><polyline points="20 6 9 17 4 12"/></svg>
+          Approve & Open Gate
+        </button>
+        <button class="btn" onclick="rejectResidentRequest()" style="background: var(--terracotta); color: white; height: 48px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Reject Entry
+        </button>
+        <button class="btn" onclick="callResidentGuard()" style="background: var(--paper); color: var(--forest-dark); border: 1px solid var(--line); height: 44px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Call Security Guard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GATE SIMULATION OVERLAY -->
+  <div class="gate-simulation-overlay" id="gateOverlay">
+    <div class="gate-box">
+      <div class="gate-light" id="gateLight"></div>
+      <div class="gate-post"></div>
+      <div class="gate-arm" id="gateArm"></div>
+      <div class="gate-road"></div>
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif; font-size: 20px; font-weight: 700; color: white; margin-bottom: 8px;" id="gateSimStatus">Gate Closed</div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; max-width: 260px;" id="gateSimSub">Waiting for flat owner approval...</div>
+  </div>
+
 </div>
 
 <script>
-  let selectedType = 'Guest';
+  // Auth control
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
 
-  document.querySelectorAll('.type-item').forEach(item=>{
-    item.addEventListener('click', ()=>{
-      document.querySelectorAll('.type-item').forEach(i=>i.classList.remove('selected'));
-      item.classList.add('selected');
-      selectedType = item.textContent;
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    if (localStorage.getItem('loggedOutFlag')) {
+      alert('Please login to continue.');
+      window.location.href = 'profile.html';
+    } else {
+      currentUser = defaultUser;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+  }
+
+  let selectedVisTypeVal = 'Guest';
+  let capturedPhotoSvg = null;
+
+  const defaultPhotoSVG = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; display:block; background:#2c3e50;">
+    <circle cx="50" cy="35" r="18" fill="#f39c12"/>
+    <path d="M50 58c-14 0-25 8-25 18h50c0-10-11-18-25-18z" fill="#e67e22"/>
+    <path d="M35 76 L50 64 L65 76 Z" fill="#34495e"/>
+  </svg>`;
+
+  const rahulPhotoSVG = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; display:block; background:#1b3a4b;">
+    <circle cx="50" cy="35" r="18" fill="#e0a96d"/>
+    <path d="M50 58c-14 0-25 8-25 18h50c0-10-11-18-25-18z" fill="#201a23"/>
+    <circle cx="43" cy="34" r="4" fill="none" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="57" cy="34" r="4" fill="none" stroke="#fff" stroke-width="1.5"/>
+    <line x1="47" y1="34" x2="53" y2="34" stroke="#fff" stroke-width="1.5"/>
+    <path d="M38 76 L50 64 L62 76 Z" fill="#2c3e50"/>
+    <path d="M48 76 L50 67 L52 76 Z" fill="#e74c3c"/>
+  </svg>`;
+
+  function selectVisType(type) {
+    selectedVisTypeVal = type;
+    document.querySelectorAll('.type-item').forEach(item => {
+      if (item.textContent === type) {
+        item.classList.add('selected');
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+    
+    // Automatically match purpose based on type
+    const purpSelect = document.getElementById('visPurpose');
+    if (type === 'Delivery') {
+      purpSelect.value = 'Delivery / Courier';
+    } else if (type === 'Service') {
+      purpSelect.value = 'Home Service / Repair';
+    } else {
+      purpSelect.value = 'Personal Visit';
+    }
+  }
+
+  // Auto-fill values when typing 'Rahul' for easy testing
+  function suggestMockDetails() {
+    const nameInput = document.getElementById('visName').value.trim();
+    if (nameInput.toLowerCase() === 'rahul' || nameInput.toLowerCase() === 'rahul kumar') {
+      document.getElementById('visPhone').value = '+91 98877 66554';
+      document.getElementById('visIdType').value = 'Aadhaar Card';
+      document.getElementById('visIdNum').value = '8765 4321 0987';
+      document.getElementById('visVehicle').value = 'MH 12 XY 9876';
+      document.getElementById('visFlatNum').value = '201';
+    }
+  }
+
+  // Simulate AI Biometric Face Scanning
+  function simulatePhotoCapture() {
+    const viewfinder = document.getElementById('camViewfinder');
+    const scanner = document.getElementById('camScanner');
+    const overlay = document.getElementById('camOverlay');
+    const placeholder = document.getElementById('cameraSvgAvatar');
+    const photoWrap = document.getElementById('capturedPhotoWrap');
+
+    // Reset view
+    photoWrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    scanner.style.display = 'block';
+    overlay.style.display = 'block';
+    viewfinder.classList.remove('captured');
+
+    // Scan animation for 1.2s
+    setTimeout(() => {
+      scanner.style.display = 'none';
+      overlay.style.display = 'none';
+      placeholder.style.display = 'none';
+      
+      const name = document.getElementById('visName').value.trim();
+      const isRahul = name.toLowerCase().includes('rahul');
+      capturedPhotoSvg = isRahul ? rahulPhotoSVG : defaultPhotoSVG;
+      
+      photoWrap.innerHTML = capturedPhotoSvg;
+      photoWrap.style.display = 'block';
+      viewfinder.classList.add('captured');
+    }, 1200);
+  }
+
+  // Load visitors list
+  let visitors = [];
+  function initVisitors() {
+    if (!currentUser) return;
+    visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
+    renderVisitors();
+  }
+
+  function renderVisitors() {
+    const listContainer = document.getElementById('visitorsList');
+    listContainer.innerHTML = '';
+
+    const list = [...visitors];
+    if (list.length === 0) {
+      list.push(
+        { name: "Rahul Sharma", details: "Guest · Tower A, Flat 201 · 20 Jul 2026 · 10:30 AM", status: "Inside", photo: defaultPhotoSVG },
+        { name: "Amazon Delivery", details: "Delivery · Tower B · 20 Jul 2026 · 09:15 AM", status: "Left", photo: defaultPhotoSVG },
+        { name: "Electrician - Rajesh", details: "Service · Common Area · 20 Jul 2026 · 08:45 AM", status: "Left", photo: defaultPhotoSVG }
+      );
+    }
+
+    list.forEach((v, idx) => {
+      const isInside = v.status === 'Inside';
+      const statusClass = isInside ? 'status-in' : 'status-out';
+      
+      // Left exit button or text label
+      const actionHtml = isInside 
+        ? `<button class="btn" onclick="recordExit(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin:0; background:var(--terracotta); color:white; border-radius:8px;">Record Exit</button>`
+        : `<div class="visitor-status ${statusClass}">${v.status}</div>`;
+
+      const photoHtml = v.photo ? `<div style="width:36px; height:36px; border-radius:6px; overflow:hidden; flex-shrink:0; background:#2c3e50;">${v.photo}</div>` : '';
+
+      const visitorItem = document.createElement('div');
+      visitorItem.className = 'visitor-item';
+      visitorItem.style.display = 'flex';
+      visitorItem.style.gap = '10px';
+      visitorItem.style.alignItems = 'center';
+      visitorItem.innerHTML = `
+        ${photoHtml}
+        <div class="visitor-info" style="flex:1;">
+          <div class="visitor-name" style="font-weight:600; color:var(--forest-dark);">${v.name}</div>
+          <div class="visitor-details">${v.details}</div>
+        </div>
+        <div>
+          ${actionHtml}
+        </div>
+      `;
+      listContainer.appendChild(visitorItem);
+    });
+  }
+
+  // Request Resident Approval
+  function requestEntryApproval() {
+    const name = document.getElementById('visName').value.trim();
+    const phone = document.getElementById('visPhone').value.trim();
+    const idNum = document.getElementById('visIdNum').value.trim();
+    const idType = document.getElementById('visIdType').value;
+    const purpose = document.getElementById('visPurpose').value;
+    const vehicle = document.getElementById('visVehicle').value.trim() || 'No Vehicle';
+    const flatInput = document.getElementById('visFlatNum').value.trim();
+
+    if (!name || !phone || !idNum || !flatInput) {
+      alert('Please fill out Visitor Name, Phone, ID Number, and Flat Number to Visit.');
+      return;
+    }
+
+    // Capture photo if not captured yet
+    if (!capturedPhotoSvg) {
+      simulatePhotoCapture();
+      setTimeout(() => {
+        showApprovalDialog();
+      }, 1300);
+    } else {
+      showApprovalDialog();
+    }
+
+    function showApprovalDialog() {
+      // Query users database to find flat owner
+      const usersList = JSON.parse(localStorage.getItem('users')) || [defaultUser];
+      const targetUser = usersList.find(u => u.flat === flatInput);
+      const ownerName = targetUser ? targetUser.name : "Resident";
+
+      // Set values inside simulated resident modal
+      document.querySelector('#residentApprovalModal .modal-title').innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Flat ${flatInput} Gate Alert
+      `;
+      document.querySelector('#residentApprovalModal div[style*="letter-spacing:0.5px"]').textContent = `Simulated Alert on ${ownerName}'s Device`;
+      document.getElementById('approvalVisitorName').textContent = name;
+      document.getElementById('approvalVisitorDetails').textContent = `${selectedVisTypeVal} · Flat ${flatInput} · Vehicle: ${vehicle}`;
+      document.getElementById('approvalVisitorPurpose').textContent = purpose;
+      document.getElementById('approvalVisitorPhoto').innerHTML = capturedPhotoSvg;
+
+      // Show resident approval modal overlay
+      document.getElementById('residentApprovalModal').classList.add('active');
+    }
+  }
+
+  // Action: Approve request (triggered by flat owner)
+  function approveResidentRequest() {
+    // Close approval dialog
+    document.getElementById('residentApprovalModal').classList.remove('active');
+
+    // Open gate simulator
+    const gateOverlay = document.getElementById('gateOverlay');
+    const gateLight = document.getElementById('gateLight');
+    const gateArm = document.getElementById('gateArm');
+    const gateSimStatus = document.getElementById('gateSimStatus');
+    const gateSimSub = document.getElementById('gateSimSub');
+
+    gateSimStatus.textContent = "Gate Closed";
+    gateSimSub.textContent = "Owner Approved. Starting barrier rotation...";
+    gateLight.className = "gate-light"; // red
+    gateArm.className = "gate-arm";
+    gateOverlay.classList.add('active');
+
+    // Timed animation sequences
+    setTimeout(() => {
+      // Light Green, Gate Open
+      gateLight.classList.add('green');
+      gateArm.classList.add('open');
+      gateSimStatus.textContent = "Gate Opening";
+      gateSimSub.textContent = "Access Granted. Vehicle scanner cleared.";
+    }, 800);
+
+    setTimeout(() => {
+      // Save visitor entry to local storage
+      const name = document.getElementById('visName').value.trim();
+      const purpose = document.getElementById('visPurpose').value;
+      const vehicle = document.getElementById('visVehicle').value.trim() || 'No Vehicle';
+      const flatInput = document.getElementById('visFlatNum').value.trim();
+      const now = new Date();
+      const formattedTime = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const newVisObj = {
+        name: name,
+        details: `${selectedVisTypeVal} · Flat ${flatInput} · Purpose: ${purpose} · Entered ${formattedTime}`,
+        status: "Inside",
+        type: selectedVisTypeVal,
+        photo: capturedPhotoSvg || defaultPhotoSVG,
+        exitTime: ""
+      };
+
+      visitors.unshift(newVisObj);
+      localStorage.setItem('society_visitors', JSON.stringify(visitors));
+      renderVisitors();
+
+      // Reset form
+      document.getElementById('visName').value = '';
+      document.getElementById('visPhone').value = '';
+      document.getElementById('visIdNum').value = '';
+      document.getElementById('visVehicle').value = '';
+      document.getElementById('visFlatNum').value = '';
+      capturedPhotoSvg = null;
+      document.getElementById('capturedPhotoWrap').style.display = 'none';
+      document.getElementById('cameraSvgAvatar').style.display = 'block';
+      document.getElementById('camViewfinder').classList.remove('captured');
+
+      // Close gate overlay
+      gateOverlay.classList.remove('active');
+    }, 3200);
+  }
+
+  function rejectResidentRequest() {
+    document.getElementById('residentApprovalModal').classList.remove('active');
+    alert('Entry request rejected by Flat Owner. Guard console notified.');
+  }
+
+  function callResidentGuard() {
+    alert('Connecting call to Gate Guard console... 📞');
+  }
+
+  // Record visitor exit
+  function recordExit(idx) {
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const originalDetails = visitors[idx].details;
+    
+    visitors[idx].status = 'Left';
+    visitors[idx].details = `${originalDetails} (Left at ${formattedTime})`;
+    
+    localStorage.setItem('society_visitors', JSON.stringify(visitors));
+    renderVisitors();
+    
+    alert(`Exit recorded for ${visitors[idx].name} at ${formattedTime}.`);
+  }
+
+  // Close modals clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
     });
   });
 
-  function generatePass() {
-    const name = document.querySelectorAll('.form-input')[0].value;
-    const phone = document.querySelectorAll('.form-input')[1].value;
-    const purpose = document.querySelectorAll('.form-input')[2].value;
-    const count = document.querySelectorAll('.form-input')[3].value;
-    const vehicle = document.querySelectorAll('.form-input')[4].value;
-    
-    if (!name) {
-      alert('Please enter visitor name');
-      return;
-    }
-    if (!phone) {
-      alert('Please enter phone number');
-      return;
-    }
-
-    // Generate pass number
-    const passNumber = 'VIS-' + Date.now().toString().slice(-6);
-    const currentTime = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-    // Add to visitors list
-    const visitorsContainer = document.getElementById('visitorsList');
-    const newVisitor = document.createElement('div');
-    newVisitor.className = 'visitor-item';
-    newVisitor.innerHTML = `
-      <div class="visitor-info">
-        <div class="visitor-name">${name}</div>
-        <div class="visitor-details">${selectedType} · ${purpose} · ${currentTime}</div>
-      </div>
-      <div class="visitor-status status-in">Inside</div>
-    `;
-    visitorsContainer.insertBefore(newVisitor, visitorsContainer.firstChild);
-    
-    // Reset form
-    document.querySelectorAll('.form-input')[0].value = '';
-    document.querySelectorAll('.form-input')[1].value = '';
-    document.querySelectorAll('.form-input')[3].value = '1';
-    document.querySelectorAll('.form-input')[4].value = '';
-    
-    alert(`Visitor Pass Generated!\n\nPass Number: ${passNumber}\nName: ${name}\nType: ${selectedType}\nCount: ${count}\nPurpose: ${purpose}\n\nPlease show this pass at the security gate.`);
-  }
+  // Initial load
+  initVisitors();
 </script>
 </body>
 </html>

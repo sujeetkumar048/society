@@ -215,6 +215,101 @@
     body{background:#E9ECE5;}
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
   }
+  
+  /* Spinner Keyframes */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  .modal-overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:90%;
+    max-width:400px;
+    padding:24px;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--forest-dark);
+  }
+  .modal-close{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
+  .detail-row{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .detail-label{
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .detail-value{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .modal-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:16px;
+  }
+  .modal-btn-primary{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+  }
+  .type-item{
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    text-align:center;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .type-item:hover, .type-item.selected{
+    border-color:var(--forest);
+    background:#E4EEE8;
+  }
 </style>
 </head>
 <body>
@@ -232,54 +327,114 @@
 
   <!-- CONTENT -->
   <div class="content">
-    <div class="card">
-      <div class="amount-display">
-        <div class="amount-label">Due Amount</div>
-        <div class="amount-value">₹2,000</div>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Payment Method</div>
-        <select class="form-input">
-          <option>UPI</option>
-          <option>Net Banking</option>
-          <option>Credit/Debit Card</option>
-          <option>Cash</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Month</div>
-        <select class="form-input">
-          <option>July 2026</option>
-          <option>June 2026</option>
-          <option>May 2026</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="processPayment()">Pay Now</button>
+    <!-- Tab Switcher -->
+    <div class="tab-slider-wrap" id="adminToggleContainer" style="display:flex; margin-bottom: 20px; background: var(--line); border-radius: 12px; padding: 4px; position: relative;">
+      <div style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: var(--forest); border-radius: 9px; transition: transform 0.25s ease;" id="tabPill"></div>
+      <div class="auth-tab" onclick="switchDesk('resident')" id="tabResident" style="flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; position: relative; z-index: 2; transition: color 0.2s;">Resident View</div>
+      <div class="auth-tab" onclick="switchDesk('admin')" id="tabAdmin" style="flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--forest-dark); position: relative; z-index: 2; transition: color 0.2s;">Invoice Center</div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Payment History</div>
-      <div id="paymentHistory">
-        <div class="history-item">
-          <div>
-            <div class="history-date">June 2026</div>
-            <div class="status-paid">Paid</div>
-          </div>
-          <div class="history-amount">₹2,000</div>
+    <!-- RESIDENT DESK VIEW -->
+    <div id="residentDesk">
+      <div class="card">
+        <div class="card-title">Pending Maintenance Bills</div>
+        <div id="pendingBillsList">
+          <!-- Dynamically populated pending bill cards with details breakdown -->
         </div>
-        <div class="history-item">
-          <div>
-            <div class="history-date">May 2026</div>
-            <div class="status-paid">Paid</div>
-          </div>
-          <div class="history-amount">₹2,000</div>
+        
+        <div class="form-group" id="payMethodGroup" style="display:none; margin-top: 16px;">
+          <div class="form-label">Payment Mode</div>
+          <select class="form-input" id="payMethod">
+            <option value="UPI">UPI (Google Pay/PhonePe)</option>
+            <option value="Card">Credit / Debit Card</option>
+            <option value="Net Banking">Net Banking</option>
+            <option value="Cash">Cash (Office Admin)</option>
+          </select>
         </div>
-        <div class="history-item">
-          <div>
-            <div class="history-date">April 2026</div>
-            <div class="status-paid">Paid</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Payment History</div>
+        <div id="paymentHistory">
+          <!-- Dyn. populated payments -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN DESK CENTER -->
+    <div id="adminDesk" style="display:none;">
+      <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
+        <div class="card-title">Invoice Generator</div>
+        
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Flat No.</div>
+            <input type="text" class="form-input" id="invFlatNum" placeholder="e.g. 201, 405" oninput="fetchFlatPreviousDue()">
           </div>
-          <div class="history-amount">₹2,000</div>
+          <div style="flex: 1;">
+            <div class="form-label">Billing Month</div>
+            <select class="form-input" id="invMonth">
+              <option value="July 2026">July 2026</option>
+              <option value="August 2026">August 2026</option>
+              <option value="September 2026">September 2026</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Maintenance (₹)</div>
+            <input type="number" class="form-input" id="invMaint" value="1200" oninput="calculateTotalInvoice()">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Water (₹)</div>
+            <input type="number" class="form-input" id="invWater" value="200" oninput="calculateTotalInvoice()">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Electric (₹)</div>
+            <input type="number" class="form-input" id="invElectric" value="300" oninput="calculateTotalInvoice()">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Parking (₹)</div>
+            <input type="number" class="form-input" id="invParking" value="150" oninput="calculateTotalInvoice()">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Penalty (₹)</div>
+            <input type="number" class="form-input" id="invPenalty" value="0" oninput="calculateTotalInvoice()">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Previous Due (₹)</div>
+            <input type="number" class="form-input" id="invPrevDue" value="0" oninput="calculateTotalInvoice()">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">GST (18% Auto) (₹)</div>
+            <input type="number" class="form-input" id="invGst" value="333" readonly style="background:#e9ece5;">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Total Amount (₹)</div>
+            <input type="number" class="form-input" id="invTotal" value="2183" readonly style="background:#e9ece5; font-weight:700; color:var(--forest-dark);">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateInvoiceSubmit()" style="height: 52px; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Generate Invoice
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Generated Invoices Log</div>
+        <div id="generatedInvoicesLogList">
+          <!-- List of generated invoices -->
         </div>
       </div>
     </div>
@@ -305,30 +460,737 @@
     </a>
   </div>
 
+  <!-- CHECKOUT GATEWAY MODAL -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">Secure Checkout</div>
+        <div class="modal-close" onclick="closeModal('checkoutModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Amount to Pay</div>
+        <div style="font-size: 32px; font-weight: 700; color: var(--forest-dark); font-family: 'IBM Plex Mono', monospace; margin: 4px 0;" id="checkoutAmount">₹2,000</div>
+        <div style="font-size: 12px; color: var(--muted);" id="checkoutMeta">For July 2026 via UPI</div>
+      </div>
+
+      <!-- UPI Gateway Screen -->
+      <div id="checkoutUPI" style="display:none; text-align: center;">
+        <div style="background: white; padding: 12px; border-radius: 12px; display: inline-block; border: 1px solid var(--line); margin-bottom: 12px;">
+          <!-- SVG QR Code -->
+          <svg width="130" height="130" viewBox="0 0 100 100" style="display: block; margin:0 auto;">
+            <rect x="2" y="2" width="96" height="96" fill="none" stroke="var(--forest)" stroke-width="2" rx="4"/>
+            <rect x="10" y="10" width="25" height="25" fill="var(--forest-dark)"/>
+            <rect x="15" y="15" width="15" height="15" fill="white"/>
+            <rect x="18" y="18" width="9" height="9" fill="var(--forest-dark)"/>
+            <rect x="65" y="10" width="25" height="25" fill="var(--forest-dark)"/>
+            <rect x="70" y="15" width="15" height="15" fill="white"/>
+            <rect x="73" y="18" width="9" height="9" fill="var(--forest-dark)"/>
+            <rect x="10" y="65" width="25" height="25" fill="var(--forest-dark)"/>
+            <rect x="15" y="70" width="15" height="15" fill="white"/>
+            <rect x="18" y="73" width="9" height="9" fill="var(--forest-dark)"/>
+            <rect x="45" y="45" width="10" height="10" fill="var(--forest-dark)"/>
+            <rect x="65" y="65" width="10" height="10" fill="var(--forest-dark)"/>
+            <rect x="75" y="75" width="15" height="15" fill="var(--forest-dark)"/>
+            <rect x="45" y="75" width="10" height="10" fill="var(--forest-dark)"/>
+            <rect x="75" y="45" width="15" height="15" fill="var(--forest-dark)"/>
+            <rect x="45" y="15" width="10" height="10" fill="var(--forest-dark)"/>
+            <rect x="55" y="25" width="5" height="15" fill="var(--forest-dark)"/>
+          </svg>
+        </div>
+        
+        <div style="font-size: 11px; font-weight:600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Select UPI App</div>
+        <div style="display:flex; justify-content:space-around; gap:8px; margin-bottom:15px;" id="upiAppSelector">
+          <div class="upi-app-btn" onclick="selectUpiApp(this, 'Google Pay')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:10px 4px; display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:10px; font-weight:600; background:var(--card); transition:all 0.15s ease;">
+            <span style="font-size:18px; margin-bottom:4px;">🟩</span>
+            GPay
+          </div>
+          <div class="upi-app-btn" onclick="selectUpiApp(this, 'PhonePe')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:10px 4px; display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:10px; font-weight:600; background:var(--card); transition:all 0.15s ease;">
+            <span style="font-size:18px; margin-bottom:4px;">🟪</span>
+            PhonePe
+          </div>
+          <div class="upi-app-btn" onclick="selectUpiApp(this, 'Paytm')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:10px 4px; display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:10px; font-weight:600; background:var(--card); transition:all 0.15s ease;">
+            <span style="font-size:18px; margin-bottom:4px;">🟦</span>
+            Paytm
+          </div>
+          <div class="upi-app-btn" onclick="selectUpiApp(this, 'BHIM UPI')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:10px 4px; display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:10px; font-weight:600; background:var(--card); transition:all 0.15s ease;">
+            <span style="font-size:18px; margin-bottom:4px;">🟧</span>
+            BHIM
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px;">Or enter UPI ID manually</div>
+        <div class="form-group">
+          <input type="text" class="form-input" id="upiIdInput" placeholder="Enter UPI ID (e.g. sujeet@upi)">
+        </div>
+      </div>
+
+      <!-- Card Gateway Screen -->
+      <div id="checkoutCard" style="display:none;">
+        <div class="form-group">
+          <div class="form-label">Card Number</div>
+          <input type="text" class="form-input" id="cardNumber" placeholder="4111 2222 3333 4444" maxlength="19">
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Expiry Date</div>
+            <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">CVV</div>
+            <input type="password" class="form-input" id="cardCvv" placeholder="•••" maxlength="3">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Cardholder Name</div>
+          <input type="text" class="form-input" id="cardName" placeholder="Name on Card">
+        </div>
+      </div>
+
+      <!-- Net Banking Screen -->
+      <div id="checkoutNet" style="display:none;">
+        <div class="form-label" style="margin-bottom: 8px;">Select bank account</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <div class="type-item" id="bankHDFC" onclick="selectBank('HDFC Bank')">HDFC Bank</div>
+          <div class="type-item" id="bankICICI" onclick="selectBank('ICICI Bank')">ICICI Bank</div>
+          <div class="type-item" id="bankSBI" onclick="selectBank('State Bank of India')">SBI</div>
+          <div class="type-item" id="bankAXIS" onclick="selectBank('Axis Bank')">Axis Bank</div>
+        </div>
+      </div>
+
+      <!-- Cash / Office Info Screen -->
+      <div id="checkoutCash" style="display:none; text-align: center; padding: 10px 0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--marigold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; margin: 0 auto 12px; display:block;"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        <p style="font-size: 13.5px; color: var(--forest-dark); font-weight: 500; margin-bottom: 8px;">Pay cash at Society Finance Office</p>
+        <p style="font-size: 11.5px; color: var(--muted); line-height: 1.4;">Tower A, Ground Floor Admin Office.<br>Working Hours: 10:00 AM - 5:00 PM</p>
+      </div>
+
+      <button class="btn btn-primary" id="btnSubmitPayment" onclick="submitGatewayPayment()">Submit Secure Payment</button>
+    </div>
+  </div>
+
+  <!-- PROCESSING MODAL -->
+  <div class="modal-overlay" id="processingModal" style="z-index: 1100;">
+    <div class="modal" style="max-width: 300px; text-align: center; padding: 32px 24px;">
+      <div class="spinner" style="width: 44px; height: 44px; border: 4px solid var(--line); border-top-color: var(--forest); border-radius: 50%; margin: 0 auto 20px;"></div>
+      <div class="modal-title" style="font-size: 16px; margin-bottom: 8px;">Processing Payment</div>
+      <p style="font-size: 12px; color: var(--muted);">Please do not close this window.</p>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="successModal" style="z-index: 1200;">
+    <div class="modal" style="max-width: 340px; text-align: center; padding: 32px 24px;">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: #E4EEE8; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid var(--forest);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="width: 26px; height: 26px;"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="modal-title" style="font-size: 18px; margin-bottom: 8px; color: var(--forest-dark);">Payment Successful!</div>
+      <p style="font-size: 12.5px; color: var(--muted); margin-bottom: 20px;" id="successMsg">Receipt has been recorded successfully.</p>
+      
+      <div style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Auto Send Receipt</div>
+      <div style="display:flex; justify-content:space-around; gap:8px; margin-bottom:20px;">
+        <div class="receipt-action-btn" onclick="sendAutoReceipt('pdf')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 4px; font-size:10px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; background:var(--paper); transition: all 0.2s;">
+          <span style="font-size:16px; margin-bottom:4px;">📄</span> PDF
+        </div>
+        <div class="receipt-action-btn" onclick="sendAutoReceipt('email')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 4px; font-size:10px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; background:var(--paper); transition: all 0.2s;">
+          <span style="font-size:16px; margin-bottom:4px;">✉️</span> Email
+        </div>
+        <div class="receipt-action-btn" onclick="sendAutoReceipt('wa')" style="flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 4px; font-size:10px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; background:var(--paper); transition: all 0.2s;">
+          <span style="font-size:16px; margin-bottom:4px;">💬</span> WhatsApp
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="viewGeneratedReceipt()">View Receipt</button>
+    </div>
+  </div>
+
+  <!-- RECEIPT DETAIL MODAL -->
+  <div class="modal-overlay" id="receiptModal" style="z-index: 1300;">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <div class="modal-title">Payment Receipt</div>
+        <div class="modal-close" onclick="closeModal('receiptModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      
+      <div style="border: 1px dashed var(--line); border-radius: 12px; padding: 16px; background: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 12px;">
+        <div style="text-align: center; border-bottom: 1px dashed var(--line); padding-bottom: 12px; margin-bottom: 12px;">
+          <h4 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; color: var(--forest-dark); margin-bottom: 2px;">SR GOLD SOCIETY</h4>
+          <span style="font-size: 9.5px; color: var(--muted); letter-spacing: 0.5px;">SURAKSHIT SOCIETY PORTAL</span>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Receipt No</div>
+          <div class="detail-value" id="rcptNo">RCPT-87654</div>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Date & Time</div>
+          <div class="detail-value" id="rcptDate">Jul 20, 2026, 02:44 PM</div>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Resident</div>
+          <div class="detail-value" id="rcptUser">Sujeet Sharma</div>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Flat</div>
+          <div class="detail-value" id="rcptFlat">Tower A - 201</div>
+        </div>
+        <div style="border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); padding: 8px 0; margin: 10px 0; display: flex; justify-content: space-between; font-weight: 600; font-size: 12.5px;">
+          <div id="rcptMonthLabel">July 2026 Maintenance</div>
+          <div id="rcptAmt">₹2,000</div>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Payment Mode</div>
+          <div class="detail-value" id="rcptMode">UPI</div>
+        </div>
+        <div class="detail-row" style="padding: 6px 0; border: none;">
+          <div class="detail-label">Status</div>
+          <div class="detail-value" style="color: var(--forest); font-weight: 600;">SUCCESSFUL</div>
+        </div>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="downloadReceiptPdf()">Download PDF</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  function processPayment() {
-    const method = document.querySelector('.form-input').value;
-    const month = document.querySelectorAll('.form-input')[1].value;
-    
-    if (confirm(`Pay ₹2,000 for ${month} via ${method}?`)) {
-      // Add new payment to history
-      const historyContainer = document.getElementById('paymentHistory');
-      const newPayment = document.createElement('div');
-      newPayment.className = 'history-item';
-      newPayment.innerHTML = `
-        <div>
-          <div class="history-date">${month}</div>
-          <div class="status-paid">Paid</div>
-        </div>
-        <div class="history-amount">₹2,000</div>
-      `;
-      historyContainer.insertBefore(newPayment, historyContainer.firstChild);
-      
-      alert('Payment successful! Receipt will be sent to your registered email.');
+  // Auth control
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    if (localStorage.getItem('loggedOutFlag')) {
+      alert('Please login to continue.');
+      window.location.href = 'profile.html';
+    } else {
+      currentUser = defaultUser;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
     }
   }
+
+  // Hide/show Admin toggle container based on role
+  function setupAdminToggle() {
+    const toggleContainer = document.getElementById('adminToggleContainer');
+    if (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') {
+      toggleContainer.style.display = 'flex';
+    } else {
+      toggleContainer.style.display = 'none';
+    }
+  }
+
+  // Switch between desks
+  function switchDesk(desk) {
+    const tabResident = document.getElementById('tabResident');
+    const tabAdmin = document.getElementById('tabAdmin');
+    const tabPill = document.getElementById('tabPill');
+    const residentDesk = document.getElementById('residentDesk');
+    const adminDesk = document.getElementById('adminDesk');
+
+    if (desk === 'resident') {
+      tabPill.style.transform = 'translateX(0)';
+      tabResident.style.color = 'white';
+      tabAdmin.style.color = 'var(--forest-dark)';
+      residentDesk.style.display = 'block';
+      adminDesk.style.display = 'none';
+      loadPaymentsHistory();
+    } else {
+      tabPill.style.transform = 'translateX(100%)';
+      tabResident.style.color = 'var(--forest-dark)';
+      tabAdmin.style.color = 'white';
+      residentDesk.style.display = 'none';
+      adminDesk.style.display = 'block';
+      calculateTotalInvoice();
+      renderAdminInvoicesLog();
+    }
+  }
+
+  // Modals operations
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  // Formatting helper for Card Input formatting
+  document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+    let target = e.target;
+    let position = target.selectionEnd;
+    let length = target.value.length;
+    
+    target.value = target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    
+    let diff = target.value.length - length;
+    if (diff > 0) {
+      target.setSelectionRange(position + diff, position + diff);
+    }
+  });
+
+  document.getElementById('cardExpiry')?.addEventListener('input', function(e) {
+    let target = e.target;
+    target.value = target.value.replace(/[^\d]/g, '');
+    if (target.value.length >= 2) {
+      target.value = target.value.slice(0, 2) + '/' + target.value.slice(2, 4);
+    }
+  });
+
+  // Calculate invoice live values
+  function calculateTotalInvoice() {
+    const maint = Number(document.getElementById('invMaint').value) || 0;
+    const water = Number(document.getElementById('invWater').value) || 0;
+    const electric = Number(document.getElementById('invElectric').value) || 0;
+    const parking = Number(document.getElementById('invParking').value) || 0;
+    const penalty = Number(document.getElementById('invPenalty').value) || 0;
+    const prevDue = Number(document.getElementById('invPrevDue').value) || 0;
+
+    const subtotal = maint + water + electric + parking + penalty + prevDue;
+    const gst = Math.round(subtotal * 0.18);
+    const total = subtotal + gst;
+
+    document.getElementById('invGst').value = gst;
+    document.getElementById('invTotal').value = total;
+  }
+
+  // Lookup outstanding dues for flat on typing
+  function fetchFlatPreviousDue() {
+    const flat = document.getElementById('invFlatNum').value.trim();
+    if (!flat) return;
+
+    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+    const flatPending = pending.filter(i => i.flat === flat);
+    const totalDue = flatPending.reduce((sum, i) => sum + i.total, 0);
+
+    document.getElementById('invPrevDue').value = totalDue;
+    calculateTotalInvoice();
+  }
+
+  // Admin submit invoice
+  function generateInvoiceSubmit() {
+    const flat = document.getElementById('invFlatNum').value.trim();
+    const month = document.getElementById('invMonth').value;
+    const maint = Number(document.getElementById('invMaint').value) || 0;
+    const water = Number(document.getElementById('invWater').value) || 0;
+    const electric = Number(document.getElementById('invElectric').value) || 0;
+    const parking = Number(document.getElementById('invParking').value) || 0;
+    const penalty = Number(document.getElementById('invPenalty').value) || 0;
+    const prevDue = Number(document.getElementById('invPrevDue').value) || 0;
+    const gst = Number(document.getElementById('invGst').value) || 0;
+    const total = Number(document.getElementById('invTotal').value) || 0;
+
+    if (!flat) {
+      alert('Please enter a target Flat Number.');
+      return;
+    }
+
+    const now = new Date();
+    const todayDateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newInvoice = {
+      id: 'INV-' + Date.now().toString().slice(-6),
+      flat: flat,
+      month: month,
+      maint: maint,
+      water: water,
+      electric: electric,
+      parking: parking,
+      penalty: penalty,
+      prevDue: prevDue,
+      gst: gst,
+      total: total,
+      date: todayDateStr,
+      status: 'Pending'
+    };
+
+    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+    
+    // Check if duplicate month for flat
+    if (pending.some(i => i.flat === flat && i.month === month)) {
+      alert(`Invoice for Flat ${flat} for ${month} is already pending payment.`);
+      return;
+    }
+
+    pending.unshift(newInvoice);
+    localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
+
+    alert(`Invoice Generated Successfully!\n\nFlat: ${flat}\nMonth: ${month}\nTotal: ₹${total.toLocaleString()}\n\nResident notified.`);
+    
+    // Reset form
+    document.getElementById('invFlatNum').value = '';
+    document.getElementById('invPenalty').value = '0';
+    document.getElementById('invPrevDue').value = '0';
+    calculateTotalInvoice();
+
+    renderAdminInvoicesLog();
+  }
+
+  // Render Admin Log of Invoices
+  function renderAdminInvoicesLog() {
+    const listContainer = document.getElementById('generatedInvoicesLogList');
+    listContainer.innerHTML = '';
+
+    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+
+    if (pending.length === 0) {
+      listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12px;">No pending invoices in system.</div>`;
+      return;
+    }
+
+    pending.forEach(inv => {
+      const row = document.createElement('div');
+      row.className = 'history-item';
+      row.style.fontSize = '12px';
+      row.innerHTML = `
+        <div>
+          <div style="font-weight:600; color:var(--forest-dark);">Flat ${inv.flat} · ${inv.month}</div>
+          <div style="font-size:10px; color:var(--muted);">${inv.id} · ${inv.date}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700; color:var(--terracotta);">₹${inv.total.toLocaleString()}</div>
+          <div style="font-size:10px; background:#F5E1DC; color:var(--terracotta); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px;">Unpaid</div>
+        </div>
+      `;
+      listContainer.appendChild(row);
+    });
+  }
+
+  // Load Payments History & Outstanding Bills
+  let payments = [];
+  let selectedBankName = "";
+  let activePayingInvoiceId = null;
+
+  function loadPaymentsHistory() {
+    if (!currentUser) return;
+    
+    payments = JSON.parse(localStorage.getItem('payments_' + currentUser.email));
+    
+    // Seed default payments if empty
+    if (!payments) {
+      payments = [
+        { month: 'June 2026', amount: '₹2,000', method: 'UPI', date: '03 Jun 2026 · 11:30 AM', txId: 'TXN-902348512' },
+        { month: 'May 2026', amount: '₹2,000', method: 'Net Banking', date: '02 May 2026 · 02:45 PM', txId: 'TXN-876123489' },
+        { month: 'April 2026', amount: '₹2,000', method: 'Credit Card', date: '04 Apr 2026 · 10:15 AM', txId: 'TXN-761239845' }
+      ];
+      localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
+    }
+
+    // Seed default pending invoice if nothing pending
+    let pending = JSON.parse(localStorage.getItem('society_pending_invoices'));
+    if (!pending) {
+      pending = [
+        { id: 'INV-76543', flat: '201', month: 'July 2026', maint: 1100, water: 200, electric: 250, parking: 150, penalty: 0, prevDue: 0, gst: 300, total: 2000, date: '20 Jul 2026 · 10:00 AM', status: 'Pending' }
+      ];
+      localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
+    }
+
+    renderPendingBillsUI();
+    renderHistoryUI();
+  }
+
+  function renderPendingBillsUI() {
+    const container = document.getElementById('pendingBillsList');
+    container.innerHTML = '';
+
+    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+    const myPending = pending.filter(i => i.flat === currentUser.flat);
+
+    const payMethodGroup = document.getElementById('payMethodGroup');
+
+    if (myPending.length === 0) {
+      container.innerHTML = `
+        <div class="amount-display" style="background:#E4EEE8; border:1px solid var(--forest); margin:0;">
+          <div class="amount-label" style="color:var(--forest);">Dues Status</div>
+          <div class="amount-value" style="color:var(--forest);">₹0</div>
+          <div style="font-size:12px; color:var(--forest); margin-top:8px; font-weight:500;">No outstanding bills! You are all caught up. 🎉</div>
+        </div>
+      `;
+      payMethodGroup.style.display = 'none';
+      return;
+    }
+
+    payMethodGroup.style.display = 'block';
+
+    myPending.forEach(inv => {
+      const card = document.createElement('div');
+      card.className = 'pending-bill-item';
+      card.style = 'border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--paper); margin-bottom:12px;';
+      
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div>
+            <div style="font-weight:600; font-size:14px; color:var(--forest-dark);">${inv.month} Maintenance</div>
+            <div style="font-size:10px; color:var(--muted);">${inv.id} · ${inv.date}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:\'IBM Plex Mono\',monospace; font-weight:700; font-size:18px; color:var(--terracotta);">₹${inv.total.toLocaleString()}</div>
+          </div>
+        </div>
+        
+        <!-- Accordion details breakdown -->
+        <div id="breakdown-${inv.id}" style="display:none; font-family:\'IBM Plex Mono\',monospace; font-size:11px; color:var(--muted); border-top:1px dashed var(--line); padding:10px 0; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Maintenance Fee:</span><span>₹${inv.maint}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Water Charges:</span><span>₹${inv.water}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Electricity Fee:</span><span>₹${inv.electric}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Parking Slots:</span><span>₹${inv.parking}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Penalties/Late Fee:</span><span>₹${inv.penalty}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Previous Arrears:</span><span>₹${inv.prevDue}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0; border-top:1px dotted var(--line); padding-top:4px;"><span>GST (18%):</span><span>₹${inv.gst}</span></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn" onclick="toggleInvoiceAccordion('${inv.id}')" style="flex:1; padding:10px; height:auto; background:var(--card); color:var(--forest); border:1px solid var(--forest); font-size:12px;">Breakdown</button>
+          <button class="btn btn-primary" onclick="payPendingBillClick('${inv.id}')" style="flex:1; padding:10px; height:auto; font-size:12px;">Pay Bill</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function toggleInvoiceAccordion(id) {
+    const breakdown = document.getElementById(`breakdown-${id}`);
+    if (breakdown.style.display === 'none') {
+      breakdown.style.display = 'block';
+    } else {
+      breakdown.style.display = 'none';
+    }
+  }
+
+  // Resident Pay Click
+  function payPendingBillClick(id) {
+    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+    const inv = pending.find(i => i.id === id);
+    if (!inv) return;
+
+    activePayingInvoiceId = id;
+    const method = document.getElementById('payMethod').value;
+
+    checkoutDetails = {
+      id: inv.id,
+      month: inv.month,
+      method: method,
+      amount: '₹' + inv.total.toLocaleString()
+    };
+
+    document.getElementById('checkoutAmount').textContent = checkoutDetails.amount;
+    document.getElementById('checkoutMeta').textContent = `For ${inv.month} via ${method}`;
+
+    // Hide all gateway sub-panels
+    document.getElementById('checkoutUPI').style.display = 'none';
+    document.getElementById('checkoutCard').style.display = 'none';
+    document.getElementById('checkoutNet').style.display = 'none';
+    document.getElementById('checkoutCash').style.display = 'none';
+
+    document.querySelectorAll('.type-item').forEach(b => b.classList.remove('selected'));
+    selectedBankName = "";
+
+    // Show selected method screen
+    if (method === 'UPI') {
+      document.getElementById('checkoutUPI').style.display = 'block';
+    } else if (method === 'Credit/Debit Card' || method === 'Card') {
+      document.getElementById('checkoutCard').style.display = 'block';
+    } else if (method === 'Net Banking') {
+      document.getElementById('checkoutNet').style.display = 'block';
+    } else {
+      document.getElementById('checkoutCash').style.display = 'block';
+    }
+
+    openModal('checkoutModal');
+  }
+
+  function renderHistoryUI() {
+    const paymentHistory = document.getElementById('paymentHistory');
+    paymentHistory.innerHTML = '';
+    
+    payments.forEach(p => {
+      const histItem = document.createElement('div');
+      histItem.className = 'history-item';
+      histItem.onclick = function() { showReceiptFromHistory(p); };
+      histItem.style.cursor = 'pointer';
+      histItem.innerHTML = `
+        <div>
+          <div class="history-date">${p.month}</div>
+          <div class="status-paid">Paid</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          <div class="history-amount">${p.amount}</div>
+          <div style="font-size:10px; color:var(--muted);">${p.method}</div>
+        </div>
+      `;
+      paymentHistory.appendChild(histItem);
+    });
+  }
+
+  function showReceiptFromHistory(p) {
+    document.getElementById('rcptNo').textContent = p.txId.replace('TXN', 'RCPT');
+    document.getElementById('rcptDate').textContent = p.date;
+    document.getElementById('rcptUser').textContent = currentUser.name;
+    document.getElementById('rcptFlat').textContent = `${currentUser.tower} - ${currentUser.flat}`;
+    document.getElementById('rcptMonthLabel').textContent = `${p.month} Maintenance`;
+    document.getElementById('rcptAmt').textContent = p.amount;
+    document.getElementById('rcptMode').textContent = p.method;
+    
+    openModal('receiptModal');
+  }
+
+  function selectBank(bankName) {
+    document.querySelectorAll('.type-item').forEach(b => b.classList.remove('selected'));
+    event.target.classList.add('selected');
+    selectedBankName = bankName;
+  }
+
+  // Submit payment inside modal
+  let latestTx = {};
+
+  function submitGatewayPayment() {
+    if (checkoutDetails.method === 'UPI') {
+      const upiVal = document.getElementById('upiIdInput').value.trim();
+      if (!upiVal || !upiVal.includes('@')) {
+        alert('Please enter a valid UPI ID (e.g. name@okhdfc)');
+        return;
+      }
+    } else if (checkoutDetails.method === 'Credit/Debit Card' || checkoutDetails.method === 'Card') {
+      const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+      const expiry = document.getElementById('cardExpiry').value;
+      const cvv = document.getElementById('cardCvv').value;
+      const name = document.getElementById('cardName').value.trim();
+
+      if (num.length < 16) {
+        alert('Please enter a valid 16-digit card number.');
+        return;
+      }
+      if (expiry.length < 5) {
+        alert('Please enter a valid card expiry (MM/YY).');
+        return;
+      }
+      if (cvv.length < 3) {
+        alert('Please enter a valid 3-digit CVV number.');
+        return;
+      }
+      if (!name) {
+        alert('Please enter cardholder name.');
+        return;
+      }
+    } else if (checkoutDetails.method === 'Net Banking') {
+      if (!selectedBankName) {
+        alert('Please select a bank from the list.');
+        return;
+      }
+    }
+
+    // Hide checkout modal
+    closeModal('checkoutModal');
+
+    // Show processing modal loader
+    openModal('processingModal');
+
+    // Simulate payment gateway delay (1.5s)
+    setTimeout(() => {
+      closeModal('processingModal');
+      
+      const txId = 'TXN-' + Math.floor(100000000 + Math.random() * 900000000);
+      const now = new Date();
+      const todayDate = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+      
+      latestTx = {
+        month: checkoutDetails.month,
+        amount: checkoutDetails.amount,
+        method: checkoutDetails.method === 'Net Banking' ? selectedBankName : checkoutDetails.method,
+        date: todayDate,
+        txId: txId
+      };
+
+      payments.unshift(latestTx);
+      localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
+
+      // Remove paid invoice from pending invoices database
+      let pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+      pending = pending.filter(i => i.id !== activePayingInvoiceId);
+      localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
+
+      // Re-load UI
+      renderPendingBillsUI();
+      renderHistoryUI();
+
+      // Show success modal
+      document.getElementById('successMsg').textContent = `Payment of ${checkoutDetails.amount} for ${checkoutDetails.month} recorded successfully.`;
+      openModal('successModal');
+      
+      // Clear inputs
+      document.getElementById('upiIdInput').value = '';
+      document.getElementById('cardNumber').value = '';
+      document.getElementById('cardExpiry').value = '';
+      document.getElementById('cardCvv').value = '';
+      document.getElementById('cardName').value = '';
+      activePayingInvoiceId = null;
+    }, 1500);
+  }
+
+  function viewGeneratedReceipt() {
+    closeModal('successModal');
+    showReceiptFromHistory(latestTx);
+  }
+
+  function downloadReceiptPdf() {
+    alert(`Receipt PDF generated!\n\nReference: ${document.getElementById('rcptNo').textContent}\nSaving to your downloads folder.`);
+  }
+
+  // Select UPI App and prefill ID
+  function selectUpiApp(el, appName) {
+    document.querySelectorAll('.upi-app-btn').forEach(btn => {
+      btn.style.borderColor = 'var(--line)';
+      btn.style.background = 'var(--card)';
+    });
+    
+    el.style.borderColor = 'var(--forest)';
+    el.style.background = '#E4EEE8';
+
+    const handle = currentUser.name.toLowerCase().replace(/\s/g, '');
+    let domain = "upi";
+    if (appName === 'Google Pay') domain = "okhdfc";
+    else if (appName === 'PhonePe') domain = "ybl";
+    else if (appName === 'Paytm') domain = "paytm";
+
+    document.getElementById('upiIdInput').value = `${handle}@${domain}`;
+  }
+
+  // Auto Receipt Channels
+  function sendAutoReceipt(type) {
+    if (type === 'pdf') {
+      alert(`Auto Receipt PDF download initiated!\n\nReference: ${latestTx.txId}\nSaving to your downloads folder.`);
+    } else if (type === 'email') {
+      alert(`Auto Receipt sent successfully via Email!\n\nTo: ${currentUser.email}\nReference: ${latestTx.txId}`);
+    } else if (type === 'wa') {
+      alert(`Auto Receipt sent successfully via WhatsApp!\n\nTo: ${currentUser.phone}\nReference: ${latestTx.txId}`);
+    }
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+
+  // Initial load
+  setupAdminToggle();
+  loadPaymentsHistory();
 </script>
 </body>
 </html>

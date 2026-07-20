@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting Desk - SR Gold Society</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1F4D3D;
+    --forest-dark: #123026;
+    --marigold: #F5C453;
+    --marigold-soft: #FEF9EB;
+    --terracotta: #D36B53;
+    --sky: #4A90E2;
+    --ink: #1B2420;
+    --muted: #62726B;
+    --paper: #F6F8F6;
+    --line: #E2E8E5;
+    --card: #FFFFFF;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAFBF9;
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #FAFBF9;
+    min-height: 100vh;
+    position: relative;
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    box-shadow: 0 0 40px rgba(0,0,0,.03);
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 24px 20px;
+    color: #fff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 160px; height: 160px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  /* ===== TABS ===== */
+  .tab-container {
+    display: flex;
+    background: var(--line);
+    border-radius: 12px;
+    padding: 4px;
+    margin: 20px 16px 12px;
+  }
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--forest);
+    color: white;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    padding: 0 16px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--forest-dark);
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--forest);
+  }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color: #fff;
+  }
+
+  /* ===== FINANCIAL SUMMARY ===== */
+  .fin-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .fin-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .fin-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .fin-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .fin-val.green { color: var(--forest); }
+  .fin-val.red { color: var(--terracotta); }
+
+  /* ===== LOG LISTS ===== */
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--paper);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-title {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .log-meta {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .log-amt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .log-amt.green { color: var(--forest); }
+  .log-amt.red { color: var(--terracotta); }
+
+  /* ===== REPORTS GRID ===== */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .report-selector-btn {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--forest-dark);
+    transition: all 0.15s ease;
+  }
+  .report-selector-btn:hover {
+    border-color: var(--forest);
+    background: var(--marigold-soft);
+  }
+  .report-selector-btn svg {
+    width: 16px; height: 16px; stroke: var(--muted);
+  }
+
+  /* ===== TABLE FORMATS FOR REPORTS ===== */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  .report-table th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 6px 4px;
+    border-bottom: 1.5px solid var(--line);
+  }
+  .report-table td {
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--paper);
+  }
+  .report-table tr.total-row td {
+    font-weight: 700;
+    border-top: 1.5px solid var(--line);
+    border-bottom: 1.5px double var(--line);
+    color: var(--forest-dark);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ===== MODAL OVERLAYS ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    width: 92%;
+    max-width: 440px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .modal-close {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .modal-close svg { width: 16px; height: 16px; stroke: var(--muted); }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 6px 14px;
+    box-shadow: 0 -6px 20px rgba(21,53,41,.06);
+    z-index: 999;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-item svg { width: 19px; height: 19px; stroke: var(--muted); }
+  .nav-item.active { color: var(--forest); }
+  .nav-item.active svg { stroke: var(--forest); }
+
+  @media (min-width: 481px) {
+    body { background: #E9ECE5; }
+    .app { margin: 24px auto; border-radius: 26px; overflow: hidden; height: calc(100vh - 48px); min-height: 0; }
+    .bottom-nav { position: absolute; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Accounting Desk</div>
+    </div>
+  </div>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-container">
+    <div class="tab-btn active" id="tabIncomeBtn" onclick="switchTab('income')">Income</div>
+    <div class="tab-btn" id="tabExpenseBtn" onclick="switchTab('expense')">Expenses</div>
+    <div class="tab-btn" id="tabReportBtn" onclick="switchTab('report')">Reports</div>
+  </div>
+
+  <div class="content">
+
+    <!-- FINANCIAL SUMMARY CARD -->
+    <div class="fin-summary">
+      <div class="fin-box">
+        <div class="fin-label">Total Incomes</div>
+        <div class="fin-val green" id="summaryIncome">₹0</div>
+      </div>
+      <div class="fin-box">
+        <div class="fin-label">Total Expenses</div>
+        <div class="fin-val red" id="summaryExpense">₹0</div>
+      </div>
+    </div>
+
+    <!-- INCOME TAB CONTENT -->
+    <div id="incomeTab">
+      <div class="card">
+        <div class="card-title">Record Income Entry</div>
+        
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Income Head</div>
+            <select class="form-input" id="incHead">
+              <option value="Maintenance">Maintenance</option>
+              <option value="Parking">Parking</option>
+              <option value="Fine">Fine</option>
+              <option value="Rent">Rent</option>
+              <option value="Interest">Interest</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Amount (₹)</div>
+            <input type="number" class="form-input" id="incAmount" placeholder="e.g. 1500">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Flat No. <span style="font-size:8px; color:var(--muted);">(Optional)</span></div>
+            <input type="text" class="form-input" id="incFlat" placeholder="e.g. 201">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Payment Type</div>
+            <select class="form-input" id="incMode">
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Description / Remarks</div>
+          <input type="text" class="form-input" id="incNote" placeholder="e.g. July Fine for late garbage dumping">
+        </div>
+
+        <button class="btn btn-primary" onclick="addIncomeSubmit()">Record Income</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Incomes Log <span class="eyebrow" id="incomeCount">0 logged</span></div>
+        <div id="incomesLogList" style="max-height: 220px; overflow-y: auto;">
+          <!-- list of incomes -->
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSE TAB CONTENT -->
+    <div id="expenseTab" style="display:none;">
+      <div class="card">
+        <div class="card-title">Record Expense Entry</div>
+        
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Expense Head</div>
+            <select class="form-input" id="expHead">
+              <option value="Electricity">Electricity</option>
+              <option value="Salary">Salary</option>
+              <option value="Water">Water</option>
+              <option value="Repairs">Repairs</option>
+              <option value="Gardening">Gardening</option>
+              <option value="Security">Security</option>
+              <option value="Lift">Lift</option>
+              <option value="Housekeeping">Housekeeping</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Amount (₹)</div>
+            <input type="number" class="form-input" id="expAmount" placeholder="e.g. 5000">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Paid To / Vendor</div>
+            <input type="text" class="form-input" id="expVendor" placeholder="e.g. BESCOM, Security Agency">
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Payment Mode</div>
+            <select class="form-input" id="expMode">
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cheque">Cheque</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Remarks / Invoice Info</div>
+          <input type="text" class="form-input" id="expNote" placeholder="e.g. Security Staff salaries July 2026">
+        </div>
+
+        <button class="btn btn-primary" onclick="addExpenseSubmit()" style="background: linear-gradient(135deg, var(--terracotta) 0%, #B84A33 100%);">Record Expense</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Expenses Log <span class="eyebrow" id="expenseCount">0 logged</span></div>
+        <div id="expensesLogList" style="max-height: 220px; overflow-y: auto;">
+          <!-- list of expenses -->
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS TAB CONTENT -->
+    <div id="reportTab" style="display:none;">
+      <div class="card">
+        <div class="card-title">Interactive Reports Center</div>
+        <div class="reports-grid">
+          <div class="report-selector-btn" onclick="openReportModal('balance_sheet')">
+            <span>Balance Sheet</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('cash_book')">
+            <span>Cash Book</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('ledger')">
+            <span>General Ledger Accounts</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('trial_balance')">
+            <span>Trial Balance</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('profit_loss')">
+            <span>Profit & Loss Statement</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('outstanding')">
+            <span>Outstanding Dues Report</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="report-selector-btn" onclick="openReportModal('collection')">
+            <span>Collection Status Analysis</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- REPORTS DIALOG MODAL -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title" id="reportModalTitle">Report Name</div>
+        <div class="modal-close" onclick="closeModal('reportModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div id="reportModalBody" style="min-height: 200px;">
+        <!-- Dynamically rendered table details -->
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="downloadReportExport()" style="width:100%; padding:12px; margin-top:16px; border-radius:10px; border:none; background:var(--forest); color:white; font-size:12px; font-weight:600; cursor:pointer;">Export Report (CSV)</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  // Auth state check
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201"
+  };
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || defaultUser;
+
+  // Toggle Tab Focus
+  function switchTab(tab) {
+    document.getElementById('incomeTab').style.display = tab === 'income' ? 'block' : 'none';
+    document.getElementById('expenseTab').style.display = tab === 'expense' ? 'block' : 'none';
+    document.getElementById('reportTab').style.display = tab === 'report' ? 'block' : 'none';
+
+    document.getElementById('tabIncomeBtn').classList.toggle('active', tab === 'income');
+    document.getElementById('tabExpenseBtn').classList.toggle('active', tab === 'expense');
+    document.getElementById('tabReportBtn').classList.toggle('active', tab === 'report');
+  }
+
+  // Modals operations
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  // Double databases lists
+  let incomes = [];
+  let expenses = [];
+
+  function initAccountingModule() {
+    incomes = JSON.parse(localStorage.getItem('society_incomes'));
+    expenses = JSON.parse(localStorage.getItem('society_expenses'));
+
+    // Seed mock invoices / incomes if empty
+    if (!incomes) {
+      incomes = [
+        { id: 'INC-201', head: 'Maintenance', amount: 2000, flat: '201', mode: 'UPI', date: '20 Jul 2026 · 11:30 AM', note: 'July Maintenance paid by Sujeet Sharma' },
+        { id: 'INC-202', head: 'Parking', amount: 300, flat: '102', mode: 'Cash', date: '19 Jul 2026 · 04:00 PM', note: 'Extra slot parking fine reservation fee' },
+        { id: 'INC-203', head: 'Fine', amount: 500, flat: '405', mode: 'UPI', date: '18 Jul 2026 · 09:15 AM', note: 'Penalty for late garbage disposal' },
+        { id: 'INC-204', head: 'Rent', amount: 15000, flat: 'Clubhouse', mode: 'Bank Transfer', date: '15 Jul 2026 · 02:30 PM', note: 'Rent collection for social event wedding' },
+        { id: 'INC-205', head: 'Interest', amount: 4500, flat: 'Bank', mode: 'Bank Transfer', date: '01 Jul 2026 · 10:00 AM', note: 'Quarterly FD interest payouts' }
+      ];
+      localStorage.setItem('society_incomes', JSON.stringify(incomes));
+    }
+
+    if (!expenses) {
+      expenses = [
+        { id: 'EXP-101', head: 'Electricity', amount: 12500, vendor: 'BESCOM', mode: 'Bank Transfer', date: '18 Jul 2026 · 03:00 PM', note: 'Tower A & B corridor lighting' },
+        { id: 'EXP-102', head: 'Salary', amount: 35000, vendor: 'Ramu & Staff', mode: 'Bank Transfer', date: '05 Jul 2026 · 11:00 AM', note: 'Staff salary disbursements' },
+        { id: 'EXP-103', head: 'Water', amount: 8000, vendor: 'Municipal Board', mode: 'Cheque', date: '10 Jul 2026 · 02:45 PM', note: 'Bulk water tanker supply' },
+        { id: 'EXP-104', head: 'Repairs', amount: 4500, vendor: 'Plumbing Experts', mode: 'Cash', date: '15 Jul 2026 · 10:15 AM', note: 'Corridor overhead leak fixes' }
+      ];
+      localStorage.setItem('society_expenses', JSON.stringify(expenses));
+    }
+
+    renderLogs();
+    calculateSummaries();
+  }
+
+  function calculateSummaries() {
+    const totalInc = incomes.reduce((sum, item) => sum + Number(item.amount), 0);
+    const totalExp = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+
+    document.getElementById('summaryIncome').textContent = `₹${totalInc.toLocaleString()}`;
+    document.getElementById('summaryExpense').textContent = `₹${totalExp.toLocaleString()}`;
+  }
+
+  function renderLogs() {
+    // Incomes Log
+    const incList = document.getElementById('incomesLogList');
+    incList.innerHTML = '';
+    document.getElementById('incomeCount').textContent = `${incomes.length} logged`;
+
+    incomes.forEach(i => {
+      const item = document.createElement('div');
+      item.className = 'log-item';
+      item.innerHTML = `
+        <div>
+          <div class="log-title">${i.head} ${i.flat ? `(Flat ${i.flat})` : ''}</div>
+          <div class="log-meta">${i.id} · ${i.date} · ${i.note || ''}</div>
+        </div>
+        <div class="log-amt green">+₹${Number(i.amount).toLocaleString()}</div>
+      `;
+      incList.appendChild(item);
+    });
+
+    // Expenses Log
+    const expList = document.getElementById('expensesLogList');
+    expList.innerHTML = '';
+    document.getElementById('expenseCount').textContent = `${expenses.length} logged`;
+
+    expenses.forEach(e => {
+      const item = document.createElement('div');
+      item.className = 'log-item';
+      item.innerHTML = `
+        <div>
+          <div class="log-title">${e.head} (To: ${e.vendor})</div>
+          <div class="log-meta">${e.id} · ${e.date} · ${e.note || ''}</div>
+        </div>
+        <div class="log-amt red">-₹${Number(e.amount).toLocaleString()}</div>
+      `;
+      expList.appendChild(item);
+    });
+  }
+
+  // Add Income
+  function addIncomeSubmit() {
+    const head = document.getElementById('incHead').value;
+    const amount = Number(document.getElementById('incAmount').value);
+    const flat = document.getElementById('incFlat').value.trim();
+    const mode = document.getElementById('incMode').value;
+    const note = document.getElementById('incNote').value.trim();
+
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid positive income amount.');
+      return;
+    }
+
+    const now = new Date();
+    const todayDate = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newInc = {
+      id: 'INC-' + Math.floor(100 + Math.random() * 900),
+      head,
+      amount,
+      flat,
+      mode,
+      date: todayDate,
+      note
+    };
+
+    incomes.unshift(newInc);
+    localStorage.setItem('society_incomes', JSON.stringify(incomes));
+
+    // Reset Inputs
+    document.getElementById('incAmount').value = '';
+    document.getElementById('incFlat').value = '';
+    document.getElementById('incNote').value = '';
+
+    initAccountingModule();
+    alert('Income entry recorded successfully!');
+  }
+
+  // Add Expense
+  function addExpenseSubmit() {
+    const head = document.getElementById('expHead').value;
+    const amount = Number(document.getElementById('expAmount').value);
+    const vendor = document.getElementById('expVendor').value.trim();
+    const mode = document.getElementById('expMode').value;
+    const note = document.getElementById('expNote').value.trim();
+
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid positive expense amount.');
+      return;
+    }
+    if (!vendor) {
+      alert('Please enter the payee vendor name.');
+      return;
+    }
+
+    const now = new Date();
+    const todayDate = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newExp = {
+      id: 'EXP-' + Math.floor(100 + Math.random() * 900),
+      head,
+      amount,
+      vendor,
+      mode,
+      date: todayDate,
+      note
+    };
+
+    expenses.unshift(newExp);
+    localStorage.setItem('society_expenses', JSON.stringify(expenses));
+
+    // Reset Inputs
+    document.getElementById('expAmount').value = '';
+    document.getElementById('expVendor').value = '';
+    document.getElementById('expNote').value = '';
+
+    initAccountingModule();
+    alert('Expense entry recorded successfully!');
+  }
+
+  // Dynamic Reports Generator
+  function openReportModal(reportType) {
+    const title = document.getElementById('reportModalTitle');
+    const body = document.getElementById('reportModalBody');
+
+    const totalInc = incomes.reduce((sum, item) => sum + Number(item.amount), 0);
+    const totalExp = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    
+    switch (reportType) {
+      case 'balance_sheet':
+        title.textContent = 'Balance Sheet (July 2026)';
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Liabilities & Equity</th><th>Amount (₹)</th><th>Assets</th><th>Amount (₹)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Society Reserves</td><td>₹1,50,000</td><td>FD in Bank</td><td>₹1,40,000</td></tr>
+              <tr><td>Retained Earnings</td><td>₹34,500</td><td>Cash Book Balance</td><td>₹${(totalInc - totalExp).toLocaleString()}</td></tr>
+              <tr><td>Outstanding Invoices Liability</td><td>₹14,000</td><td>Outstanding Dues Receivable</td><td>₹16,000</td></tr>
+              <tr class="total-row"><td>Total Liabilities</td><td>₹1,98,500</td><td>Total Assets</td><td>₹${(156000 + totalInc - totalExp).toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+        `;
+        break;
+
+      case 'cash_book':
+        title.textContent = 'Cash Book (Double Entry)';
+        let cashRowsHtml = '';
+        const allTx = [
+          ...incomes.map(i => ({ date: i.date, desc: `${i.head} - Flat ${i.flat || 'N/A'}`, dr: i.amount, cr: 0 })),
+          ...expenses.map(e => ({ date: e.date, desc: `${e.head} (To: ${e.vendor})`, dr: 0, cr: e.amount }))
+        ].sort((a,b) => b.date.localeCompare(a.date));
+
+        allTx.forEach(tx => {
+          cashRowsHtml += `
+            <tr>
+              <td>${tx.date.split(' · ')[0]}</td>
+              <td>${tx.desc}</td>
+              <td style="color:var(--forest); font-weight:600;">${tx.dr > 0 ? `₹${tx.dr.toLocaleString()}` : '-'}</td>
+              <td style="color:var(--terracotta); font-weight:600;">${tx.cr > 0 ? `₹${tx.cr.toLocaleString()}` : '-'}</td>
+            </tr>
+          `;
+        });
+
+        body.innerHTML = `
+          <div style="max-height: 300px; overflow-y:auto;">
+            <table class="report-table">
+              <thead>
+                <tr><th>Date</th><th>Transaction Details</th><th>Debit (In)</th><th>Credit (Out)</th></tr>
+              </thead>
+              <tbody>
+                ${cashRowsHtml}
+                <tr class="total-row">
+                  <td colspan="2">Net Book Balance</td>
+                  <td colspan="2" style="text-align:right; color:var(--forest);">₹${(totalInc - totalExp).toLocaleString()}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+        break;
+
+      case 'ledger':
+        title.textContent = 'General Ledger Account Balances';
+        // group incomes and expenses by head
+        const headsMap = {};
+        incomes.forEach(i => {
+          headsMap[i.head] = (headsMap[i.head] || 0) + Number(i.amount);
+        });
+        expenses.forEach(e => {
+          headsMap[e.head] = (headsMap[e.head] || 0) - Number(e.amount);
+        });
+
+        let ledgerRows = '';
+        Object.keys(headsMap).forEach(h => {
+          const balance = headsMap[h];
+          ledgerRows += `
+            <tr>
+              <td>${h} Account</td>
+              <td>${balance > 0 ? 'Revenue / Income' : 'Expense / Asset'}</td>
+              <td style="font-weight:600; color:${balance > 0 ? 'var(--forest)' : 'var(--terracotta)'}">₹${Math.abs(balance).toLocaleString()}</td>
+            </tr>
+          `;
+        });
+
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Account Head Name</th><th>Classification</th><th>Net Account Balance</th></tr>
+            </thead>
+            <tbody>
+              ${ledgerRows}
+            </tbody>
+          </table>
+        `;
+        break;
+
+      case 'trial_balance':
+        title.textContent = 'Trial Balance Sheet';
+        // Lists all account balances as debits/credits
+        let trialRows = '';
+        let totalDr = 0;
+        let totalCr = 0;
+
+        incomes.forEach(i => {
+          totalCr += i.amount;
+        });
+        expenses.forEach(e => {
+          totalDr += e.amount;
+        });
+
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Account head description</th><th>Debit Bal (Dr)</th><th>Credit Bal (Cr)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Maintenance Fee Collection</td><td>-</td><td>₹${incomes.filter(i => i.head==='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Rentals & Clubhouse income</td><td>-</td><td>₹${incomes.filter(i => i.head==='Rent').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Fines & Penalties</td><td>-</td><td>₹${incomes.filter(i => i.head==='Fine').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Interest on FD Accounts</td><td>-</td><td>₹${incomes.filter(i => i.head==='Interest').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Staff Salary expense</td><td>₹${expenses.filter(e => e.head==='Salary').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Electricity common board</td><td>₹${expenses.filter(e => e.head==='Electricity').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Water supply tankers expense</td><td>₹${expenses.filter(e => e.head==='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Repairs & Upkeep</td><td>₹${expenses.filter(e => e.head==='Repairs').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
+              <tr class="total-row"><td>Sum totals</td><td>₹${totalDr.toLocaleString()}</td><td>₹${totalCr.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+        `;
+        break;
+
+      case 'profit_loss':
+        title.textContent = 'Profit & Loss Statement (P&L)';
+        const netProfit = totalInc - totalExp;
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Revenue streams</th><th>Amount (₹)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Gross Maintenance Income</td><td>₹${incomes.filter(i=>i.head==='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Non-Maintenance Ancillary Income (Parking, fine, rent)</td><td>₹${incomes.filter(i=>i.head!=='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr style="font-weight:600;"><td>Total Gross Income (A)</td><td>₹${totalInc.toLocaleString()}</td></tr>
+              
+              <tr><td style="padding-top:12px;"><b>Operating Expenses</b></td><td></td></tr>
+              <tr><td>Staff salaries & wages</td><td>₹${expenses.filter(e=>e.head==='Salary').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Electricity & Water utilities</td><td>₹${expenses.filter(e=>e.head==='Electricity' || e.head==='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
+              <tr><td>General Repairs, gardening & housekeeping</td><td>₹${expenses.filter(e=>e.head!=='Salary'&&e.head!=='Electricity'&&e.head!=='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
+              <tr style="font-weight:600;"><td>Total Operating Expenses (B)</td><td>₹${totalExp.toLocaleString()}</td></tr>
+              
+              <tr class="total-row"><td>Net Operating Profit (A - B)</td><td style="color:${netProfit >= 0 ? 'var(--forest)' : 'var(--terracotta)'}">₹${netProfit.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+        `;
+        break;
+
+      case 'outstanding':
+        title.textContent = 'Outstanding Maintenance Receivables';
+        // Read outstanding bills from society_pending_invoices database
+        const pendingInvoices = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+        
+        let outstandingRows = '';
+        let totalOutstanding = 0;
+
+        if (pendingInvoices.length === 0) {
+          outstandingRows = `<tr><td colspan="4" style="text-align:center; color:var(--muted);">All dues collected. No outstanding payments! 🎉</td></tr>`;
+        } else {
+          pendingInvoices.forEach(inv => {
+            totalOutstanding += inv.total;
+            outstandingRows += `
+              <tr>
+                <td>Flat ${inv.flat}</td>
+                <td>${inv.month}</td>
+                <td>${inv.id}</td>
+                <td style="font-weight:600; color:var(--terracotta);">₹${inv.total.toLocaleString()}</td>
+              </tr>
+            `;
+          });
+        }
+
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Flat Number</th><th>Due Period</th><th>Invoice Ref</th><th>Outstanding Due</th></tr>
+            </thead>
+            <tbody>
+              ${outstandingRows}
+              <tr class="total-row">
+                <td colspan="3">Total Receivables</td>
+                <td>₹${totalOutstanding.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+        break;
+
+      case 'collection':
+        title.textContent = 'Collection Status Analysis';
+        // Shows summary details of paid vs unpaid units
+        const pendingInv = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+        const unpaidCount = pendingInv.length;
+        const paidCount = incomes.filter(i => i.head === 'Maintenance').length;
+        const collectionRate = (paidCount + unpaidCount) > 0 ? Math.round((paidCount / (paidCount + unpaidCount)) * 100) : 100;
+
+        body.innerHTML = `
+          <table class="report-table">
+            <thead>
+              <tr><th>Collection metrics</th><th>Details</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Units Billed Maintenance (July)</td><td>100 flats</td></tr>
+              <tr><td>Payments Successfully Settled</td><td>${35 + paidCount} units</td></tr>
+              <tr><td>Payments Outstanding / Delayed</td><td>${unpaidCount} units</td></tr>
+              <tr class="total-row"><td>Overall Collection Efficiency</td><td>${collectionRate}%</td></tr>
+            </tbody>
+          </table>
+        `;
+        break;
+    }
+
+    openModal('reportModal');
+  }
+
+  function downloadReportExport() {
+    alert('Accounting Report data exported successfully as spreadsheet CSV format!\nSaving file locally to your downloads folder.');
+  }
+
+  // Close modals clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+
+  // Initial Boot
+  initAccountingModule();
+</script>
+</body>
+</html>

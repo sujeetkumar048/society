@@ -308,81 +308,6 @@
     </div>
 
     <div id="noticesList">
-      <div class="notice-card" onclick="viewNotice(this)">
-        <div class="notice-header">
-          <span class="notice-tag tag-urgent">Urgent</span>
-          <span class="notice-date">Jul 20, 2026</span>
-        </div>
-        <div class="notice-title">Water Supply Maintenance</div>
-        <div class="notice-preview">Water supply will be interrupted tomorrow from 10 AM to 2 PM for pipeline maintenance in Tower B.</div>
-        <div class="notice-meta">
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Committee
-          </div>
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            45 views
-          </div>
-        </div>
-      </div>
-
-      <div class="notice-card" onclick="viewNotice(this)">
-        <div class="notice-header">
-          <span class="notice-tag tag-event">Event</span>
-          <span class="notice-date">Jul 18, 2026</span>
-        </div>
-        <div class="notice-title">Annual General Meeting</div>
-        <div class="notice-preview">AGM scheduled for July 25th at 6 PM in the community hall. All residents are requested to attend.</div>
-        <div class="notice-meta">
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg>
-            Secretary
-          </div>
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            78 views
-          </div>
-        </div>
-      </div>
-
-      <div class="notice-card" onclick="viewNotice(this)">
-        <div class="notice-header">
-          <span class="notice-tag tag-general">General</span>
-          <span class="notice-date">Jul 15, 2026</span>
-        </div>
-        <div class="notice-title">New Security Guidelines</div>
-        <div class="notice-preview">Updated security protocols effective from August 1st. All visitors must pre-register through the app.</div>
-        <div class="notice-meta">
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Security
-          </div>
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            92 views
-          </div>
-        </div>
-      </div>
-
-      <div class="notice-card" onclick="viewNotice(this)">
-        <div class="notice-header">
-          <span class="notice-tag tag-general">General</span>
-          <span class="notice-date">Jul 10, 2026</span>
-        </div>
-        <div class="notice-title">Garden Maintenance Schedule</div>
-        <div class="notice-preview">Regular garden maintenance every Sunday morning. Please cooperate with the maintenance staff.</div>
-        <div class="notice-meta">
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg>
-            Committee
-          </div>
-          <div class="meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            56 views
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -415,6 +340,29 @@
     </div>
   </div>
 
+  <!-- VIEW NOTICE MODAL -->
+  <div class="modal-overlay" id="viewNoticeModal">
+    <div class="modal" style="border: 2px solid var(--forest); box-shadow: 0 10px 40px rgba(31,77,61,0.15);">
+      <div class="modal-header">
+        <div class="modal-title" id="viewModalTitle">Notice Detail</div>
+        <div class="modal-close" onclick="closeModal('viewNoticeModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <span id="viewModalTag" class="notice-tag tag-general">General</span>
+        <span id="viewModalDate" class="notice-date">Jul 20, 2026</span>
+      </div>
+      <div id="viewModalDesc" style="font-size:13.5px; line-height:1.6; color:var(--ink); margin-bottom:20px; white-space:pre-wrap;">
+        Notice description goes here...
+      </div>
+      <div style="font-size:11px; color:var(--muted); display:flex; gap:12px; border-top:1px solid var(--line); padding-top:12px; justify-content:space-between; align-items:center;">
+        <span id="viewModalAuthor">By Committee</span>
+        <span id="viewModalViews">0 views</span>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <a href="index.html" class="nav-item">
@@ -438,6 +386,32 @@
 </div>
 
 <script>
+  // Auth control
+  const defaultUser = {
+    name: "Sujeet Sharma",
+    phone: "+91 98765 43210",
+    email: "sujeet@email.com",
+    role: "Super Admin",
+    tower: "Tower A",
+    flat: "201",
+    memberSince: "Jan 2024",
+    flatType: "3 BHK",
+    password: "password123",
+    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    if (localStorage.getItem('loggedOutFlag')) {
+      alert('Please login to continue.');
+      window.location.href = 'profile.html';
+    } else {
+      currentUser = defaultUser;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+  }
+
   function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
   }
@@ -446,10 +420,89 @@
     document.getElementById(modalId).classList.remove('active');
   }
 
+  // Load notices database
+  let notices = [];
+  function initNotices() {
+    notices = JSON.parse(localStorage.getItem('society_notices'));
+
+    if (!notices) {
+      notices = [
+        {
+          type: "urgent",
+          title: "Water Supply Maintenance",
+          desc: "Water supply will be interrupted tomorrow from 10 AM to 2 PM for pipeline maintenance in Tower B.",
+          date: "Jul 20, 2026",
+          author: "Committee",
+          views: 45
+        },
+        {
+          type: "event",
+          title: "Annual General Meeting",
+          desc: "AGM scheduled for July 25th at 6 PM in the community hall. All residents are requested to attend.",
+          date: "Jul 18, 2026",
+          author: "Secretary",
+          views: 78
+        },
+        {
+          type: "general",
+          title: "New Security Guidelines",
+          desc: "Updated security protocols effective from August 1st. All visitors must pre-register through the app.",
+          date: "Jul 15, 2026",
+          author: "Security",
+          views: 92
+        },
+        {
+          type: "general",
+          title: "Garden Maintenance Schedule",
+          desc: "Regular garden maintenance every Sunday morning. Please cooperate with the maintenance staff.",
+          date: "Jul 10, 2026",
+          author: "Committee",
+          views: 56
+        }
+      ];
+      localStorage.setItem('society_notices', JSON.stringify(notices));
+    }
+
+    renderNoticesList();
+  }
+
+  function renderNoticesList() {
+    const listContainer = document.getElementById('noticesList');
+    listContainer.innerHTML = '';
+
+    notices.forEach((n, idx) => {
+      const tagClass = n.type === 'urgent' ? 'tag-urgent' : n.type === 'event' ? 'tag-event' : 'tag-general';
+      const tagLabel = n.type.charAt(0).toUpperCase() + n.type.slice(1);
+      
+      const card = document.createElement('div');
+      card.className = 'notice-card';
+      card.onclick = function() { viewNoticeDetail(idx); };
+      card.innerHTML = `
+        <div class="notice-header">
+          <span class="notice-tag ${tagClass}">${tagLabel}</span>
+          <span class="notice-date">${n.date}</span>
+        </div>
+        <div class="notice-title">${n.title}</div>
+        <div class="notice-preview">${n.desc.substring(0, 100)}${n.desc.length > 100 ? '...' : ''}</div>
+        <div class="notice-meta">
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ${n.author}
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            ${n.views} views
+          </div>
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  }
+
   function addNotice() {
     const type = document.getElementById('noticeType').value;
-    const title = document.getElementById('noticeTitle').value;
-    const description = document.getElementById('noticeDescription').value;
+    const title = document.getElementById('noticeTitle').value.trim();
+    const description = document.getElementById('noticeDescription').value.trim();
     
     if (!title) {
       alert('Please enter a title');
@@ -461,32 +514,20 @@
     }
 
     const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const tagClass = type === 'urgent' ? 'tag-urgent' : type === 'event' ? 'tag-event' : 'tag-general';
-    const tagLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
-    const noticesContainer = document.getElementById('noticesList');
-    const newNotice = document.createElement('div');
-    newNotice.className = 'notice-card';
-    newNotice.onclick = function() { viewNotice(this); };
-    newNotice.innerHTML = `
-      <div class="notice-header">
-        <span class="notice-tag ${tagClass}">${tagLabel}</span>
-        <span class="notice-date">${today}</span>
-      </div>
-      <div class="notice-title">${title}</div>
-      <div class="notice-preview">${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</div>
-      <div class="notice-meta">
-        <div class="meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Committee
-        </div>
-        <div class="meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          0 views
-        </div>
-      </div>
-    `;
-    noticesContainer.insertBefore(newNotice, noticesContainer.firstChild);
+    const newNotice = {
+      type: type,
+      title: title,
+      desc: description,
+      date: today,
+      author: currentUser.role || 'Resident',
+      views: 0
+    };
+
+    notices.unshift(newNotice);
+    localStorage.setItem('society_notices', JSON.stringify(notices));
+
+    renderNoticesList();
     
     // Reset form
     document.getElementById('noticeTitle').value = '';
@@ -497,13 +538,30 @@
     alert('Notice published successfully!');
   }
 
-  function viewNotice(card) {
-    const title = card.querySelector('.notice-title').textContent;
-    const preview = card.querySelector('.notice-preview').textContent;
-    alert(`${title}\n\n${preview}`);
+  function viewNoticeDetail(idx) {
+    const n = notices[idx];
+    n.views = (n.views || 0) + 1;
+    localStorage.setItem('society_notices', JSON.stringify(notices));
+    renderNoticesList();
+
+    const tagClass = n.type === 'urgent' ? 'tag-urgent' : n.type === 'event' ? 'tag-event' : 'tag-general';
+    const tagLabel = n.type.charAt(0).toUpperCase() + n.type.slice(1);
+
+    document.getElementById('viewModalTitle').textContent = n.title;
+    document.getElementById('viewModalDesc').textContent = n.desc;
+    
+    const tagSpan = document.getElementById('viewModalTag');
+    tagSpan.className = `notice-tag ${tagClass}`;
+    tagSpan.textContent = tagLabel;
+    
+    document.getElementById('viewModalDate').textContent = n.date;
+    document.getElementById('viewModalAuthor').textContent = `By ${n.author}`;
+    document.getElementById('viewModalViews').textContent = `${n.views} views`;
+
+    openModal('viewNoticeModal');
   }
 
-  // Close modal when clicking outside
+  // Close modals clicking outside
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
@@ -511,6 +569,9 @@
       }
     });
   });
+
+  // Initial load
+  initNotices();
 </script>
 </body>
 </html>

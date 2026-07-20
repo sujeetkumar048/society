@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worker Directory - SR Gold Society</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1F4D3D;
+    --forest-dark: #123026;
+    --marigold: #F5C453;
+    --marigold-soft: #FEF9EB;
+    --terracotta: #D36B53;
+    --sky: #4A90E2;
+    --ink: #1B2420;
+    --muted: #62726B;
+    --paper: #F6F8F6;
+    --line: #E2E8E5;
+    --card: #FFFFFF;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #FAFBF9;
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #FAFBF9;
+    min-height: 100vh;
+    position: relative;
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    box-shadow: 0 0 40px rgba(0,0,0,.03);
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 24px 20px;
+    color: #fff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 160px; height: 160px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  /* ===== SEARCH / CATEGORIES ===== */
+  .search-section {
+    padding: 16px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+  .search-box input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    margin-left: 8px;
+    font-size: 13.5px;
+    outline: none;
+    color: var(--ink);
+  }
+  .category-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .category-scroll::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    white-space: nowrap;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .cat-pill.active {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
+  }
+
+  /* ===== WORKERS LIST ===== */
+  .content {
+    padding: 16px;
+  }
+  .worker-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    display: flex;
+    gap: 16px;
+    position: relative;
+  }
+  .worker-photo-wrap {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--line);
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--paper);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  }
+  .worker-photo-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .worker-avatar-txt {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--forest-dark);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .worker-info {
+    flex: 1;
+  }
+  .worker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+  }
+  .worker-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--forest-dark);
+  }
+  .worker-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    background: #E4EEE8;
+    color: var(--forest);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .worker-badge.busy {
+    background: #F5E1DC;
+    color: var(--terracotta);
+  }
+  .worker-cat {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .worker-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .worker-detail-row span {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .worker-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color: white;
+    flex: 1;
+  }
+  .btn-outline-wa {
+    background: transparent;
+    border: 1px solid #25D366;
+    color: #25D366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+  }
+  .btn-outline-wa svg { width: 16px; height: 16px; fill: #25D366; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    width: 92%;
+    max-width: 400px;
+    padding: 20px;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--forest-dark);
+  }
+  .modal-close {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .modal-close svg { width: 16px; height: 16px; stroke: var(--muted); }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 6px 14px;
+    box-shadow: 0 -6px 20px rgba(21,53,41,.06);
+    z-index: 999;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-item svg { width: 19px; height: 19px; stroke: var(--muted); }
+  .nav-item.active { color: var(--forest); }
+  .nav-item.active svg { stroke: var(--forest); }
+
+  @media (min-width: 481px) {
+    body { background: #E9ECE5; }
+    .app { margin: 24px auto; border-radius: 26px; overflow: hidden; height: calc(100vh - 48px); min-height: 0; }
+    .bottom-nav { position: absolute; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Worker Directory</div>
+    </div>
+  </div>
+
+  <!-- SEARCH & CATEGORIES -->
+  <div class="search-section">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Search workers by name..." oninput="filterWorkers()">
+    </div>
+    <div class="category-scroll" id="categoryScroll">
+      <div class="cat-pill active" onclick="selectCategory('All')">All</div>
+      <div class="cat-pill" onclick="selectCategory('Plumber')">Plumber</div>
+      <div class="cat-pill" onclick="selectCategory('Electrician')">Electrician</div>
+      <div class="cat-pill" onclick="selectCategory('Painter')">Painter</div>
+      <div class="cat-pill" onclick="selectCategory('Carpenter')">Carpenter</div>
+      <div class="cat-pill" onclick="selectCategory('AC Repair')">AC Repair</div>
+      <div class="cat-pill" onclick="selectCategory('RO Repair')">RO Repair</div>
+      <div class="cat-pill" onclick="selectCategory('House Maid')">House Maid</div>
+      <div class="cat-pill" onclick="selectCategory('Cook')">Cook</div>
+      <div class="cat-pill" onclick="selectCategory('Driver')">Driver</div>
+    </div>
+  </div>
+
+  <!-- WORKERS GRID -->
+  <div class="content" id="workersListWrap">
+    <!-- Loaded dynamically -->
+  </div>
+
+  <!-- BOOKING MODAL -->
+  <div class="modal-overlay" id="bookModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Confirm Booking Request</div>
+        <div class="modal-close" onclick="closeModal('bookModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size:13.5px; color:var(--muted); margin-bottom:16px;">
+        You are sending a booking request to <strong id="bookWorkerName" style="color:var(--forest-dark);">Worker</strong>.
+      </div>
+      <div class="form-group">
+        <div class="form-label">Preferred Date</div>
+        <input type="date" class="form-input" id="bookDate">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Preferred Time Slot</div>
+        <select class="form-input" id="bookSlot">
+          <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 AM - 12:00 PM)</option>
+          <option value="Afternoon (12:00 PM - 04:00 PM)">Afternoon (12:00 PM - 04:00 PM)</option>
+          <option value="Evening (04:00 PM - 07:00 PM)">Evening (04:00 PM - 07:00 PM)</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="confirmBooking()" style="width:100%; margin-top:10px;">Send Booking Request</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  let workers = [];
+  let currentCategory = 'All';
+  let activeBookingWorker = null;
+
+  function initDirectory() {
+    workers = JSON.parse(localStorage.getItem('society_directory_workers'));
+
+    if (!workers) {
+      workers = [
+        { name: "Vinay Kumar", category: "Plumber", rating: "4.8", mobile: "+91 98765 11111", charges: "₹250 / Visit", available: true, photo: "" },
+        { name: "Amit Sharma", category: "Electrician", rating: "4.9", mobile: "+91 98765 22222", charges: "₹300 / Visit", available: true, photo: "" },
+        { name: "Prakash Raj", category: "Painter", rating: "4.6", mobile: "+91 98765 33333", charges: "₹200 / hr", available: false, photo: "" },
+        { name: "Sanjay Dutta", category: "Carpenter", rating: "4.7", mobile: "+91 98765 44444", charges: "₹250 / Visit", available: true, photo: "" },
+        { name: "Nitin Patil", category: "AC Repair", rating: "4.8", mobile: "+91 98765 55555", charges: "₹350 / Visit", available: true, photo: "" },
+        { name: "Ravi Mishra", category: "RO Repair", rating: "4.5", mobile: "+91 98765 66666", charges: "₹200 / Visit", available: true, photo: "" },
+        { name: "Maya Bai", category: "House Maid", rating: "4.9", mobile: "+91 98765 77777", charges: "₹4500 / month", available: true, photo: "" },
+        { name: "Kamla Devi", category: "Cook", rating: "4.8", mobile: "+91 98765 88888", charges: "₹5000 / month", available: false, photo: "" },
+        { name: "Harpreet Singh", category: "Driver", rating: "4.7", mobile: "+91 98765 99999", charges: "₹12000 / month", available: true, photo: "" }
+      ];
+      localStorage.setItem('society_directory_workers', JSON.stringify(workers));
+    }
+
+    // Set tomorrow as default booking date
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('bookDate').value = tomorrow.toISOString().split('T')[0];
+
+    renderWorkers();
+  }
+
+  function renderWorkers() {
+    const listWrap = document.getElementById('workersListWrap');
+    listWrap.innerHTML = '';
+
+    const searchQ = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    workers.forEach(w => {
+      // Filter Category
+      if (currentCategory !== 'All' && w.category !== currentCategory) return;
+
+      // Filter Search
+      if (searchQ && !w.name.toLowerCase().includes(searchQ)) return;
+
+      const card = document.createElement('div');
+      card.className = 'worker-card';
+
+      // Photo avatar fallback
+      let photoHtml = `<div class="worker-avatar-txt">${w.name.charAt(0)}</div>`;
+      if (w.photo) {
+        photoHtml = `<img src="${w.photo}" alt="${w.name}">`;
+      }
+
+      card.innerHTML = `
+        <div class="worker-photo-wrap">
+          ${photoHtml}
+        </div>
+        <div class="worker-info">
+          <div class="worker-header">
+            <div class="worker-name">${w.name}</div>
+            <div class="worker-badge ${w.available ? '' : 'busy'}">${w.available ? 'Available' : 'Busy'}</div>
+          </div>
+          <div class="worker-cat">${w.category}</div>
+          <div class="worker-detail-row">
+            <div>Rating: <span>★ ${w.rating}</span></div>
+            <div>Charges: <span>${w.charges}</span></div>
+          </div>
+          <div class="worker-actions">
+            <button class="btn btn-primary" onclick="openBookingModal('${w.name}')" ${w.available ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"'}>Book Now</button>
+            <button class="btn btn-outline-wa" onclick="simulateWhatsApp('${w.name}', '${w.mobile}')" title="WhatsApp worker">
+              <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.193 1.45 4.882 1.453 5.436.002 9.865-4.424 9.868-9.863.002-2.635-1.02-5.11-2.884-6.978C16.593 1.898 14.116.877 11.48.875c-5.44 0-9.87 4.425-9.874 9.863-.001 1.796.486 3.548 1.411 5.12L1.97 21.03l5.35-1.402l-.673-.474z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+      listWrap.appendChild(card);
+    });
+  }
+
+  function selectCategory(cat) {
+    currentCategory = cat;
+    document.querySelectorAll('.cat-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.textContent === cat);
+    });
+    renderWorkers();
+  }
+
+  function filterWorkers() {
+    renderWorkers();
+  }
+
+  // Booking details
+  function openBookingModal(name) {
+    activeBookingWorker = name;
+    document.getElementById('bookWorkerName').textContent = name;
+    document.getElementById('bookModal').classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function confirmBooking() {
+    const bDate = document.getElementById('bookDate').value;
+    const bSlot = document.getElementById('bookSlot').value;
+
+    if (!bDate) {
+      alert("Please select a preferred date.");
+      return;
+    }
+
+    const bookings = JSON.parse(localStorage.getItem('society_worker_bookings')) || [];
+    bookings.unshift({
+      workerName: activeBookingWorker,
+      date: bDate,
+      slot: bSlot,
+      status: "Confirmed",
+      timestamp: new Date().toLocaleString('en-IN')
+    });
+    localStorage.setItem('society_worker_bookings', JSON.stringify(bookings));
+
+    closeModal('bookModal');
+    alert(`Success!\n\nYour Booking request has been sent to ${activeBookingWorker}.\nPreferred slot: ${bDate} (${bSlot}).\nThe worker will contact you on your registered number.`);
+  }
+
+  function simulateWhatsApp(name, mobile) {
+    alert(`WhatsApp Chat Initiated! 💬\n\nRedirecting to WhatsApp chat with ${name} (${mobile})\n\nMessage template: "Hello ${name}, I am a resident of SR Gold Society and would like to book your service."`);
+  }
+
+  // Close modals clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+
+  initDirectory();
+</script>
+</body>
+</html>
