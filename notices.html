@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notice Board — SR Gold Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --paper:#F1F4EF;
+    --card:#FFFFFF;
+    --forest:#1F4D3D;
+    --forest-dark:#153529;
+    --marigold:#D9A62E;
+    --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D;
+    --sky:#3E7CB1;
+    --line:#DDE3DA;
+    --muted:#6B7A70;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header{
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+    padding:22px 20px 34px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:50%;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    z-index:1;
+  }
+  .back-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .back-btn svg{width:18px; height:18px; stroke:#fff;}
+  .page-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+  }
+
+  /* ===== CONTENT ===== */
+  .content{
+    padding:20px 16px;
+  }
+  .notice-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:14px;
+    border:1px solid var(--line);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .notice-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(21,53,41,.08);
+  }
+  .notice-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .notice-tag{
+    font-size:10px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:10px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .tag-urgent{
+    background:#F5E1DC;
+    color:var(--terracotta);
+  }
+  .tag-general{
+    background:#DEEBF5;
+    color:var(--sky);
+  }
+  .tag-event{
+    background:var(--marigold-soft);
+    color:#9C7412;
+  }
+  .notice-date{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+  }
+  .notice-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--forest-dark);
+    margin-bottom:6px;
+  }
+  .notice-preview{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+  .notice-meta{
+    display:flex;
+    gap:12px;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .meta-item{
+    font-size:11px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .add-notice-btn{
+    background:var(--forest);
+    color:#fff;
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .modal-overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:90%;
+    max-width:400px;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:24px;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--forest-dark);
+  }
+  .modal-close{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
+  .form-group{
+    margin-bottom:16px;
+  }
+  .form-label{
+    font-size:12px;
+    font-weight:500;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .form-input, .form-textarea, .form-select{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus{
+    outline:none;
+    border-color:var(--forest);
+  }
+  .form-textarea{
+    min-height:100px;
+    resize:vertical;
+  }
+  .modal-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .modal-btn-primary{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:10px 6px 14px;
+    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
+  .nav-item.active{color:var(--forest);}
+  .nav-item.active svg{stroke:var(--forest);}
+
+  @media (min-width:481px){
+    body{background:#E9ECE5;}
+    .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Notice Board</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="add-notice-btn" onclick="openModal('addNoticeModal')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add New Notice
+    </div>
+
+    <div id="noticesList">
+      <div class="notice-card" onclick="viewNotice(this)">
+        <div class="notice-header">
+          <span class="notice-tag tag-urgent">Urgent</span>
+          <span class="notice-date">Jul 20, 2026</span>
+        </div>
+        <div class="notice-title">Water Supply Maintenance</div>
+        <div class="notice-preview">Water supply will be interrupted tomorrow from 10 AM to 2 PM for pipeline maintenance in Tower B.</div>
+        <div class="notice-meta">
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Committee
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            45 views
+          </div>
+        </div>
+      </div>
+
+      <div class="notice-card" onclick="viewNotice(this)">
+        <div class="notice-header">
+          <span class="notice-tag tag-event">Event</span>
+          <span class="notice-date">Jul 18, 2026</span>
+        </div>
+        <div class="notice-title">Annual General Meeting</div>
+        <div class="notice-preview">AGM scheduled for July 25th at 6 PM in the community hall. All residents are requested to attend.</div>
+        <div class="notice-meta">
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg>
+            Secretary
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            78 views
+          </div>
+        </div>
+      </div>
+
+      <div class="notice-card" onclick="viewNotice(this)">
+        <div class="notice-header">
+          <span class="notice-tag tag-general">General</span>
+          <span class="notice-date">Jul 15, 2026</span>
+        </div>
+        <div class="notice-title">New Security Guidelines</div>
+        <div class="notice-preview">Updated security protocols effective from August 1st. All visitors must pre-register through the app.</div>
+        <div class="notice-meta">
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            92 views
+          </div>
+        </div>
+      </div>
+
+      <div class="notice-card" onclick="viewNotice(this)">
+        <div class="notice-header">
+          <span class="notice-tag tag-general">General</span>
+          <span class="notice-date">Jul 10, 2026</span>
+        </div>
+        <div class="notice-title">Garden Maintenance Schedule</div>
+        <div class="notice-preview">Regular garden maintenance every Sunday morning. Please cooperate with the maintenance staff.</div>
+        <div class="notice-meta">
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg>
+            Committee
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            56 views
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD NOTICE MODAL -->
+  <div class="modal-overlay" id="addNoticeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Add New Notice</div>
+        <div class="modal-close" onclick="closeModal('addNoticeModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Notice Type</div>
+        <select class="form-select" id="noticeType">
+          <option value="general">General</option>
+          <option value="urgent">Urgent</option>
+          <option value="event">Event</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Title</div>
+        <input type="text" class="form-input" id="noticeTitle" placeholder="Enter notice title">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Description</div>
+        <textarea class="form-textarea" id="noticeDescription" placeholder="Enter notice details..."></textarea>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="addNotice()">Publish Notice</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function addNotice() {
+    const type = document.getElementById('noticeType').value;
+    const title = document.getElementById('noticeTitle').value;
+    const description = document.getElementById('noticeDescription').value;
+    
+    if (!title) {
+      alert('Please enter a title');
+      return;
+    }
+    if (!description) {
+      alert('Please enter a description');
+      return;
+    }
+
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const tagClass = type === 'urgent' ? 'tag-urgent' : type === 'event' ? 'tag-event' : 'tag-general';
+    const tagLabel = type.charAt(0).toUpperCase() + type.slice(1);
+
+    const noticesContainer = document.getElementById('noticesList');
+    const newNotice = document.createElement('div');
+    newNotice.className = 'notice-card';
+    newNotice.onclick = function() { viewNotice(this); };
+    newNotice.innerHTML = `
+      <div class="notice-header">
+        <span class="notice-tag ${tagClass}">${tagLabel}</span>
+        <span class="notice-date">${today}</span>
+      </div>
+      <div class="notice-title">${title}</div>
+      <div class="notice-preview">${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</div>
+      <div class="notice-meta">
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Committee
+        </div>
+        <div class="meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          0 views
+        </div>
+      </div>
+    `;
+    noticesContainer.insertBefore(newNotice, noticesContainer.firstChild);
+    
+    // Reset form
+    document.getElementById('noticeTitle').value = '';
+    document.getElementById('noticeDescription').value = '';
+    document.getElementById('noticeType').value = 'general';
+    
+    closeModal('addNoticeModal');
+    alert('Notice published successfully!');
+  }
+
+  function viewNotice(card) {
+    const title = card.querySelector('.notice-title').textContent;
+    const preview = card.querySelector('.notice-preview').textContent;
+    alert(`${title}\n\n${preview}`);
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

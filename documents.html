@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents — SR Gold Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --paper:#F1F4EF;
+    --card:#FFFFFF;
+    --forest:#1F4D3D;
+    --forest-dark:#153529;
+    --marigold:#D9A62E;
+    --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D;
+    --sky:#3E7CB1;
+    --line:#DDE3DA;
+    --muted:#6B7A70;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header{
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+    padding:22px 20px 34px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:50%;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    z-index:1;
+  }
+  .back-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .back-btn svg{width:18px; height:18px; stroke:#fff;}
+  .page-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+  }
+
+  /* ===== CONTENT ===== */
+  .content{
+    padding:20px 16px;
+  }
+  .doc-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .doc-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(21,53,41,.08);
+  }
+  .doc-icon{
+    width:44px; height:44px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .doc-icon svg{width:22px; height:22px;}
+  .doc-icon.pdf{background:#F5E1DC; color:var(--terracotta);}
+  .doc-icon.pdf svg{stroke:var(--terracotta);}
+  .doc-icon.doc{background:#DEEBF5; color:var(--sky);}
+  .doc-icon.doc svg{stroke:var(--sky);}
+  .doc-icon.xls{background:#E4EEE8; color:var(--forest);}
+  .doc-icon.xls svg{stroke:var(--forest);}
+  .doc-icon.img{background:var(--marigold-soft); color:#9C7412;}
+  .doc-icon.img svg{stroke:#9C7412;}
+  .doc-info{
+    flex:1;
+    min-width:0;
+  }
+  .doc-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--forest-dark);
+    margin-bottom:2px;
+  }
+  .doc-meta{
+    font-size:11px;
+    color:var(--muted);
+    display:flex;
+    gap:8px;
+  }
+  .doc-action{
+    width:36px; height:36px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .doc-action svg{width:16px; height:16px; stroke:var(--muted);}
+  .section-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--forest-dark);
+    margin-bottom:12px;
+    margin-top:20px;
+  }
+  .upload-btn{
+    background:var(--forest);
+    color:#fff;
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .modal-overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:90%;
+    max-width:400px;
+    padding:24px;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--forest-dark);
+  }
+  .modal-close{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
+  .form-group{
+    margin-bottom:16px;
+  }
+  .form-label{
+    font-size:12px;
+    font-weight:500;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .form-input, .form-select{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .form-input:focus, .form-select:focus{
+    outline:none;
+    border-color:var(--forest);
+  }
+  .modal-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .modal-btn-primary{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:10px 6px 14px;
+    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
+  .nav-item.active{color:var(--forest);}
+  .nav-item.active svg{stroke:var(--forest);}
+
+  @media (min-width:481px){
+    body{background:#E9ECE5;}
+    .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Documents</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="upload-btn" onclick="openModal('uploadModal')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload Document
+    </div>
+
+    <div class="section-title">Society Documents</div>
+    <div id="societyDocs">
+      <div class="doc-card" onclick="downloadDoc('Society Bylaws', 'PDF')">
+        <div class="doc-icon pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">Society Bylaws</div>
+          <div class="doc-meta">PDF · 2.4 MB · Updated Jan 2026</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="downloadDoc('Maintenance Bill - July 2026', 'PDF')">
+        <div class="doc-icon pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">Maintenance Bill - July 2026</div>
+          <div class="doc-meta">PDF · 156 KB · Jul 1, 2026</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="downloadDoc('Annual Budget 2026-27', 'XLSX')">
+        <div class="doc-icon xls">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">Annual Budget 2026-27</div>
+          <div class="doc-meta">XLSX · 890 KB · Mar 2026</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Personal Documents</div>
+    <div id="personalDocs">
+      <div class="doc-card" onclick="downloadDoc('Flat Ownership Deed', 'PDF')">
+        <div class="doc-icon pdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">Flat Ownership Deed</div>
+          <div class="doc-meta">PDF · 4.2 MB · Feb 2024</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="downloadDoc('Property Photos', 'JPG')">
+        <div class="doc-icon img">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">Property Photos</div>
+          <div class="doc-meta">JPG · 12 images · Jan 2024</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="downloadDoc('NOC Certificate', 'DOC')">
+        <div class="doc-icon doc">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="doc-info">
+          <div class="doc-name">NOC Certificate</div>
+          <div class="doc-meta">DOC · 245 KB · Dec 2023</div>
+        </div>
+        <div class="doc-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD DOCUMENT MODAL -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Upload Document</div>
+        <div class="modal-close" onclick="closeModal('uploadModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Document Type</div>
+        <select class="form-select" id="docType">
+          <option value="society">Society Document</option>
+          <option value="personal">Personal Document</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Document Name</div>
+        <input type="text" class="form-input" id="docName" placeholder="Enter document name">
+      </div>
+      <div class="form-group">
+        <div class="form-label">File</div>
+        <input type="file" class="form-input" id="docFile">
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="uploadDocument()">Upload</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function uploadDocument() {
+    const type = document.getElementById('docType').value;
+    const name = document.getElementById('docName').value;
+    const file = document.getElementById('docFile').value;
+    
+    if (!name) {
+      alert('Please enter document name');
+      return;
+    }
+    if (!file) {
+      alert('Please select a file');
+      return;
+    }
+
+    const fileName = file.split('\\').pop().split('/').pop();
+    const fileExt = fileName.split('.').pop().toUpperCase();
+    const iconClass = fileExt === 'PDF' ? 'pdf' : fileExt === 'XLS' || fileExt === 'XLSX' ? 'xls' : fileExt === 'JPG' || fileExt === 'PNG' ? 'img' : 'doc';
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    const containerId = type === 'society' ? 'societyDocs' : 'personalDocs';
+    const container = document.getElementById(containerId);
+    
+    const newDoc = document.createElement('div');
+    newDoc.className = 'doc-card';
+    newDoc.onclick = function() { downloadDoc(name, fileExt); };
+    newDoc.innerHTML = `
+      <div class="doc-icon ${iconClass}">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div class="doc-info">
+        <div class="doc-name">${name}</div>
+        <div class="doc-meta">${fileExt} · Just now · ${today}</div>
+      </div>
+      <div class="doc-action">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+    `;
+    container.insertBefore(newDoc, container.firstChild);
+    
+    // Reset form
+    document.getElementById('docName').value = '';
+    document.getElementById('docFile').value = '';
+    document.getElementById('docType').value = 'society';
+    
+    closeModal('uploadModal');
+    alert('Document uploaded successfully!');
+  }
+
+  function downloadDoc(name, type) {
+    alert(`Downloading: ${name} (${type})\n\nFile will be saved to your downloads folder.`);
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

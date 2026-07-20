@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — SR Gold Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --paper:#F1F4EF;
+    --card:#FFFFFF;
+    --forest:#1F4D3D;
+    --forest-dark:#153529;
+    --marigold:#D9A62E;
+    --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D;
+    --sky:#3E7CB1;
+    --line:#DDE3DA;
+    --muted:#6B7A70;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header{
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+    padding:22px 20px 34px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:50%;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    z-index:1;
+  }
+  .back-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .back-btn svg{width:18px; height:18px; stroke:#fff;}
+  .page-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+  }
+
+  /* ===== CONTENT ===== */
+  .content{
+    padding:20px 16px;
+  }
+  .profile-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:16px;
+    border:1px solid var(--line);
+    text-align:center;
+  }
+  .profile-avatar{
+    width:80px; height:80px;
+    border-radius:50%;
+    background:var(--forest);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:28px;
+    margin:0 auto 16px;
+    border:3px solid var(--marigold);
+  }
+  .profile-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:20px;
+    color:var(--forest-dark);
+    margin-bottom:4px;
+  }
+  .profile-role{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .profile-details{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    text-align:left;
+  }
+  .detail-item{
+    background:var(--paper);
+    padding:12px;
+    border-radius:12px;
+  }
+  .detail-label{
+    font-size:10px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:4px;
+  }
+  .detail-value{
+    font-size:13px;
+    font-weight:500;
+    color:var(--forest-dark);
+  }
+  .menu-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .menu-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .menu-item:last-child{border-bottom:none;}
+  .menu-item:hover{background:var(--paper);}
+  .menu-icon{
+    width:40px; height:40px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .menu-icon svg{width:20px; height:20px;}
+  .menu-icon.forest{background:#E4EEE8; color:var(--forest);}
+  .menu-icon.forest svg{stroke:var(--forest);}
+  .menu-icon.sky{background:#DEEBF5; color:var(--sky);}
+  .menu-icon.sky svg{stroke:var(--sky);}
+  .menu-icon.marigold{background:var(--marigold-soft); color:#9C7412;}
+  .menu-icon.marigold svg{stroke:#9C7412;}
+  .menu-icon.terracotta{background:#F5E1DC; color:var(--terracotta);}
+  .menu-icon.terracotta svg{stroke:var(--terracotta);}
+  .menu-text{
+    flex:1;
+    font-size:14px;
+    font-weight:500;
+    color:var(--forest-dark);
+  }
+  .menu-arrow{
+    color:var(--muted);
+  }
+  .menu-arrow svg{width:18px; height:18px; stroke:var(--muted);}
+  .logout-btn{
+    background:var(--terracotta);
+    color:#fff;
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .add-user-btn{
+    background:var(--forest);
+    color:#fff;
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .modal-overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:90%;
+    max-width:400px;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:24px;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--forest-dark);
+  }
+  .modal-close{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
+  .form-group{
+    margin-bottom:16px;
+  }
+  .form-label{
+    font-size:12px;
+    font-weight:500;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .form-input{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .form-input:focus{
+    outline:none;
+    border-color:var(--forest);
+  }
+  .form-select{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .modal-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .modal-btn-primary{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+  }
+  .modal-btn-secondary{
+    background:var(--paper);
+    color:var(--forest-dark);
+    border:1px solid var(--line);
+  }
+  .toggle-switch{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .toggle-switch:last-child{border-bottom:none;}
+  .toggle-label{
+    font-size:14px;
+    font-weight:500;
+    color:var(--forest-dark);
+  }
+  .toggle-input{
+    width:48px; height:26px;
+    background:var(--line);
+    border-radius:13px;
+    position:relative;
+    cursor:pointer;
+    transition:background .3s ease;
+  }
+  .toggle-input.active{background:var(--forest);}
+  .toggle-input::after{
+    content:'';
+    position:absolute;
+    width:22px; height:22px;
+    background:#fff;
+    border-radius:50%;
+    top:2px; left:2px;
+    transition:transform .3s ease;
+  }
+  .toggle-input.active::after{transform:translateX(22px);}
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:10px 6px 14px;
+    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
+  .nav-item.active{color:var(--forest);}
+  .nav-item.active svg{stroke:var(--forest);}
+
+  @media (min-width:481px){
+    body{background:#E9ECE5;}
+    .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div class="page-title">Profile</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="profile-card">
+      <div class="profile-avatar">SS</div>
+      <div class="profile-name">Sujeet Sharma</div>
+      <div class="profile-role">Super Admin · Tower A, Flat 201</div>
+      <div class="profile-details">
+        <div class="detail-item">
+          <div class="detail-label">Phone</div>
+          <div class="detail-value">+91 98765 43210</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Email</div>
+          <div class="detail-value">sujeet@email.com</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Member Since</div>
+          <div class="detail-value">Jan 2024</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Flat Type</div>
+          <div class="detail-value">3 BHK</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="add-user-btn" onclick="openModal('addUserModal')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add New User
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-item" onclick="openModal('editProfileModal')">
+        <div class="menu-icon forest">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="menu-text">Edit Profile</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" onclick="openModal('changePasswordModal')">
+        <div class="menu-icon sky">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="menu-text">Change Password</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" onclick="openModal('privacyModal')">
+        <div class="menu-icon marigold">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="menu-text">Privacy Settings</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" onclick="openModal('notificationsModal')">
+        <div class="menu-icon forest">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="menu-text">Notifications</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" onclick="openModal('helpModal')">
+        <div class="menu-icon terracotta">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="menu-text">Help & Support</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="logout-btn" onclick="alert('Logged out successfully!')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </div>
+  </div>
+
+  <!-- ADD USER MODAL -->
+  <div class="modal-overlay" id="addUserModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Add New User</div>
+        <div class="modal-close" onclick="closeModal('addUserModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Full Name</div>
+        <input type="text" class="form-input" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Phone Number</div>
+        <input type="tel" class="form-input" placeholder="Enter phone number">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Email</div>
+        <input type="email" class="form-input" placeholder="Enter email address">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Role</div>
+        <select class="form-select">
+          <option>Resident</option>
+          <option>Committee Member</option>
+          <option>Staff</option>
+          <option>Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Tower</div>
+        <select class="form-select">
+          <option>Tower A</option>
+          <option>Tower B</option>
+          <option>Tower C</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Flat Number</div>
+        <input type="text" class="form-input" placeholder="Enter flat number">
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="addUser()">Add User</button>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div class="modal-overlay" id="editProfileModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Edit Profile</div>
+        <div class="modal-close" onclick="closeModal('editProfileModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Full Name</div>
+        <input type="text" class="form-input" value="Sujeet Sharma">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Phone Number</div>
+        <input type="tel" class="form-input" value="+91 98765 43210">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Email</div>
+        <input type="email" class="form-input" value="sujeet@email.com">
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal-overlay" id="changePasswordModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Change Password</div>
+        <div class="modal-close" onclick="closeModal('changePasswordModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Current Password</div>
+        <input type="password" class="form-input" placeholder="Enter current password">
+      </div>
+      <div class="form-group">
+        <div class="form-label">New Password</div>
+        <input type="password" class="form-input" placeholder="Enter new password">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Confirm New Password</div>
+        <input type="password" class="form-input" placeholder="Confirm new password">
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+  </div>
+
+  <!-- PRIVACY SETTINGS MODAL -->
+  <div class="modal-overlay" id="privacyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Privacy Settings</div>
+        <div class="modal-close" onclick="closeModal('privacyModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Show phone number to residents</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Show email to residents</div>
+        <div class="toggle-input" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Allow visitors to see my flat</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Profile visible in directory</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="savePrivacy()">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS MODAL -->
+  <div class="modal-overlay" id="notificationsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Notification Settings</div>
+        <div class="modal-close" onclick="closeModal('notificationsModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Maintenance reminders</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Visitor notifications</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Notice board updates</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Complaint updates</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Chat messages</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Payment reminders</div>
+        <div class="toggle-input active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="saveNotifications()">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- HELP & SUPPORT MODAL -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Help & Support</div>
+        <div class="modal-close" onclick="closeModal('helpModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">How can we help you?</div>
+        <select class="form-select">
+          <option>Technical Issue</option>
+          <option>Billing Question</option>
+          <option>Feature Request</option>
+          <option>Report a Bug</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Describe your issue</div>
+        <textarea class="form-input" style="min-height:100px; resize:vertical;" placeholder="Please describe your issue in detail..."></textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Contact Email (Optional)</div>
+        <input type="email" class="form-input" placeholder="your@email.com">
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="submitHelp()">Submit Request</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function addUser() {
+    alert('User added successfully!');
+    closeModal('addUserModal');
+  }
+
+  function saveProfile() {
+    alert('Profile updated successfully!');
+    closeModal('editProfileModal');
+  }
+
+  function changePassword() {
+    alert('Password changed successfully!');
+    closeModal('changePasswordModal');
+  }
+
+  function savePrivacy() {
+    alert('Privacy settings saved!');
+    closeModal('privacyModal');
+  }
+
+  function saveNotifications() {
+    alert('Notification settings saved!');
+    closeModal('notificationsModal');
+  }
+
+  function submitHelp() {
+    alert('Support request submitted! We will get back to you soon.');
+    closeModal('helpModal');
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

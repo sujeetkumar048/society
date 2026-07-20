@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complaints — SR Gold Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --paper:#F1F4EF;
+    --card:#FFFFFF;
+    --forest:#1F4D3D;
+    --forest-dark:#153529;
+    --marigold:#D9A62E;
+    --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D;
+    --sky:#3E7CB1;
+    --line:#DDE3DA;
+    --muted:#6B7A70;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header{
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+    padding:22px 20px 34px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:50%;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    z-index:1;
+  }
+  .page-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+  }
+  .add-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .add-btn svg{width:18px; height:18px; stroke:#fff;}
+
+  /* ===== CONTENT ===== */
+  .content{
+    padding:20px 16px;
+  }
+  .filter-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .filter-tab{
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:500;
+    white-space:nowrap;
+    cursor:pointer;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--muted);
+  }
+  .filter-tab.active{
+    background:var(--forest);
+    color:#fff;
+    border-color:var(--forest);
+  }
+  .complaint-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+    border:1px solid var(--line);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .complaint-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(21,53,41,.08);
+  }
+  .complaint-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .complaint-id{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+  }
+  .complaint-status{
+    font-size:11px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:10px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .status-pending{
+    background:var(--marigold-soft);
+    color:#9C7412;
+  }
+  .status-in-progress{
+    background:#DEEBF5;
+    color:var(--sky);
+  }
+  .status-resolved{
+    background:#E4EEE8;
+    color:var(--forest);
+  }
+  .complaint-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--forest-dark);
+    margin-bottom:6px;
+  }
+  .complaint-desc{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.4;
+    margin-bottom:12px;
+  }
+  .complaint-meta{
+    display:flex;
+    gap:12px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+  .meta-item{
+    font-size:11px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .priority-dot{
+    width:8px; height:8px;
+    border-radius:50%;
+  }
+  .priority-high{background:var(--terracotta);}
+  .priority-medium{background:var(--marigold);}
+  .priority-low{background:var(--forest);}
+  .modal-overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:90%;
+    max-width:400px;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:24px;
+  }
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--forest-dark);
+  }
+  .modal-close{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .modal-close svg{width:18px; height:18px; stroke:var(--muted);}
+  .detail-row{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .detail-label{
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .detail-value{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .modal-btn{
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:16px;
+  }
+  .modal-btn-primary{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:10px 6px 14px;
+    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:500;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
+  .nav-item.active{color:var(--forest);}
+  .nav-item.active svg{stroke:var(--forest);}
+
+  @media (min-width:481px){
+    body{background:#E9ECE5;}
+    .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="page-title">Complaints</div>
+      <a href="add-complaint.html" class="add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="filterComplaints('all')">All</div>
+      <div class="filter-tab" onclick="filterComplaints('pending')">Pending</div>
+      <div class="filter-tab" onclick="filterComplaints('in-progress')">In Progress</div>
+      <div class="filter-tab" onclick="filterComplaints('resolved')">Resolved</div>
+    </div>
+
+    <div id="complaintsList">
+      <div class="complaint-card" data-status="in-progress" onclick="viewComplaint('CMP-2026-042', 'Lift not working', 'Lift in Tower A is not responding to calls from floors 3-5.', 'high', 'Tower A', '2 days ago')">
+        <div class="complaint-header">
+          <div class="complaint-id">#CMP-2026-042</div>
+          <div class="complaint-status status-in-progress">In Progress</div>
+        </div>
+        <div class="complaint-title">Lift not working</div>
+        <div class="complaint-desc">Lift in Tower A is not responding to calls from floors 3-5.</div>
+        <div class="complaint-meta">
+          <div class="meta-item">
+            <div class="priority-dot priority-high"></div>
+            High Priority
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2 days ago
+          </div>
+        </div>
+      </div>
+
+      <div class="complaint-card" data-status="pending" onclick="viewComplaint('CMP-2026-041', 'Water leakage in corridor', 'Water leaking from ceiling on 4th floor corridor, Tower B.', 'high', 'Tower B', '3 days ago')">
+        <div class="complaint-header">
+          <div class="complaint-id">#CMP-2026-041</div>
+          <div class="complaint-status status-pending">Pending</div>
+        </div>
+        <div class="complaint-title">Water leakage in corridor</div>
+        <div class="complaint-desc">Water leaking from ceiling on 4th floor corridor, Tower B.</div>
+        <div class="complaint-meta">
+          <div class="meta-item">
+            <div class="priority-dot priority-high"></div>
+            High Priority
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            3 days ago
+          </div>
+        </div>
+      </div>
+
+      <div class="complaint-card" data-status="resolved" onclick="viewComplaint('CMP-2026-040', 'Garden lights not working', 'Multiple garden lights in central lawn area are not functioning.', 'medium', 'Garden', '5 days ago')">
+        <div class="complaint-header">
+          <div class="complaint-id">#CMP-2026-040</div>
+          <div class="complaint-status status-resolved">Resolved</div>
+        </div>
+        <div class="complaint-title">Garden lights not working</div>
+        <div class="complaint-desc">Multiple garden lights in central lawn area are not functioning.</div>
+        <div class="complaint-meta">
+          <div class="meta-item">
+            <div class="priority-dot priority-medium"></div>
+            Medium Priority
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            5 days ago
+          </div>
+        </div>
+      </div>
+
+      <div class="complaint-card" data-status="resolved" onclick="viewComplaint('CMP-2026-039', 'Parking slot dispute', 'Vehicle parked in reserved slot B-201 without authorization.', 'low', 'Parking B', '1 week ago')">
+        <div class="complaint-header">
+          <div class="complaint-id">#CMP-2026-039</div>
+          <div class="complaint-status status-resolved">Resolved</div>
+        </div>
+        <div class="complaint-title">Parking slot dispute</div>
+        <div class="complaint-desc">Vehicle parked in reserved slot B-201 without authorization.</div>
+        <div class="complaint-meta">
+          <div class="meta-item">
+            <div class="priority-dot priority-low"></div>
+            Low Priority
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            1 week ago
+          </div>
+        </div>
+      </div>
+
+      <div class="complaint-card" data-status="in-progress" onclick="viewComplaint('CMP-2026-038', 'Common area cleaning', 'Staircase area in Tower B needs thorough cleaning.', 'medium', 'Tower B', '1 week ago')">
+        <div class="complaint-header">
+          <div class="complaint-id">#CMP-2026-038</div>
+          <div class="complaint-status status-in-progress">In Progress</div>
+        </div>
+        <div class="complaint-title">Common area cleaning</div>
+        <div class="complaint-desc">Staircase area in Tower B needs thorough cleaning.</div>
+        <div class="complaint-meta">
+          <div class="meta-item">
+            <div class="priority-dot priority-medium"></div>
+            Medium Priority
+          </div>
+          <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            1 week ago
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLAINT DETAIL MODAL -->
+  <div class="modal-overlay" id="complaintModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Complaint Details</div>
+        <div class="modal-close" onclick="closeModal('complaintModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Complaint ID</div>
+        <div class="detail-value" id="modalId">#CMP-2026-042</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Title</div>
+        <div class="detail-value" id="modalTitle">Lift not working</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Description</div>
+        <div class="detail-value" id="modalDesc">Lift in Tower A is not responding to calls from floors 3-5.</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Priority</div>
+        <div class="detail-value" id="modalPriority">High</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Location</div>
+        <div class="detail-value" id="modalLocation">Tower A</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Submitted</div>
+        <div class="detail-value" id="modalDate">2 days ago</div>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('complaintModal')">Close</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function filterComplaints(filter) {
+    // Update active tab
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Filter complaints
+    const complaints = document.querySelectorAll('.complaint-card');
+    complaints.forEach(complaint => {
+      const status = complaint.getAttribute('data-status');
+      if (filter === 'all' || status === filter) {
+        complaint.style.display = 'block';
+      } else {
+        complaint.style.display = 'none';
+      }
+    });
+  }
+
+  function viewComplaint(id, title, desc, priority, location, date) {
+    document.getElementById('modalId').textContent = '#' + id;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent = desc;
+    document.getElementById('modalPriority').textContent = priority.charAt(0).toUpperCase() + priority.slice(1);
+    document.getElementById('modalLocation').textContent = location;
+    document.getElementById('modalDate').textContent = date;
+    openModal('complaintModal');
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>
