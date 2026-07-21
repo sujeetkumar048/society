@@ -663,28 +663,9 @@
 
 <script>
   // Auth control
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (!localStorage.getItem('loggedOutFlag')) {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      window.location.href = 'profile.html';
-    }
+    window.location.href = 'profile.html';
   }
 
   // Hide/show Admin toggle container based on role
@@ -866,19 +847,46 @@
       const row = document.createElement('div');
       row.className = 'history-item';
       row.style.fontSize = '12px';
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
       row.innerHTML = `
         <div>
           <div style="font-weight:600; color:var(--forest-dark);">Flat ${inv.flat} · ${inv.month}</div>
           <div style="font-size:10px; color:var(--muted);">${inv.id} · ${inv.date}</div>
         </div>
-        <div style="text-align:right;">
+        <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
           <div style="font-weight:700; color:var(--terracotta);">₹${inv.total.toLocaleString()}</div>
-          <div style="font-size:10px; background:#F5E1DC; color:var(--terracotta); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px;">Unpaid</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:10px; background:#F5E1DC; color:var(--terracotta); padding:2px 6px; border-radius:4px; font-weight:600;">Unpaid</span>
+            ${isAdmin ? `<button onclick="deleteInvoice('${inv.id}')" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>` : ''}
+          </div>
         </div>
       `;
       listContainer.appendChild(row);
     });
   }
+
+  window.deleteInvoice = function(invId) {
+    if (!confirm('Are you sure you want to delete this invoice?')) return;
+    pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== invId);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_invoices', pendingInvoicesList)
+        .then(() => {
+          alert('Invoice deleted successfully!');
+          renderPendingBillsUI();
+          renderAdminInvoicesLog();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting invoice from database.');
+        });
+    } else {
+      localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
+      alert('Invoice deleted successfully!');
+      renderPendingBillsUI();
+      renderAdminInvoicesLog();
+    }
+  };
 
   // Load Payments History & Outstanding Bills
   let payments = [];

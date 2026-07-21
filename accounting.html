@@ -582,16 +582,10 @@
 
 <script>
   // Auth state check
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201"
-  };
-
-  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || defaultUser;
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'profile.html';
+  }
 
   // Toggle Tab Focus
   function switchTab(tab) {
@@ -615,11 +609,52 @@
   // Double databases lists
   let incomes = [];
   let expenses = [];
-
-  let incomes = [];
-  let expenses = [];
   let isListeningIncomes = false;
   let isListeningExpenses = false;
+
+  window.deleteIncome = function(idx) {
+    if (!confirm('Are you sure you want to delete this income entry?')) return;
+    incomes.splice(idx, 1);
+    if (typeof fbSet === 'function') {
+      fbSet('society_incomes', incomes)
+        .then(() => {
+          alert('Income entry deleted successfully!');
+          renderLogs();
+          calculateSummaries();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting income entry from database.');
+        });
+    } else {
+      localStorage.setItem('society_incomes', JSON.stringify(incomes));
+      alert('Income entry deleted successfully!');
+      renderLogs();
+      calculateSummaries();
+    }
+  };
+
+  window.deleteExpense = function(idx) {
+    if (!confirm('Are you sure you want to delete this expense entry?')) return;
+    expenses.splice(idx, 1);
+    if (typeof fbSet === 'function') {
+      fbSet('society_expenses', expenses)
+        .then(() => {
+          alert('Expense entry deleted successfully!');
+          renderLogs();
+          calculateSummaries();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting expense entry from database.');
+        });
+    } else {
+      localStorage.setItem('society_expenses', JSON.stringify(expenses));
+      alert('Expense entry deleted successfully!');
+      renderLogs();
+      calculateSummaries();
+    }
+  };
 
   function initAccountingModule() {
     if (typeof fbListen === 'function') {
@@ -682,15 +717,19 @@
     incList.innerHTML = '';
     document.getElementById('incomeCount').textContent = `${incomes.length} logged`;
 
-    incomes.forEach(i => {
+    incomes.forEach((i, idx) => {
       const item = document.createElement('div');
       item.className = 'log-item';
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
       item.innerHTML = `
         <div>
           <div class="log-title">${i.head} ${i.flat ? `(Flat ${i.flat})` : ''}</div>
           <div class="log-meta">${i.id} · ${i.date} · ${i.note || ''}</div>
         </div>
-        <div class="log-amt green">+₹${Number(i.amount).toLocaleString()}</div>
+        <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          <div class="log-amt green">+₹${Number(i.amount).toLocaleString()}</div>
+          ${isAdmin ? `<button onclick="deleteIncome(${idx})" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600;">Delete</button>` : ''}
+        </div>
       `;
       incList.appendChild(item);
     });
@@ -700,15 +739,19 @@
     expList.innerHTML = '';
     document.getElementById('expenseCount').textContent = `${expenses.length} logged`;
 
-    expenses.forEach(e => {
+    expenses.forEach((e, idx) => {
       const item = document.createElement('div');
       item.className = 'log-item';
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
       item.innerHTML = `
         <div>
           <div class="log-title">${e.head} (To: ${e.vendor})</div>
           <div class="log-meta">${e.id} · ${e.date} · ${e.note || ''}</div>
         </div>
-        <div class="log-amt red">-₹${Number(e.amount).toLocaleString()}</div>
+        <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          <div class="log-amt red">-₹${Number(e.amount).toLocaleString()}</div>
+          ${isAdmin ? `<button onclick="deleteExpense(${idx})" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600;">Delete</button>` : ''}
+        </div>
       `;
       expList.appendChild(item);
     });

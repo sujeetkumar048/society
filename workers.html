@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -405,6 +405,10 @@
 </div>
 
 <script>
+  // Auth guard
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) { window.location.href = 'profile.html'; }
+
   let workers = [];
   let currentCategory = 'All';
   let activeBookingWorker = null;
@@ -515,15 +519,23 @@
       return;
     }
 
-    const bookings = JSON.parse(localStorage.getItem('society_worker_bookings')) || [];
-    bookings.unshift({
+    const newBooking = {
       workerName: activeBookingWorker,
       date: bDate,
       slot: bSlot,
-      status: "Confirmed",
+      status: 'Confirmed',
+      bookedBy: currentUser ? currentUser.name : 'Resident',
+      flat: currentUser ? (currentUser.flat || '') : '',
       timestamp: new Date().toLocaleString('en-IN')
-    });
-    localStorage.setItem('society_worker_bookings', JSON.stringify(bookings));
+    };
+
+    if (typeof fbPush === 'function') {
+      fbPush('society_worker_bookings', newBooking);
+    } else {
+      const bookings = JSON.parse(localStorage.getItem('society_worker_bookings')) || [];
+      bookings.unshift(newBooking);
+      localStorage.setItem('society_worker_bookings', JSON.stringify(bookings));
+    }
 
     closeModal('bookModal');
     alert(`Success!\n\nYour Booking request has been sent to ${activeBookingWorker}.\nPreferred slot: ${bDate} (${bSlot}).\nThe worker will contact you on your registered number.`);

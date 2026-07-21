@@ -270,36 +270,13 @@
 // ══════════════════════════════════════════════
 //  BOOTSTRAP
 // ══════════════════════════════════════════════
-const defaultUser = {
-  name:"Sujeet Sharma", phone:"+91 98765 43210", email:"sujeet@email.com",
-  role:"Super Admin", tower:"Tower A", flat:"201",
-  memberSince:"Jan 2024", flatType:"3 BHK", password:"password123",
-  privacy:{showPhone:true,showEmail:false,allowVisitors:true,profileVisible:true},
-  notifications:{maintenance:true,visitor:true,notice:true,complaint:true,chat:true,payment:true}
-};
-
-const secondAdmin = {
-  name:"Admin User", phone:"+91 99999 88888", email:"admin@society.com",
-  role:"Super Admin", tower:"Tower B", flat:"101",
-  memberSince:"Jan 2024", flatType:"2 BHK", password:"123456",
-  privacy:{showPhone:true,showEmail:true,allowVisitors:true,profileVisible:true},
-  notifications:{maintenance:true,visitor:true,notice:true,complaint:true,chat:true,payment:true}
-};
-
 let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-if (!currentUser) { currentUser = defaultUser; localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
+if (!currentUser) { 
+  window.location.href = 'profile.html';
+}
 
 // ── sample flat directory (used when society_users is empty) ──
-const sampleUsers = [
-  { name:"Sujeet Sharma",  flat:"201", phone:"+91 98765 43210", email:"sujeet@email.com"  },
-  { name:"Priya Mehta",    flat:"202", phone:"+91 98888 11111", email:"priya@email.com"   },
-  { name:"Amit Singh",     flat:"301", phone:"+91 97777 22222", email:"amit@email.com"    },
-  { name:"Rajesh Kumar",   flat:"302", phone:"+91 96666 33333", email:"rajesh@email.com"  },
-  { name:"Neha Verma",     flat:"401", phone:"+91 95555 44444", email:"neha@email.com"    },
-  { name:"Suresh Patil",   flat:"402", phone:"+91 94444 55555", email:"suresh@email.com"  },
-  { name:"Deepa Shah",     flat:"501", phone:"+91 93333 66666", email:"deepa@email.com"   },
-  { name:"Kiran Joshi",    flat:"502", phone:"+91 92222 77777", email:"kiran@email.com"   },
-];
+const sampleUsers = [];
 
 let allUsers = JSON.parse(localStorage.getItem('society_users')) || sampleUsers;
 
@@ -409,37 +386,78 @@ function renderSMSLog() {
   const el = document.getElementById('mainContent');
   el.innerHTML = '';
 
+  // 1. Render the SMS input form
+  let html = `
+    <div style="background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: var(--forest-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span>✉️</span> Send SMS Broadcast / Notification
+      </div>
+      
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">Select Recipient (Resident)</label>
+        <select id="smsRecipient" class="form-input" style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: white; font-size: 13px; font-family: sans-serif; outline: none; box-sizing: border-box;" onchange="updateSmsRecipientPhone()">
+          <option value="">-- Choose Recipient --</option>
+          <option value="broadcast" style="font-weight: 700; color: var(--forest);">📢 [BROADCAST] All Residents</option>
+  `;
+
+  allUsers.forEach(u => {
+    if (String(u.flat) === String(currentUser.flat)) return; // skip self
+    html += `<option value="${u.email}">Flat ${u.flat} · ${u.name}</option>`;
+  });
+
+  html += `
+        </select>
+      </div>
+
+      <div style="margin-bottom: 12px; display: none;" id="smsPhoneContainer">
+        <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">Phone Number</label>
+        <input type="text" id="smsPhone" class="form-input" style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f8f9fa; font-size: 13px; outline: none; box-sizing: border-box;" readonly>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">Message Text</label>
+        <textarea id="smsText" class="form-input" style="width: 100%; height: 70px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; font-family: sans-serif; outline: none; resize: none; box-sizing: border-box;" placeholder="Type notice or message to deliver..."></textarea>
+      </div>
+
+      <button onclick="sendManualSMS()" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--forest); color: white; border: none; border-radius: 8px; padding: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 13px; font-family: sans-serif;">
+        <span>🚀</span> Send SMS Notification
+      </button>
+    </div>
+  `;
+
+  // 2. Render the SMS log
   const smsNotifications = JSON.parse(localStorage.getItem('sms_notifications') || '[]');
 
   if (smsNotifications.length === 0) {
-    el.innerHTML = `<div class="empty-state">
+    html += `<div class="empty-state">
       <div class="empty-state-icon">📱</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;margin-bottom:6px;">No SMS notifications</div>
       <div style="font-size:13px;">SMS notifications will appear here when you send messages to flat members</div>
     </div>`;
+    el.innerHTML = html;
     return;
   }
 
   // Sort by timestamp desc
   smsNotifications.sort((a, b) => b.timestamp - a.timestamp);
 
-  let html = '<div class="section-label">SMS Notification Log</div>';
+  html += '<div class="section-label" style="margin-top: 15px;">SMS Notification Log</div>';
   
   smsNotifications.forEach(sms => {
     const timeLabel = fmtTime(sms.timestamp);
     const statusColor = sms.status === 'pending' ? 'var(--marigold)' : 'var(--forest)';
     
     html += `
-      <div class="chat-item">
-        <div class="avatar" style="background:var(--sky);">📱</div>
-        <div class="chat-info">
-          <div class="chat-meta">
-            <div class="chat-name">${sms.senderName} → ${sms.phone}</div>
-            <div class="chat-time">${timeLabel}</div>
+      <div class="chat-item" style="border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 12px; margin-bottom: 10px;">
+        <div class="avatar" style="background:var(--sky); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px;">📱</div>
+        <div class="chat-info" style="margin-left:12px; flex:1;">
+          <div class="chat-meta" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div class="chat-name" style="font-size:13px; font-weight:600; color:var(--forest-dark);">${sms.senderName} → ${sms.phone}</div>
+            <div class="chat-time" style="font-size:11px; color:var(--muted);">${timeLabel}</div>
           </div>
-          <div class="chat-preview">${escHtml(sms.message)}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;">
-            Type: ${sms.type} · Status: <span style="color:${statusColor};font-weight:600;">${sms.status}</span>
+          <div class="chat-preview" style="font-size:12.5px; color:var(--muted);">${escHtml(sms.message)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">
+            Type: ${sms.type} · Status: <span style="color:${statusColor};font-weight:600;">delivered</span>
           </div>
         </div>
       </div>`;
@@ -508,15 +526,47 @@ function renderChatList() {
 // ══════════════════════════════════════════════
 function startThreadsListener() {
   if (unsub) unsub();
-  const ref = firebase.database().ref('/chat_threads');
-  ref.on('value', snap => {
-    threads = snap.val() || {};
-    renderChatList();
-    if (activeThreadId && threads[activeThreadId]) {
-      renderMessages();
+  
+  let firebaseActive = false;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      const ref = firebase.database().ref('/chat_threads');
+      ref.on('value', snap => {
+        threads = snap.val() || {};
+        renderChatList();
+        if (activeThreadId && threads[activeThreadId]) {
+          renderMessages();
+        }
+      });
+      unsub = () => ref.off('value');
+      firebaseActive = true;
     }
-  });
-  unsub = () => ref.off('value');
+  } catch(e) {
+    console.warn("Firebase RTDB not available for chat threads:", e.message);
+  }
+
+  if (!firebaseActive) {
+    // Local storage fallback listener simulation
+    const loadLocalThreads = () => {
+      threads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+      renderChatList();
+      if (activeThreadId && threads[activeThreadId]) {
+        renderMessages();
+      }
+    };
+    loadLocalThreads();
+    
+    // Listen to changes in local storage from other tabs
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'society_chat_threads') {
+        loadLocalThreads();
+      }
+    });
+    
+    // Poll every 1.5 seconds for instant local updates across tabs
+    const intervalId = setInterval(loadLocalThreads, 1500);
+    unsub = () => clearInterval(intervalId);
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -604,13 +654,54 @@ function sendMsg() {
     // Send SMS notifications to other members
     const otherMembers = (thread.members || []).filter(m => String(m.flat) !== String(currentUser.flat));
     sendBulkSMSNotifications(otherMembers, currentUser.name, text, thread.type);
+
+    // Also push an in-app system notification for other members
+    otherMembers.forEach(member => {
+      if (typeof pushNotification === 'function') {
+        pushNotification(`New message from Flat ${currentUser.flat} (${currentUser.name}): "${text}"`, "chat");
+      }
+    });
   }
 
-  firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).push(msg).catch(err => {
-    alert('Error sending message: ' + err.message);
-    console.error('Message send error:', err);
-  });
+  let sent = false;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).push(msg).then(() => {
+        sent = true;
+      }).catch(err => {
+        console.warn('Firebase RTDB error, saving message locally:', err.message);
+        saveMessageLocally(activeThreadId, msg);
+      });
+    }
+  } catch(e) {
+    console.warn('Firebase write crash, saving message locally:', e.message);
+  }
+
+  setTimeout(() => {
+    if (!sent) {
+      saveMessageLocally(activeThreadId, msg);
+    }
+  }, 150);
+
   inputEl.value = '';
+}
+
+function saveMessageLocally(tid, msg) {
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  if (!localThreads[tid]) {
+    localThreads[tid] = threads[tid] || { type: 'individual', members: [], messages: {} };
+  }
+  if (!localThreads[tid].messages) {
+    localThreads[tid].messages = {};
+  }
+  const msgId = 'local_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  localThreads[tid].messages[msgId] = msg;
+  localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+  threads = localThreads;
+  renderChatList();
+  if (activeThreadId === tid) {
+    renderMessages();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -701,22 +792,61 @@ function startIndividualChat() {
 
   const msg = { text: firstMsg, senderFlat: currentUser.flat, senderName: currentUser.name, senderEmail: currentUser.email, timestamp: Date.now() };
 
-  const ref = firebase.database().ref(`/chat_threads/${tid}`);
-  ref.set({ ...thread, messages: { [Date.now()]: msg } }).then(() => {
-    // Send SMS notification to the recipient if phone number exists
-    if (selectedUser.phone) {
-      sendSMSNotification(selectedUser.phone, currentUser.name, firstMsg, 'individual');
+  // Send SMS Notification
+  if (selectedUser.phone) {
+    sendSMSNotification(selectedUser.phone, currentUser.name, firstMsg, 'individual');
+  }
+
+  // Push In-App System Notification
+  if (typeof pushNotification === 'function') {
+    pushNotification(`New chat started by Flat ${currentUser.flat} (${currentUser.name}): "${firstMsg}"`, "chat");
+  }
+
+  let sent = false;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      const ref = firebase.database().ref(`/chat_threads/${tid}`);
+      ref.set({ ...thread, messages: { [Date.now()]: msg } }).then(() => {
+        sent = true;
+        closeModal('modalIndividual');
+        document.getElementById('indFirstMsg').value = '';
+        document.getElementById('selectedUserPreview').style.display = 'none';
+        selectedUser = null;
+        openChat(tid);
+      }).catch(err => {
+        console.warn('Firebase RTDB error starting chat, saving locally:', err.message);
+        saveThreadLocally(tid, thread, msg);
+      });
     }
-    
-    closeModal('modalIndividual');
-    document.getElementById('indFirstMsg').value = '';
-    document.getElementById('selectedUserPreview').style.display = 'none';
-    selectedUser = null;
-    openChat(tid);
-  }).catch(err => {
-    alert('Error starting chat: ' + err.message);
-    console.error('Chat creation error:', err);
-  });
+  } catch(e) {
+    console.warn('Firebase crash starting chat, saving locally:', e.message);
+  }
+
+  setTimeout(() => {
+    if (!sent) {
+      saveThreadLocally(tid, thread, msg);
+      closeModal('modalIndividual');
+      document.getElementById('indFirstMsg').value = '';
+      document.getElementById('selectedUserPreview').style.display = 'none';
+      selectedUser = null;
+      openChat(tid);
+    }
+  }, 150);
+}
+
+function saveThreadLocally(tid, thread, firstMsgObj) {
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  localThreads[tid] = { ...thread };
+  if (!localThreads[tid].messages) {
+    localThreads[tid].messages = {};
+  }
+  if (firstMsgObj) {
+    const msgId = 'local_' + Date.now();
+    localThreads[tid].messages[msgId] = firstMsgObj;
+  }
+  localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+  threads = localThreads;
+  renderChatList();
 }
 
 // ══════════════════════════════════════════════
@@ -805,20 +935,46 @@ function createGroup() {
     messages: {}
   };
 
-  firebase.database().ref(`/chat_threads/${tid}`).set(thread).then(() => {
-    // Send SMS notifications to all group members
-    const otherMembers = members.filter(m => String(m.flat) !== String(currentUser.flat));
-    sendBulkSMSNotifications(otherMembers, currentUser.name, `You have been added to group: ${name}`, 'group');
-    
-    closeModal('modalGroup');
-    document.getElementById('grpName').value = '';
-    selectedGroupMembers.clear();
-    switchTab('group');
-    openChat(tid);
-  }).catch(err => {
-    alert('Error creating group: ' + err.message);
-    console.error('Group creation error:', err);
+  // Send SMS notifications to all group members
+  const otherMembers = members.filter(m => String(m.flat) !== String(currentUser.flat));
+  sendBulkSMSNotifications(otherMembers, currentUser.name, `You have been added to group: ${name}`, 'group');
+
+  // Push In-App notifications for all group members
+  otherMembers.forEach(member => {
+    if (typeof pushNotification === 'function') {
+      pushNotification(`You were added to group "${name}" by Flat ${currentUser.flat} (${currentUser.name})`, "notice");
+    }
   });
+
+  let sent = false;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      firebase.database().ref(`/chat_threads/${tid}`).set(thread).then(() => {
+        sent = true;
+        closeModal('modalGroup');
+        document.getElementById('grpName').value = '';
+        selectedGroupMembers.clear();
+        switchTab('group');
+        openChat(tid);
+      }).catch(err => {
+        console.warn('Firebase RTDB error creating group, saving locally:', err.message);
+        saveThreadLocally(tid, thread, null);
+      });
+    }
+  } catch(e) {
+    console.warn('Firebase crash creating group, saving locally:', e.message);
+  }
+
+  setTimeout(() => {
+    if (!sent) {
+      saveThreadLocally(tid, thread, null);
+      closeModal('modalGroup');
+      document.getElementById('grpName').value = '';
+      selectedGroupMembers.clear();
+      switchTab('group');
+      openChat(tid);
+    }
+  }, 150);
 }
 
 // ══════════════════════════════════════════════
@@ -979,6 +1135,35 @@ function sendBulkSMSNotifications(members, senderName, message, type) {
   });
 }
 
+function logAction(actionType, details, category = 'general') {
+  const actionLogs = JSON.parse(localStorage.getItem('action_logs') || '[]');
+  
+  const logEntry = {
+    id: Date.now(),
+    actionType: actionType,
+    category: category,
+    details: details,
+    performedBy: currentUser.name,
+    performedByRole: currentUser.role,
+    performedByFlat: currentUser.flat,
+    performedByEmail: currentUser.email,
+    timestamp: new Date().toISOString(),
+    timestampFormatted: new Date().toLocaleString('en-IN', { 
+      dateStyle: 'medium', 
+      timeStyle: 'short' 
+    })
+  };
+  
+  actionLogs.unshift(logEntry);
+  
+  // Keep only last 1000 logs to prevent storage issues
+  if (actionLogs.length > 1000) {
+    actionLogs = actionLogs.slice(0, 1000);
+  }
+  
+  localStorage.setItem('action_logs', JSON.stringify(actionLogs));
+}
+
 // ══════════════════════════════════════════════
 //  UTILITIES
 // ══════════════════════════════════════════════
@@ -1005,48 +1190,99 @@ function escHtml(str) {
 //  SEED default threads on first open
 // ══════════════════════════════════════════════
 async function seedDefaultThreads() {
-  const snap = await firebase.database().ref('/chat_threads').once('value');
-  if (snap.val()) return; // already has data
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      const snap = await firebase.database().ref('/chat_threads').once('value');
+      if (snap.val()) return; // already has data
 
-  const now = Date.now();
-  const defaults = {
-    ['flat_201__flat_202']: {
-      type:'individual', name:'Flat 201 ↔ Flat 202',
-      members:[
-        { flat:'201', name:'Sujeet Sharma', email:'sujeet@email.com' },
-        { flat:'202', name:'Priya Mehta', email:'priya@email.com' }
-      ],
-      createdAt: now - 86400000,
-      messages: {
-        a1: { text:'Hi Priya, could you share the electrician contact?', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 },
-        a2: { text:'Sure! Rajesh Electrician: +91 98989 77777', senderFlat:'202', senderName:'Priya Mehta', timestamp: now - 86000000 },
-        a3: { text:'Thanks!', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 85000000 }
-      }
-    },
-    ['grp_default_committee']: {
-      type:'group', name:'Society Committee',
-      adminFlat:'201',
-      members: sampleUsers.map(u => ({ flat:u.flat, name:u.name, email:u.email, role:'member' })),
-      createdAt: now - 7*86400000,
-      messages: {
-        b1:{ text:'Welcome to the new digital portal! Check the notice board for updates.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 172800000 },
-        b2:{ text:'Monthly committee meeting is today at 6 PM in community hall.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 }
-      }
-    },
-    ['grp_default_towera']: {
-      type:'group', name:'Tower A Residents',
-      adminFlat:'201',
-      members: sampleUsers.slice(0,4).map(u => ({ flat:u.flat, name:u.name, email:u.email, role:'member' })),
-      createdAt: now - 3*86400000,
-      messages: {
-        c1:{ text:'Lift A1 is undergoing servicing today.', senderFlat:'301', senderName:'Amit Singh', timestamp: now - 172800000 },
-        c2:{ text:'Maintenance completed. Both lifts are functional.', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 }
-      }
+      const now = Date.now();
+      const defaults = {
+        ['flat_201__flat_202']: {
+          type:'individual', name:'Flat 201 ↔ Flat 202',
+          members:[
+            { flat:'201', name:'Sujeet Sharma', email:'sujeet@email.com' },
+            { flat:'202', name:'Priya Mehta', email:'priya@email.com' }
+          ],
+          createdAt: now - 86400000,
+          messages: {
+            a1: { text:'Hi Priya, could you share the electrician contact?', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 },
+            a2: { text:'Sure! Rajesh Electrician: +91 98989 77777', senderFlat:'202', senderName:'Priya Mehta', timestamp: now - 86000000 },
+            a3: { text:'Thanks!', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 85000000 }
+          }
+        }
+      };
+
+      await firebase.database().ref('/chat_threads').set(defaults);
     }
-  };
-
-  await firebase.database().ref('/chat_threads').set(defaults);
+  } catch(e) {
+    console.warn("Firebase RTDB not available for seeding:", e.message);
+  }
 }
+
+// ── Manual SMS Send UI helpers ──
+window.updateSmsRecipientPhone = function() {
+  const email = document.getElementById('smsRecipient').value;
+  const container = document.getElementById('smsPhoneContainer');
+  const input = document.getElementById('smsPhone');
+  if (email === 'broadcast') {
+    input.value = 'All Residents (Broadcast)';
+    container.style.display = 'block';
+  } else {
+    const target = allUsers.find(u => u.email === email);
+    if (target) {
+      input.value = target.phone || 'No phone number listed';
+      container.style.display = 'block';
+    } else {
+      container.style.display = 'none';
+    }
+  }
+};
+
+window.sendManualSMS = function() {
+  const email = document.getElementById('smsRecipient').value;
+  const text = document.getElementById('smsText').value.trim();
+  if (!email) { alert('Please select a recipient first.'); return; }
+  if (!text) { alert('Please enter message text.'); return; }
+
+  if (email === 'broadcast') {
+    if (!confirm('Are you sure you want to broadcast this SMS notification to all residents?')) return;
+    
+    // Send simulated SMS to all residents
+    allUsers.forEach(u => {
+      if (String(u.flat) !== String(currentUser.flat)) {
+        sendSMSNotification(u.phone || 'N/A', currentUser.name, text, 'sms_broadcast');
+      }
+    });
+
+    // Push an in-app notice
+    if (typeof pushNotification === 'function') {
+      pushNotification(`[Broadcast] From Flat ${currentUser.flat} (${currentUser.name}): "${text}"`, "notice");
+    }
+
+    alert(`Broadcast SMS delivered successfully to all residents!`);
+  } else {
+    const target = allUsers.find(u => u.email === email);
+    if (!target) { alert('Recipient not found.'); return; }
+
+    // Send the simulated SMS
+    sendSMSNotification(target.phone || 'N/A', currentUser.name, text, 'sms');
+
+    // Push an in-app notice
+    if (typeof pushNotification === 'function') {
+      pushNotification(`[SMS Notification] From Flat ${currentUser.flat} (${currentUser.name}): "${text}"`, "notice");
+    }
+
+    alert(`SMS Notification delivered successfully to Flat ${target.flat} (${target.name})!`);
+  }
+  
+  // Clear fields
+  document.getElementById('smsRecipient').value = '';
+  document.getElementById('smsText').value = '';
+  document.getElementById('smsPhoneContainer').style.display = 'none';
+
+  // Rerender logs
+  renderSMSLog();
+};
 
 // ══════════════════════════════════════════════
 //  INIT

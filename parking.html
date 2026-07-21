@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -375,6 +375,10 @@
 </div>
 
 <script>
+  // Auth guard
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) { window.location.href = 'profile.html'; }
+
   let residents = [];
   let visitorSlots = [];
 
@@ -532,7 +536,11 @@
     freeSlot.flat = flat;
     freeSlot.time = timeStr;
 
-    localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+    if (typeof fbSet === 'function') {
+      fbSet('society_parking_visitors', visitorSlots);
+    } else {
+      localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+    }
     
     renderVisitorSlots();
 
@@ -560,7 +568,11 @@
       slot.flat = "";
       slot.time = "";
 
-      localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+      if (typeof fbSet === 'function') {
+        fbSet('society_parking_visitors', visitorSlots);
+      } else {
+        localStorage.setItem('society_parking_visitors', JSON.stringify(visitorSlots));
+      }
       renderVisitorSlots();
       alert(`Slot ${slot.slotId} has been successfully checked out and is now available.`);
     }

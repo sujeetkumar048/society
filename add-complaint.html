@@ -332,28 +332,9 @@
 
 <script>
   // Auth control
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (!localStorage.getItem('loggedOutFlag')) {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      window.location.href = 'profile.html';
-    }
+    window.location.href = 'profile.html';
   }
 
   let selectedCategory = null;

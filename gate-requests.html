@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate Requests — SR Gold Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B2420;
+    --paper: #F1F4EF;
+    --card: #FFFFFF;
+    --forest: #1F4D3D;
+    --forest-dark: #153529;
+    --marigold: #D9A62E;
+    --marigold-soft: #F4E4BC;
+    --terracotta: #C1503D;
+    --sky: #3E7CB1;
+    --line: #DDE3DA;
+    --muted: #6B7A70;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: var(--paper);
+    position: relative;
+    padding-bottom: 92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color: #fff;
+    padding: 22px 20px 34px;
+    border-radius: 0 0 28px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 160px; height: 160px;
+    border: 1px dashed rgba(255,255,255,.18);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    padding: 20px 16px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--forest-dark);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  
+  /* ===== BUTTONS ===== */
+  .btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--forest);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--forest-dark);
+  }
+  .btn-danger {
+    background: var(--terracotta);
+    color: #fff;
+  }
+  .btn-danger:hover {
+    background: #a64232;
+  }
+  
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    transition: stroke 0.2s;
+  }
+  .nav-item.active {
+    color: var(--forest);
+  }
+
+  .visitor-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 12.5px;
+  }
+  .visitor-meta-grid div {
+    background: var(--paper);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .visitor-meta-grid span {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <a href="index.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <div class="page-title">Gate Request Panel</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="mainContainer">
+    <!-- Will be rendered dynamically -->
+    <div class="empty-state">
+      <div class="empty-icon">⏳</div>
+      <h3>Checking for gate requests...</h3>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+</div>
+
+<!-- 🔥 Firebase SDK (Compat) 🔥 -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+  let currentUser = null;
+  let gateRequests = [];
+  let isListening = false;
+
+  // Authentication check
+  if (typeof checkSession === 'function') {
+    checkSession();
+  }
+  currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+  function initGateRequestsPage() {
+    if (!currentUser) {
+      window.location.href = 'profile.html';
+      return;
+    }
+
+    // Set active link in bottom-nav
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+      if (item.href.includes('gate-requests')) item.classList.add('active');
+    });
+
+    loadGateRequests();
+  }
+
+  function loadGateRequests() {
+    if (typeof fbListen === 'function' && !isListening) {
+      isListening = true;
+      fbListen('society_pending_visitor_approvals', (data) => {
+        gateRequests = data || [];
+        renderRequestsUI();
+      });
+    } else if (!isListening) {
+      gateRequests = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+      renderRequestsUI();
+      
+      // Local polling fallback
+      setInterval(() => {
+        gateRequests = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+        renderRequestsUI();
+      }, 2000);
+    }
+  }
+
+  function renderRequestsUI() {
+    const container = document.getElementById('mainContainer');
+    if (!container) return;
+
+    const normalise = s => String(s).replace(/flat\s*/i, '').trim();
+    const myFlat = normalise(currentUser.flat || '');
+
+    // Get pending gate requests targeting our flat
+    const myPending = gateRequests.filter(req => 
+      normalise(req.flatNo) === myFlat && req.status === 'Pending'
+    );
+
+    if (myPending.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="background:#fff; border-radius:18px; border:1px solid var(--line); padding:50px 20px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <div class="empty-icon" style="font-size:52px; margin-bottom:15px;">🛡️</div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--forest-dark); margin-bottom:8px;">No Pending Entrance Alerts</div>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5; max-width:280px; margin:0 auto;">All visitor gate request cards are processed. You are fully up to date!</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    myPending.forEach(req => {
+      const visitorPhoto = req.photo || `
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" style="width:100%; height:100%; padding:14px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      `;
+
+      html += `
+        <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 8px 30px rgba(31,77,61,0.15);">
+          <div class="card-title" style="color:var(--forest-dark); border-bottom: 1px solid var(--line); padding-bottom:10px; font-size:15px;">
+            🔔 Gate Request: Approve Entrance?
+          </div>
+
+          <div style="display:flex; gap:16px; margin:16px 0; align-items:center; background:var(--paper); padding:14px; border-radius:12px; border:1px solid var(--line);">
+            <div style="width:74px; height:74px; border-radius:10px; overflow:hidden; background:#2c3e50; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              ${visitorPhoto}
+            </div>
+            <div style="flex:1;">
+              <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; color:var(--forest-dark);">${req.visitorName}</div>
+              <div style="font-size:12px; color:var(--forest); font-weight:600; margin-top:4px;">🔑 Purpose: ${req.purpose}</div>
+              <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Count: ${req.count} Person(s)</div>
+            </div>
+          </div>
+
+          <div class="visitor-meta-grid">
+            <div>
+              <span>Vehicle Info</span>
+              <strong>${req.vehicle || 'No Vehicle'}</strong>
+            </div>
+            <div>
+              <span>Arrival Time</span>
+              <strong>${req.timestamp.split(' · ')[1] || 'Just now'}</strong>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:20px;">
+            <button onclick="approveGateRequest('${req.id}', '${req.visitorName}')" class="btn btn-primary" style="flex:1;">
+              ✅ Approve Entry
+            </button>
+            <button onclick="rejectGateRequest('${req.id}', '${req.visitorName}')" class="btn btn-danger" style="flex:1;">
+              ❌ Decline Entry
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  window.approveGateRequest = function(reqId, visitorName) {
+    const idx = gateRequests.findIndex(r => r.id === reqId);
+    if (idx === -1) return;
+
+    gateRequests[idx].status = 'Approved';
+
+    // Fetch original visitor entry list
+    const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
+    const target = gateRequests[idx];
+    
+    // Add visitor to inside list
+    const newVisitorRecord = {
+      name: target.visitorName,
+      details: `${target.purpose} · Flat ${target.flatNo} · Entered ${target.timestamp}`,
+      status: 'Inside',
+      type: 'Guest',
+      photo: target.photo,
+      exitTime: ''
+    };
+    visitors.unshift(newVisitorRecord);
+    localStorage.setItem('society_visitors', JSON.stringify(visitors));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_visitor_approvals', gateRequests)
+        .then(() => {
+          fbSet('society_visitors', visitors);
+          alert(`Success! Entry request for ${visitorName} has been APPROVED.`);
+          renderRequestsUI();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error approving request.');
+        });
+    } else {
+      localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(gateRequests));
+      alert(`Success! Entry request for ${visitorName} has been APPROVED.`);
+      renderRequestsUI();
+    }
+  };
+
+  window.rejectGateRequest = function(reqId, visitorName) {
+    if (!confirm(`Are you sure you want to decline entry for ${visitorName}?`)) return;
+    const idx = gateRequests.findIndex(r => r.id === reqId);
+    if (idx === -1) return;
+
+    gateRequests[idx].status = 'Rejected';
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_visitor_approvals', gateRequests)
+        .then(() => {
+          alert(`Entry request for ${visitorName} has been DECLINED.`);
+          renderRequestsUI();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error rejecting request.');
+        });
+    } else {
+      localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(gateRequests));
+      alert(`Entry request for ${visitorName} has been DECLINED.`);
+      renderRequestsUI();
+    }
+  };
+
+  initGateRequestsPage();
+</script>
+</body>
+</html>

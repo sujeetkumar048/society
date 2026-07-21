@@ -695,6 +695,7 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- ═══════════════════════════════════ -->
@@ -852,6 +853,7 @@
         <!-- Filled dynamically -->
       </div>
     </div>
+
 
     <div class="add-user-btn" onclick="openModal('addUserModal')" style="display:none;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1145,70 +1147,9 @@
 </div>
 
 <script>
-  // Initial state helper
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    societyName: "Surakshit Society",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: {
-      showPhone: true,
-      showEmail: false,
-      allowVisitors: true,
-      profileVisible: true
-    },
-    notifications: {
-      maintenance: true,
-      visitor: true,
-      notice: true,
-      complaint: true,
-      chat: true,
-      payment: true
-    }
-  };
 
-  const secondAdmin = {
-    name: "Admin User",
-    phone: "+91 99999 88888",
-    email: "admin@society.com",
-    role: "Super Admin",
-    societyName: "Surakshit Society",
-    tower: "Tower B",
-    flat: "101",
-    memberSince: "Jan 2024",
-    flatType: "2 BHK",
-    password: "123456",
-    privacy: {
-      showPhone: true,
-      showEmail: true,
-      allowVisitors: true,
-      profileVisible: true
-    },
-    notifications: {
-      maintenance: true,
-      visitor: true,
-      notice: true,
-      complaint: true,
-      chat: true,
-      payment: true
-    }
-  };
-
-  // Ensure default users have Approved status
-  defaultUser.status = "Approved";
-  secondAdmin.status = "Approved";
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser && !localStorage.getItem('loggedOutFlag')) {
-    currentUser = defaultUser;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-  }
   let users = [];
   let isListeningUsers = false;
 
@@ -1218,38 +1159,11 @@
         isListeningUsers = true;
         fbListen('society_users', (data) => {
           users = data || [];
-          if (users.length === 0) {
-            users = [defaultUser, secondAdmin];
-            fbSet('society_users', users);
-          }
-          // Make sure default users are always present
-          let changed = false;
-          if (!users.some(u => u.email === defaultUser.email)) {
-            users.push(defaultUser);
-            changed = true;
-          }
-          if (!users.some(u => u.email === secondAdmin.email)) {
-            users.push(secondAdmin);
-            changed = true;
-          }
-          
-          // Ensure default admins are marked Approved
-          users.forEach(u => {
-            if ((u.email === defaultUser.email || u.email === secondAdmin.email) && u.status !== 'Approved') {
-              u.status = 'Approved';
-              changed = true;
-            }
-          });
-
-          if (changed) {
-            fbSet('society_users', users);
-          }
-          
           updateProfileUI();
         });
       }
     } else {
-      users = JSON.parse(localStorage.getItem('society_users')) || [defaultUser, secondAdmin];
+      users = JSON.parse(localStorage.getItem('society_users')) || [];
       updateProfileUI();
     }
   }
@@ -1552,20 +1466,24 @@
     const role = document.getElementById('regRole').value;
     const adminEmail = document.getElementById('regAdminEmail').value.trim().toLowerCase();
 
-    if (!validateRegSociety() || !validateRegName() || !validateRegPhone() || !validateRegEmail() || !password || !validateRegFlat()) {
+    // Field Validations
+    if (!validateRegSociety() || !validateRegName() || !validateRegPhone() || !validateRegEmail() || !password) {
       showToast('Please fix validation errors before registering', 'error');
       return;
     }
-
-    if (!adminEmail || !adminEmail.includes('@')) {
-      showToast('Please enter a valid Admin Email ID for approval', 'error');
+    if (!validateRegFlat()) {
+      showToast('Please specify your Flat No.', 'error');
       return;
     }
 
+    // Check if email or phone already exists
     if (users.some(u => u.email === email || u.phone === phone)) {
       showToast('A profile with this email or phone already exists.', 'error');
       return;
     }
+
+    // Check if they are the first user for this society name
+    const isFirstUserOfThisSociety = !users.some(u => u.societyName.toLowerCase() === societyName.toLowerCase());
 
     const newUser = {
       societyName,
@@ -1575,9 +1493,9 @@
       password,
       tower,
       flat,
-      role,
-      adminEmail, // Admin assigned to approve this registration
-      status: "Pending", // Requires Super Admin / Committee approval
+      role: isFirstUserOfThisSociety ? "Super Admin" : role,
+      adminEmail: isFirstUserOfThisSociety ? email.toLowerCase() : adminEmail,
+      status: isFirstUserOfThisSociety ? "Approved" : "Pending",
       memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       flatType: "3 BHK",
       privacy: {
@@ -1600,27 +1518,40 @@
     
     if (typeof fbSet === 'function') {
       fbSet('society_users', users).then(() => {
-        if (typeof pushNotification === 'function') {
-          pushNotification(`New signup: ${name} (Flat ${flat}) requested approval from Admin: ${adminEmail}`, "notice");
+        if (isFirstUserOfThisSociety) {
+          showToast('Registration successful! Logging you in...', 'success');
+          currentUser = newUser;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        } else {
+          if (typeof pushNotification === 'function') {
+            pushNotification(`New signup: ${name} (Flat ${flat}) requested approval for society ${societyName}`, "notice");
+          }
+          showToast('Registration submitted! Pending administrator approval.', 'success');
+          setTimeout(() => {
+            toggleAuthTab('login');
+          }, 1500);
         }
+      });
+    } else {
+      localStorage.setItem('society_users', JSON.stringify(users));
+      localStorage.setItem('users', JSON.stringify(users));
+      if (isFirstUserOfThisSociety) {
+        showToast('Registration successful! Logging you in...', 'success');
+        currentUser = newUser;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      } else {
         showToast('Registration submitted! Pending administrator approval.', 'success');
         setTimeout(() => {
           toggleAuthTab('login');
           document.getElementById('loginId').value = email;
-          document.getElementById('loginPassword').value = '';
-          document.getElementById('loginPasswordFeedback').textContent = '';
         }, 1500);
-      });
-    } else {
-      localStorage.setItem('society_users', JSON.stringify(users));
-      if (typeof pushNotification === 'function') {
-        pushNotification(`New signup: ${name} (Flat ${flat}) requested approval from Admin: ${adminEmail}`, "notice");
       }
-      showToast('Registration submitted! Pending administrator approval.', 'success');
-      setTimeout(() => {
-        toggleAuthTab('login');
-        document.getElementById('loginId').value = email;
-      }, 1500);
     }
   }
 
@@ -1674,7 +1605,7 @@
       detailValues[1].textContent = currentUser.email;
       detailValues[2].textContent = currentUser.memberSince || "Jul 2026";
       detailValues[3].textContent = currentUser.flatType || "3 BHK";
-
+      
       // Show/hide "Add New User" button based on role
       if (currentUser.role === 'Super Admin') {
         addUserBtn.style.display = 'flex';
@@ -1754,17 +1685,30 @@
       users[idx].name = name;
       users[idx].phone = phone;
       users[idx].email = email;
-      localStorage.setItem('users', JSON.stringify(users));
     }
 
-    currentUser.name = name;
-    currentUser.phone = phone;
-    currentUser.email = email;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        finishProfileSave();
+      }).catch(err => {
+        console.error(err);
+        alert('Error saving changes to database.');
+      });
+    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('society_users', JSON.stringify(users));
+      finishProfileSave();
+    }
 
-    alert('Profile updated successfully!');
-    closeModal('editProfileModal');
-    updateProfileUI();
+    function finishProfileSave() {
+      currentUser.name = name;
+      currentUser.phone = phone;
+      currentUser.email = email;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      alert('Profile updated successfully!');
+      closeModal('editProfileModal');
+      updateProfileUI();
+    }
   }
 
   // Change Password
@@ -2273,6 +2217,7 @@
       list.appendChild(row);
     });
   }
+
 
   window.approveUser = function(email) {
     const idx = users.findIndex(u => u.email === email);

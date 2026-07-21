@@ -414,28 +414,9 @@
 
 <script>
   // Auth control
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (!localStorage.getItem('loggedOutFlag')) {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      window.location.href = 'profile.html';
-    }
+    window.location.href = 'profile.html';
   }
 
   function openModal(modalId) {
@@ -570,6 +551,13 @@
 
     notices.unshift(newNotice);
     
+    // Log the notice creation
+    logAction('notice_created', { 
+      title: title, 
+      type: type, 
+      author: currentUser.role || 'Resident' 
+    }, 'notices');
+    
     if (typeof fbSet === 'function') {
       fbSet('society_notices', notices).then(() => {
         if (typeof pushNotification === 'function') {
@@ -671,6 +659,35 @@
     
     deletionLogs.unshift(logEntry);
     localStorage.setItem('deletion_logs', JSON.stringify(deletionLogs));
+  }
+
+  function logAction(actionType, details, category = 'general') {
+    const actionLogs = JSON.parse(localStorage.getItem('action_logs') || '[]');
+    
+    const logEntry = {
+      id: Date.now(),
+      actionType: actionType,
+      category: category,
+      details: details,
+      performedBy: currentUser.name,
+      performedByRole: currentUser.role,
+      performedByFlat: currentUser.flat,
+      performedByEmail: currentUser.email,
+      timestamp: new Date().toISOString(),
+      timestampFormatted: new Date().toLocaleString('en-IN', { 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      })
+    };
+    
+    actionLogs.unshift(logEntry);
+    
+    // Keep only last 1000 logs to prevent storage issues
+    if (actionLogs.length > 1000) {
+      actionLogs = actionLogs.slice(0, 1000);
+    }
+    
+    localStorage.setItem('action_logs', JSON.stringify(actionLogs));
   }
 
   // Close modals clicking outside

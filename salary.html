@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -496,10 +496,58 @@
 </div>
 
 <script>
+
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { role: 'Super Admin' };
+
   let employees = [];
   let punches = [];
   let dailyTasks = {};
   let uploadedTaskPhotoBase64 = "";
+
+  window.deleteEmployee = function(idx) {
+    if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
+    employees.splice(idx, 1);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_employees', employees)
+        .then(() => {
+          alert('Employee deleted successfully!');
+          renderEmployees();
+          populateEmployeeDropdowns();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting employee.');
+        });
+    } else {
+      localStorage.setItem('society_employees', JSON.stringify(employees));
+      alert('Employee deleted successfully!');
+      renderEmployees();
+      populateEmployeeDropdowns();
+    }
+  };
+
+  window.deletePunch = function(idx) {
+    if (!confirm('Are you sure you want to delete this attendance punch record?')) return;
+    punches.splice(idx, 1);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_punches', punches)
+        .then(() => {
+          alert('Punch record deleted successfully!');
+          renderPunchesLog();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting punch record.');
+        });
+    } else {
+      localStorage.setItem('society_punches', JSON.stringify(punches));
+      alert('Punch record deleted successfully!');
+      renderPunchesLog();
+    }
+  };
 
   function initSalaryDesk() {
     employees = JSON.parse(localStorage.getItem('society_employees'));
@@ -664,7 +712,20 @@
     const tbody = document.getElementById('punchLogsList');
     tbody.innerHTML = '';
 
-    punches.forEach(p => {
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const theadRow = tbody.parentNode.querySelector('thead tr');
+    if (theadRow) {
+      theadRow.innerHTML = `
+        <th style="padding:8px 4px; text-align:left;">Employee</th>
+        <th style="padding:8px 4px; text-align:left;">Date</th>
+        <th style="padding:8px 4px; text-align:left;">In</th>
+        <th style="padding:8px 4px; text-align:left;">Out</th>
+        <th style="padding:8px 4px; text-align:right;">Hours</th>
+        ${isAdmin ? `<th style="padding:8px 4px; text-align:right;">Action</th>` : ''}
+      `;
+    }
+
+    punches.forEach((p, idx) => {
       const tr = document.createElement('tr');
       tr.style.borderBottom = '1px solid var(--paper)';
       tr.innerHTML = `
@@ -672,7 +733,8 @@
         <td style="padding:10px 4px; color:var(--muted);">${p.date}</td>
         <td style="padding:10px 4px;">${p.inTime}</td>
         <td style="padding:10px 4px;">${p.outTime || '<span style="color:var(--forest); font-weight:600; font-size:10px;">Working</span>'}</td>
-        <td style="padding:10px 4px; text-align:right; font-family:\'IBM Plex Mono\',monospace; font-weight:600;">${p.hours > 0 ? `${p.hours} hrs` : '-'}</td>
+        <td style="padding:10px 4px; text-align:right; font-family:'IBM Plex Mono',monospace; font-weight:600;">${p.hours > 0 ? `${p.hours} hrs` : '-'}</td>
+        ${isAdmin ? `<td style="padding:10px 4px; text-align:right;"><button onclick="deletePunch(${idx})" style="background:none; border:none; color:var(--terracotta); font-weight:700; font-size:11px; cursor:pointer; padding:0; line-height:1.2;">Delete</button></td>` : ''}
       `;
       tbody.appendChild(tr);
     });
@@ -826,6 +888,8 @@
     listContainer.innerHTML = '';
     document.getElementById('staffCount').textContent = `${employees.length} active`;
 
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
     employees.forEach((emp, idx) => {
       const isPaid = emp.payoutStatus === 'Paid';
       const actionBtn = isPaid 
@@ -849,11 +913,12 @@
           <div>Overtime: <span>${emp.overtime} hrs</span></div>
           <div>Status: <span style="color:${isPaid ? 'var(--forest)' : 'var(--terracotta)'}; font-weight:700;">${emp.payoutStatus}</span></div>
         </div>
-        <div class="action-row">
+        <div class="action-row" style="gap:8px;">
           <button class="btn btn-outline" style="border-color:var(--line); color:var(--muted); flex:1;" onclick="openAdjustModal(${idx})" ${isPaid ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Adjust Stats</button>
           <div style="flex:1;">
             ${actionBtn}
           </div>
+          ${isAdmin ? `<button class="btn btn-outline" style="border-color:var(--terracotta); color:var(--terracotta); font-weight:600;" onclick="deleteEmployee(${idx})">Delete</button>` : ''}
         </div>
       `;
       listContainer.appendChild(card);

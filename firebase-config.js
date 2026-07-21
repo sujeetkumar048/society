@@ -51,7 +51,10 @@ const DB_PATHS = {
   'chat_messages'                      : '/chat',
   'society_documents'                  : '/documents',
   'society_gate_log'                   : '/gate_log',
-  'society_notifications'             : '/notifications',
+  'society_notifications'              : '/notifications',
+  'society_services'                   : '/local_services',
+  'society_meter_readings'             : '/meter_readings',
+  'society_gate_requests'              : '/gate_requests',
 };
 
 // ─── Core Helper: fbDB ──────────────────────────────────────────────────────
@@ -220,7 +223,7 @@ db.ref('.info/connected').on('value', snap => {
     badge.textContent = window._fbOnline ? '🟢 Live' : '🔴 Offline';
     badge.style.color  = window._fbOnline ? '#1F4D3D' : '#D36B53';
   }
-// ─── Global Notification Helper ──────────────────────────────────────────────
+});
 window.pushNotification = function(title, type) {
   if (typeof fbGet === 'function') {
     fbGet('society_notifications').then(list => {

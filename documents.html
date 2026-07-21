@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -434,6 +434,10 @@
 </div>
 
 <script>
+  // Auth guard
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) { window.location.href = 'profile.html'; }
+
   function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
   }

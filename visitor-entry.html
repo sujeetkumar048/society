@@ -585,18 +585,25 @@
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn btn-primary" onclick="approveResidentRequest()" style="height: 48px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><polyline points="20 6 9 17 4 12"/></svg>
-          Approve & Open Gate
+      <!-- DYNAMIC STATUS CONTAINER -->
+      <div id="guardApprovalStatusBox" style="background:#fffcf0; border:1px solid var(--marigold); border-radius:12px; padding:16px; font-size:13px; text-align:center; color:var(--muted); font-weight:600; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; margin-bottom:15px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="width:20px; height:20px; border:3px solid var(--line); border-top-color:var(--marigold); border-radius:50%; animation: spin 1.5s linear infinite;"></div>
+        <style>
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+        <span style="font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-size:13.5px;">Waiting for Resident's Approval...</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn" onclick="cancelGateApprovalRequest()" style="background: var(--paper); color: var(--muted); border: 1px solid var(--line); height: 42px; padding: 0; display:flex; align-items:center; justify-content:center; font-size:12.5px;">
+          Cancel Gate Request
         </button>
-        <button class="btn" onclick="rejectResidentRequest()" style="background: var(--terracotta); color: white; height: 48px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Reject Entry
-        </button>
-        <button class="btn" onclick="callResidentGuard()" style="background: var(--paper); color: var(--forest-dark); border: 1px solid var(--line); height: 44px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <button class="btn" onclick="callResidentGuard()" style="background: var(--paper); color: var(--forest-dark); border: 1px solid var(--line); height: 42px; padding: 0; display:flex; align-items:center; justify-content:center; gap:8px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           Call Security Guard
+        </button>
+        <button onclick="guardOverrideApprove()" style="background: none; border: none; color: var(--muted); text-decoration: underline; font-size: 11px; cursor: pointer; text-align: center; margin-top: 10px; font-weight: 500;">
+          Guard Override (Simulate Resident Approval)
         </button>
       </div>
     </div>
@@ -618,28 +625,9 @@
 
 <script>
   // Auth control
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (!localStorage.getItem('loggedOutFlag')) {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      window.location.href = 'profile.html';
-    }
+    window.location.href = 'profile.html';
   }
 
   let selectedVisTypeVal = 'Guest';
@@ -999,11 +987,16 @@
     list.forEach((v, idx) => {
       const isInside = v.status === 'Inside';
       const statusClass = isInside ? 'status-in' : 'status-out';
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
       
       // Left exit button or text label
-      const actionHtml = isInside 
+      let actionHtml = isInside 
         ? `<button class="btn" onclick="recordExit(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin:0; background:var(--terracotta); color:white; border-radius:8px;">Record Exit</button>`
         : `<div class="visitor-status ${statusClass}">${v.status}</div>`;
+
+      if (isAdmin) {
+        actionHtml += `<button onclick="deleteVisitor(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin-left:6px; background:#c0392b; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>`;
+      }
 
       const photoHtml = v.photo ? `<div style="width:36px; height:36px; border-radius:6px; overflow:hidden; flex-shrink:0; background:#2c3e50;">${v.photo}</div>` : '';
 
@@ -1018,13 +1011,34 @@
           <div class="visitor-name" style="font-weight:600; color:var(--forest-dark);">${v.name}</div>
           <div class="visitor-details">${v.details}</div>
         </div>
-        <div>
+        <div style="display:flex; align-items:center;">
           ${actionHtml}
         </div>
       `;
       listContainer.appendChild(visitorItem);
     });
   }
+
+  window.deleteVisitor = function(idx) {
+    if (!confirm('Are you sure you want to delete this visitor entry?')) return;
+    visitors.splice(idx, 1);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_visitors', visitors)
+        .then(() => {
+          alert('Visitor entry deleted successfully!');
+          renderVisitors();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error deleting visitor entry from database.');
+        });
+    } else {
+      localStorage.setItem('society_visitors', JSON.stringify(visitors));
+      alert('Visitor entry deleted successfully!');
+      renderVisitors();
+    }
+  };
 
   // Request Resident Approval
   function requestEntryApproval() {
@@ -1055,7 +1069,7 @@
     function showApprovalDialog() {
       // Lookup flat owner — check Firebase-cached society_users first
       const usersList = JSON.parse(localStorage.getItem('society_users')) ||
-                        JSON.parse(localStorage.getItem('users')) || [defaultUser];
+                        JSON.parse(localStorage.getItem('users')) || [];
 
       // Match flat number – support "302", "Flat 302", etc.
       const normalise = s => String(s).replace(/flat\s*/i, '').trim();
@@ -1111,11 +1125,89 @@
 
       // Show resident approval modal overlay
       document.getElementById('residentApprovalModal').classList.add('active');
+
+      // Start waiting listener
+      startGateRequestStatusListener(pendingEntry.id);
     }
   }
 
-  // Action: Approve request (triggered by flat owner)
+  let gateApprovalTimer = null;
+  let activeGateRequestId = null;
+
+  function startGateRequestStatusListener(reqId) {
+    activeGateRequestId = reqId;
+    if (gateApprovalTimer) clearInterval(gateApprovalTimer);
+
+    // Reset status box UI to loading
+    const statusBox = document.getElementById('guardApprovalStatusBox');
+    statusBox.innerHTML = `
+      <div style="width:20px; height:20px; border:3px solid var(--line); border-top-color:var(--marigold); border-radius:50%; animation: spin 1.5s linear infinite;"></div>
+      <span style="font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-size:13.5px;">Waiting for Resident's Approval...</span>
+    `;
+
+    const checkStatus = () => {
+      // Fetch fresh approvals from Local Storage
+      const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+      const target = approvals.find(a => a.id === reqId);
+      if (target) {
+        if (target.status === 'Approved') {
+          clearInterval(gateApprovalTimer);
+          statusBox.innerHTML = `<span style="color:var(--forest); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;">✅ APPROVED BY OWNER!</span>`;
+          setTimeout(() => {
+            approveResidentRequest(); // trigger gate open simulation
+          }, 1000);
+        } else if (target.status === 'Rejected') {
+          clearInterval(gateApprovalTimer);
+          statusBox.innerHTML = `<span style="color:var(--terracotta); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;">❌ REJECTED BY OWNER!</span>`;
+          setTimeout(() => {
+            document.getElementById('residentApprovalModal').classList.remove('active');
+            alert(`Visitor request was declined by Flat ${target.flatNo} owner (${target.ownerName}).`);
+          }, 1500);
+        }
+      }
+    };
+
+    gateApprovalTimer = setInterval(checkStatus, 1500);
+  }
+
+  window.cancelGateApprovalRequest = function() {
+    if (gateApprovalTimer) clearInterval(gateApprovalTimer);
+    document.getElementById('residentApprovalModal').classList.remove('active');
+    
+    // Set status to Cancelled
+    if (activeGateRequestId) {
+      const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+      const idx = approvals.findIndex(a => a.id === activeGateRequestId);
+      if (idx !== -1) {
+        approvals[idx].status = 'Cancelled';
+        localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+        if (typeof fbSet === 'function') fbSet('society_pending_visitor_approvals', approvals);
+      }
+    }
+    alert('Entry request cancelled by guard.');
+  };
+
+  window.guardOverrideApprove = function() {
+    if (!confirm('Override: Approve this visitor entry on behalf of the resident?')) return;
+    if (gateApprovalTimer) clearInterval(gateApprovalTimer);
+
+    if (activeGateRequestId) {
+      const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+      const idx = approvals.findIndex(a => a.id === activeGateRequestId);
+      if (idx !== -1) {
+        approvals[idx].status = 'Approved';
+        localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+        if (typeof fbSet === 'function') fbSet('society_pending_visitor_approvals', approvals);
+      }
+    }
+    
+    approveResidentRequest();
+  };
+
+  // Action: Approve request (triggered by flat owner or guard override)
   function approveResidentRequest() {
+    if (gateApprovalTimer) clearInterval(gateApprovalTimer);
+    
     // Close approval dialog
     document.getElementById('residentApprovalModal').classList.remove('active');
 
@@ -1160,8 +1252,13 @@
       };
 
       visitors.unshift(newVisObj);
-      // Write to Firebase
-      fbPush('society_visitors', newVisObj);
+      
+      // Update Firebase
+      if (typeof fbPush === 'function') {
+        fbPush('society_visitors', newVisObj);
+      } else {
+        localStorage.setItem('society_visitors', JSON.stringify(visitors));
+      }
       renderVisitors();
 
       // Reset form
@@ -1178,11 +1275,6 @@
       // Close gate overlay
       gateOverlay.classList.remove('active');
     }, 3200);
-  }
-
-  function rejectResidentRequest() {
-    document.getElementById('residentApprovalModal').classList.remove('active');
-    alert('Entry request rejected by Flat Owner. Guard console notified.');
   }
 
   function callResidentGuard() {

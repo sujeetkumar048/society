@@ -515,45 +515,75 @@
 
   <!-- QUICK ACTIONS -->
   <div class="section">
-    <div class="section-title">Quick Actions <span class="eyebrow">9 tools</span></div>
+    <div class="section-title">Quick Actions <span class="eyebrow">13 tools</span></div>
     <div class="actions-grid">
-      <a href="pay-maintenance.html" class="action">
+      <!-- 1. Pay Maintenance -->
+      <a href="pay-maintenance.html" class="action" id="qa_tool_pay_maintenance">
         <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
         <span>Pay Maintenance</span>
       </a>
-      <a href="add-complaint.html" class="action">
-        <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-        <span>Add Complaint</span>
-      </a>
-      <a href="visitor-entry.html" class="action">
-        <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <span>Visitor Entry</span>
-      </a>
-      <a href="notices.html" class="action">
-        <div class="action-icon bg-marigold"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-        <span>Notice Board</span>
-      </a>
-      <a href="chat.html" class="action">
-        <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-        <span>Chat</span>
-      </a>
-      <a href="documents.html" class="action">
-        <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <span>Documents</span>
-      </a>
-      <a href="accounting.html" class="action">
+      <!-- 2. Accounting -->
+      <a href="accounting.html" class="action" id="qa_tool_accounting">
         <div class="action-icon bg-marigold"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
         <span>Accounting</span>
       </a>
-      <a href="salary.html" class="action">
+      <!-- 3. Salary Pay -->
+      <a href="salary.html" class="action" id="qa_tool_salary_pay">
         <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M14.5 9.5 12 12l-2.5-2.5"/></svg></div>
         <span>Salary Pay</span>
       </a>
-      <a href="#" class="action" onclick="openModal('usersModal'); return false;">
+      <!-- 4. All Users -->
+      <a href="#" class="action" onclick="openModal('usersModal'); return false;" id="qa_tool_all_users">
         <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <span>All Users</span>
       </a>
+      <!-- 5. Add Complaint -->
+      <a href="add-complaint.html" class="action" id="qa_tool_add_complaint">
+        <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <span>Add Complaint</span>
+      </a>
+      <!-- 6. Notice Board -->
+      <a href="notices.html" class="action" id="qa_tool_notice_board">
+        <div class="action-icon bg-marigold"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <span>Notice Board</span>
+      </a>
+      <!-- 7. Visitor Entry -->
+      <a href="visitor-entry.html" class="action" id="qa_tool_visitor_entry">
+        <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <span>Visitor Entry</span>
+      </a>
+      <!-- 8. Gate Request -->
+      <a href="gate-requests.html" class="action" id="qa_tool_gate_requests">
+        <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <span>Gate Request</span>
+      </a>
+      <!-- 9. Flat Scores -->
+      <a href="#" class="action" onclick="openModal('memberScoresModal'); return false;" id="qa_tool_member_scores">
+        <div class="action-icon bg-marigold"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
+        <span>Flat Scores</span>
+      </a>
+      <!-- 10. Documents -->
+      <a href="documents.html" class="action" id="qa_tool_documents">
+        <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <span>Documents</span>
+      </a>
+      <!-- 11. Meter Readings -->
+      <a href="#" class="action" onclick="openModal('meterReadingsModal'); return false;" id="qa_tool_meter_readings">
+        <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="16" x2="18" y2="16"/><circle cx="12" cy="7" r="2"/></svg></div>
+        <span>Meter Readings</span>
+      </a>
+      <!-- 12. Chat -->
+      <a href="chat.html" class="action" id="qa_tool_chat">
+        <div class="action-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <span>Chat</span>
+      </a>
+      <!-- 13. Local Services -->
+      <a href="#" class="action" onclick="openModal('localServicesModal'); return false;" id="qa_tool_local_services">
+        <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <span>Local Services</span>
+      </a>
     </div>
+
   </div>
 
   <!-- ACTIVITIES -->
@@ -591,49 +621,17 @@
     </div>
   </div>
 
-  <!-- USER ROLES -->
-  <div class="section">
-    <div class="section-title">User Roles <span class="eyebrow">2 active</span></div>
-    <div class="role-card">
-      <div class="role-head">
-        <div class="stamp role-stamp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg></div>
-        <div>
-          <div class="role-name">Super Admin</div>
-          <div class="role-desc">Entire society control</div>
-        </div>
-      </div>
-      <div class="role-chips">
-        <span class="chip">Society Setup</span>
-        <span class="chip">Tower</span>
-        <span class="chip">Flat</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Staff Accounts</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Reports</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Approvals</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Expenses</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Salary</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Backup</span>
-        <span class="role-toggle-btn" onclick="toggleRoleChips(this)" data-expanded="false" style="font-size:11px; color:var(--forest); cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; padding:6px 12px; background:rgba(31,77,61,0.08); border-radius:20px;">+ 6 more</span>
+
+  <!-- GATE ALERT FLOATING BANNER -->
+  <div id="gateAlertBanner" style="position:fixed; bottom:84px; left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:448px; background:linear-gradient(135deg, var(--terracotta), #a64232); color:white; padding:14px 18px; border-radius:16px; display:none; z-index:999; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(193,80,61,0.25); border:1px solid rgba(255,255,255,0.2);">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:20px;">🚨</span>
+      <div style="text-align:left;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; letter-spacing:0.3px;">Gate Alert: Visitor Request!</div>
+        <div id="gateAlertBannerText" style="font-size:11.5px; opacity:0.9; margin-top:2px;">A guest is requesting entrance approval.</div>
       </div>
     </div>
-    
-    <div class="role-card" style="margin-top:12px;">
-      <div class="role-head">
-        <div class="stamp role-stamp" style="border-color:var(--sky); color:var(--sky);"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div>
-          <div class="role-name">Committee Members</div>
-          <div class="role-desc">Day-to-day society decisions</div>
-        </div>
-      </div>
-      <div class="role-chips">
-        <span class="chip">Approve Expenses</span>
-        <span class="chip">Approve Visitors</span>
-        <span class="chip">View Reports</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Add Notices</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Assign Work</span>
-        <span class="chip" data-collapsible="true" style="display:none;">Manage Complaints</span>
-        <span class="role-toggle-btn" onclick="toggleRoleChips(this)" data-expanded="false" style="font-size:11px; color:var(--forest); cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; padding:6px 12px; background:rgba(31,77,61,0.08); border-radius:20px;">+ 3 more</span>
-      </div>
-    </div>
+    <a href="gate-requests.html" style="background:white; color:var(--terracotta); border:none; border-radius:8px; padding:8px 14px; font-size:11.5px; font-weight:700; cursor:pointer; text-decoration:none; box-shadow:0 2px 6px rgba(0,0,0,0.1);">Review</a>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -715,48 +713,134 @@
     </div>
   </div>
 
+  <!-- LOCAL SERVICES DIRECTORY MODAL -->
+  <div class="modal-overlay" id="localServicesModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🛠️ Local Service Providers</div>
+        <div class="modal-close" onclick="closeModal('localServicesModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      
+
+      <!-- Render Container -->
+      <div id="localServicesContainer" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 4px; margin-bottom: 12px;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Admin Add Service Form (Hidden by default, shown for Admin users, placed in the bottom) -->
+      <div id="adminAddServiceContainer" style="display:none; background:rgba(31,77,61,0.04); border:1px dashed var(--forest); border-radius:14px; padding:12px; margin-top:12px; text-align:left;">
+        <div onclick="toggleAddServiceForm()" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:4px 0;">
+          <span>➕ Add Service Provider (Admin Only)</span>
+          <span id="addServiceFormToggleArrow" style="font-size: 11px;">▼</span>
+        </div>
+        
+        <div id="addServiceFormFields" style="display:none; flex-direction:column; gap:8px; margin-top:10px;">
+          <input type="text" id="addServiceName" placeholder="Provider Name (e.g. Ramesh Kumar)" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+          <input type="tel" id="addServicePhone" placeholder="Contact Number (10 Digits)" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px;">
+          
+          <div style="display:flex; gap:8px;">
+            <select id="addServiceCategory" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; background:white; font-family:'Space Grotesk',sans-serif; font-weight:600;">
+              <option value="Plumber">🪠 Plumber</option>
+              <option value="Carpenter">🪚 Carpenter</option>
+              <option value="Electrician">⚡ Electrician</option>
+              <option value="Others">🛠️ Others</option>
+            </select>
+            
+            <select id="addServiceRating" style="width:120px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; background:white; font-family:'Space Grotesk',sans-serif; font-weight:600;">
+              <option value="5.0">⭐⭐⭐⭐⭐ (5.0)</option>
+              <option value="4.5">⭐⭐⭐⭐. (4.5)</option>
+              <option value="4.0">⭐⭐⭐⭐ (4.0)</option>
+              <option value="3.5">⭐⭐⭐. (3.5)</option>
+              <option value="3.0">⭐⭐⭐ (3.0)</option>
+            </select>
+          </div>
+          
+          <button onclick="submitNewService()" style="background:var(--forest); color:white; border:none; padding:10px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; margin-top:4px; transition:background 0.2s;">
+            Submit Service Provider
+          </button>
+        </div>
+      </div>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('localServicesModal')" style="margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
+  <!-- MEMBER SCORES MODAL -->
+  <div class="modal-overlay" id="memberScoresModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🏆 Flat Resident Scores</div>
+        <div class="modal-close" onclick="closeModal('memberScoresModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.4; text-align:left;">
+        Scores are calculated automatically: <b>Base (80)</b> + Timely Payment (+10) + Resolved Complaint (+5) - Unpaid/Late Payment (-15) - Open Complaint (-10).
+      </div>
+      <div id="memberScoresContainer" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; text-align:left;">
+        <!-- Filled dynamically -->
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('memberScoresModal')" style="margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
+  <!-- METER READINGS MODAL -->
+  <div class="modal-overlay" id="meterReadingsModal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title">⚡ Meter Readings</div>
+        <div class="modal-close" onclick="closeModal('meterReadingsModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+
+      <!-- Readings List (top) -->
+      <div id="meterReadingsContainer" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:2px; margin-bottom:12px;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Add / Edit Form (bottom, collapsible, hidden by default) -->
+      <div style="background:rgba(31,77,61,0.04); border:1px dashed var(--forest); border-radius:12px; padding:12px; margin-top:4px;">
+        <div onclick="toggleMeterForm()" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:2px 0;">
+          <span>➕ Add / Edit Meter Reading</span>
+          <span id="meterFormArrow" style="font-size:11px;">▼</span>
+        </div>
+
+        <div id="meterFormFields" style="display:none; flex-direction:column; gap:8px; margin-top:10px;">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="mtrFlat" placeholder="Flat No (e.g. A-101)" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+            <input type="month" id="mtrMonth" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          </div>
+          <input type="number" id="mtrReading" placeholder="Reading (Units e.g. 1240)" min="0" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          
+          <!-- Photo Upload -->
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label for="mtrPhoto" style="flex:1; background:white; border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--forest-dark); cursor:pointer; display:flex; align-items:center; gap:6px;">
+              📷 Add Meter Photo
+              <input type="file" id="mtrPhoto" accept="image/*" capture="environment" style="display:none;" onchange="previewMeterPhoto(this)">
+            </label>
+            <div id="mtrPhotoPreview" style="width:48px; height:48px; border-radius:8px; border:1px solid var(--line); overflow:hidden; display:none; flex-shrink:0;">
+              <img id="mtrPhotoImg" src="" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+          </div>
+          <input type="hidden" id="mtrEditId" value="">
+          <button onclick="saveMeterReading()" style="background:var(--forest); color:white; border:none; padding:10px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer;">Save Reading</button>
+        </div>
+      </div>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('meterReadingsModal')" style="margin-top:14px;">Close</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
   // Dynamic state load & auth validation
-  const defaultUser = {
-    name: "Sujeet Sharma",
-    phone: "+91 98765 43210",
-    email: "sujeet@email.com",
-    role: "Super Admin",
-    societyName: "Surakshit Society",
-    tower: "Tower A",
-    flat: "201",
-    memberSince: "Jan 2024",
-    flatType: "3 BHK",
-    password: "password123",
-    privacy: { showPhone: true, showEmail: false, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
-  const secondAdmin = {
-    name: "Admin User",
-    phone: "+91 99999 88888",
-    email: "admin@society.com",
-    role: "Super Admin",
-    societyName: "Surakshit Society",
-    tower: "Tower B",
-    flat: "101",
-    memberSince: "Jan 2024",
-    flatType: "2 BHK",
-    password: "123456",
-    privacy: { showPhone: true, showEmail: true, allowVisitors: true, profileVisible: true },
-    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
-  };
-
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (!localStorage.getItem('loggedOutFlag')) {
-      currentUser = defaultUser;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      window.location.href = 'profile.html';
-    }
+    window.location.href = 'profile.html';
   }
 
   if (currentUser && currentUser.societyName) {
@@ -767,11 +851,526 @@
 
   function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
+    if (modalId === 'localServicesModal') {
+      initLocalServicesSync();
+    } else if (modalId === 'memberScoresModal') {
+      initMemberScores();
+    } else if (modalId === 'meterReadingsModal') {
+      initMeterReadings();
+    }
   }
 
   function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
   }
+
+  // Local Services Logic
+  let localServices = [];
+  let isListeningServices = false;
+
+  const defaultServices = [
+    { id: '1', name: 'Ramesh Kumar', phone: '+91 98765 43210', category: 'Plumber', rating: '4.8', reviews: 12 },
+    { id: '2', name: 'Suresh Singh', phone: '+91 99887 76655', category: 'Plumber', rating: '4.5', reviews: 8 },
+    { id: '3', name: 'Amit Verma', phone: '+91 91234 56789', category: 'Carpenter', rating: '4.9', reviews: 15 },
+    { id: '4', name: 'Vinod Sharma', phone: '+91 88776 65544', category: 'Carpenter', rating: '4.6', reviews: 10 },
+    { id: '5', name: 'Rajesh Gupta', phone: '+91 93456 78901', category: 'Electrician', rating: '4.7', reviews: 20 },
+    { id: '6', name: 'Anil Prasad', phone: '+91 87654 32109', category: 'Electrician', rating: '4.4', reviews: 7 }
+  ];
+
+  function initLocalServicesSync() {
+    // Show/hide admin add form
+    const addContainer = document.getElementById('adminAddServiceContainer');
+    if (addContainer) {
+      addContainer.style.display = (currentUser && currentUser.role === 'Super Admin') ? 'block' : 'none';
+    }
+
+    if (typeof fbListen === 'function') {
+      if (!isListeningServices) {
+        isListeningServices = true;
+        fbListen('society_services', (data) => {
+          localServices = (data && data.length > 0) ? data : defaultServices;
+          renderLocalServices();
+        });
+      }
+    } else {
+      const stored = localStorage.getItem('society_services');
+      localServices = stored ? JSON.parse(stored) : defaultServices;
+      renderLocalServices();
+    }
+  }
+
+  window.submitNewService = function() {
+    const name = document.getElementById('addServiceName').value.trim();
+    const phone = document.getElementById('addServicePhone').value.trim();
+    const category = document.getElementById('addServiceCategory').value;
+    const rating = document.getElementById('addServiceRating').value;
+
+    if (!name || !phone) {
+      alert('Please fill out Name and Contact Number');
+      return;
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone.replace(/[\s\-\+]/g, '').slice(-10))) {
+      alert('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    const newProvider = {
+      id: Date.now().toString(),
+      name,
+      phone: phone.startsWith('+91') ? phone : `+91 ${phone}`,
+      category,
+      rating,
+      reviews: Math.floor(1 + Math.random() * 5)
+    };
+
+    localServices.push(newProvider);
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_services', localServices).then(() => {
+        logAction('service_added', { serviceName: name, category: category, rating: rating }, 'local_services');
+        alert('Service Provider added successfully!');
+        resetAddServiceForm();
+      });
+    } else {
+      localStorage.setItem('society_services', JSON.stringify(localServices));
+      logAction('service_added', { serviceName: name, category: category, rating: rating }, 'local_services');
+      alert('Service Provider added successfully!');
+      resetAddServiceForm();
+      renderLocalServices();
+    }
+  };
+
+  function resetAddServiceForm() {
+    document.getElementById('addServiceName').value = '';
+    document.getElementById('addServicePhone').value = '';
+    document.getElementById('addServiceCategory').value = 'Plumber';
+    document.getElementById('addServiceRating').value = '5.0';
+  }
+
+  window.renderLocalServices = function() {
+    const container = document.getElementById('localServicesContainer');
+    if (!container) return;
+
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    
+    // Sort services by category then by name
+    const sortedServices = [...localServices].sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return a.name.localeCompare(b.name);
+    });
+
+    let html = '<div style="display:flex; flex-direction:column; gap:10px; padding:10px 0;">';
+    sortedServices.forEach(srv => {
+      const displayedPhone = isAdmin ? srv.phone : '+91 XXXXX XXXXX';
+      
+      // Category (Service Name) - Name - Contact - Review - Rating format
+      const rowText = `${srv.category} - ${srv.name} - ${displayedPhone} - ${srv.reviews} Reviews - ⭐ ${srv.rating}`;
+
+      html += `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; line-height:1.4; word-break:break-word; box-shadow: 0 2px 8px rgba(0,0,0,0.01); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="flex:1;">${rowText}</div>
+          ${isAdmin ? `<button onclick="deleteLocalService('${srv.id}')" style="background:var(--terracotta); color:white; border:none; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; flex-shrink:0;">🗑️ Delete</button>` : ''}
+        </div>
+      `;
+    });
+    html += '</div>';
+
+    if (sortedServices.length === 0) {
+      html = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No service providers found.</div>`;
+    }
+
+    container.innerHTML = html;
+  };
+
+  window.toggleAddServiceForm = function() {
+    const fields = document.getElementById('addServiceFormFields');
+    const arrow = document.getElementById('addServiceFormToggleArrow');
+    if (fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      arrow.textContent = '▲';
+    } else {
+      fields.style.display = 'none';
+      arrow.textContent = '▼';
+    }
+  };
+
+  window.deleteLocalService = function(id) {
+    if (!confirm('Are you sure you want to delete this service provider? This action cannot be undone.')) return;
+
+    // Check admin permission
+    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+      alert('You do not have permission to delete service providers.');
+      return;
+    }
+
+    // Get service details before deletion for logging
+    const serviceToDelete = localServices.find(s => s.id === id);
+
+    // Remove from local services array
+    localServices = localServices.filter(s => s.id !== id);
+    
+    // Update localStorage
+    localStorage.setItem('society_services', JSON.stringify(localServices));
+    
+    // Try to update Firebase
+    if (typeof fbSet === 'function') {
+      fbSet('society_services', localServices).catch(e => {
+        console.warn('Firebase update failed, localStorage updated:', e.message);
+      });
+    }
+    
+    // Log deletion details
+    logDeletion('local_service', id, serviceToDelete);
+    
+    // Re-render local services
+    renderLocalServices();
+    
+    // Show success feedback
+    alert('Service provider deleted successfully.');
+  };
+
+  function logDeletion(type, id, details) {
+    const deletionLogs = JSON.parse(localStorage.getItem('deletion_logs') || '[]');
+    
+    const logEntry = {
+      id: Date.now(),
+      type: type,
+      itemId: id,
+      details: details,
+      deletedBy: currentUser.name,
+      deletedByRole: currentUser.role,
+      deletedByFlat: currentUser.flat,
+      timestamp: new Date().toISOString(),
+      timestampFormatted: new Date().toLocaleString('en-IN', { 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      })
+    };
+    
+    deletionLogs.unshift(logEntry);
+    localStorage.setItem('deletion_logs', JSON.stringify(deletionLogs));
+  }
+
+  function logAction(actionType, details, category = 'general') {
+    const actionLogs = JSON.parse(localStorage.getItem('action_logs') || '[]');
+    
+    const logEntry = {
+      id: Date.now(),
+      actionType: actionType,
+      category: category,
+      details: details,
+      performedBy: currentUser.name,
+      performedByRole: currentUser.role,
+      performedByFlat: currentUser.flat,
+      performedByEmail: currentUser.email,
+      timestamp: new Date().toISOString(),
+      timestampFormatted: new Date().toLocaleString('en-IN', { 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      })
+    };
+    
+    actionLogs.unshift(logEntry);
+    
+    // Keep only last 1000 logs to prevent storage issues
+    if (actionLogs.length > 1000) {
+      actionLogs = actionLogs.slice(0, 1000);
+    }
+    
+    localStorage.setItem('action_logs', JSON.stringify(actionLogs));
+  }
+
+  // ===== METER READINGS LOGIC =====
+  let meterReadings = [];
+
+  window.initMeterReadings = function() {
+    // Pre-fill current month
+    const monthInput = document.getElementById('mtrMonth');
+    if (monthInput && !monthInput.value) {
+      const now = new Date();
+      monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    // Pre-fill flat from currentUser
+    const flatInput = document.getElementById('mtrFlat');
+    if (flatInput && !flatInput.value && currentUser) {
+      flatInput.value = `${currentUser.tower || ''}-${currentUser.flat || ''}`.replace(/^-|-$/g, '');
+    }
+
+    // Load from Firebase or localStorage
+    if (typeof fbListen === 'function') {
+      fbListen('society_meter_readings', (data) => {
+        meterReadings = data || [];
+        renderMeterReadings();
+      });
+    } else {
+      meterReadings = JSON.parse(localStorage.getItem('society_meter_readings')) || [];
+      renderMeterReadings();
+    }
+  };
+
+  window.previewMeterPhoto = function(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const preview = document.getElementById('mtrPhotoPreview');
+        const img = document.getElementById('mtrPhotoImg');
+        img.src = e.target.result;
+        preview.style.display = 'block';
+        input.dataset.base64 = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  window.saveMeterReading = function() {
+    const flat    = document.getElementById('mtrFlat').value.trim().toUpperCase();
+    const month   = document.getElementById('mtrMonth').value;
+    const reading = document.getElementById('mtrReading').value.trim();
+    const editId  = document.getElementById('mtrEditId').value;
+    const photoEl = document.getElementById('mtrPhoto');
+    const photo   = photoEl.dataset.base64 || '';
+
+    if (!flat || !month || !reading) {
+      alert('Please fill Flat No, Month and Reading.');
+      return;
+    }
+
+    const monthLabel = new Date(month + '-01').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+    if (editId) {
+      // Edit existing
+      const idx = meterReadings.findIndex(r => r.id === editId);
+      if (idx !== -1) {
+        meterReadings[idx] = { ...meterReadings[idx], flat, month, monthLabel, reading, photo: photo || meterReadings[idx].photo };
+        logAction('meter_reading_updated', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
+      }
+    } else {
+      // Check for duplicate flat+month
+      const duplicate = meterReadings.find(r => r.flat === flat && r.month === month);
+      if (duplicate) {
+        alert(`Reading for Flat ${flat} in ${monthLabel} already exists. Use the Edit button.`);
+        return;
+      }
+      meterReadings.push({
+        id: Date.now().toString(),
+        flat, month, monthLabel, reading, photo,
+        addedBy: currentUser ? currentUser.name : 'Admin',
+        addedAt: new Date().toLocaleString('en-IN')
+      });
+      logAction('meter_reading_added', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
+    }
+
+    // Sort by month desc then flat
+    meterReadings.sort((a, b) => b.month.localeCompare(a.month) || a.flat.localeCompare(b.flat));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_meter_readings', meterReadings).then(() => {
+        resetMeterForm();
+        renderMeterReadings();
+      });
+    } else {
+      localStorage.setItem('society_meter_readings', JSON.stringify(meterReadings));
+      resetMeterForm();
+      renderMeterReadings();
+    }
+  };
+
+  function resetMeterForm() {
+    document.getElementById('mtrFlat').value = currentUser ? `${currentUser.tower || ''}-${currentUser.flat || ''}`.replace(/^-|-$/g,'') : '';
+    const now = new Date();
+    document.getElementById('mtrMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    document.getElementById('mtrReading').value = '';
+    document.getElementById('mtrEditId').value = '';
+    document.getElementById('mtrPhotoPreview').style.display = 'none';
+    document.getElementById('mtrPhotoImg').src = '';
+    const photoEl = document.getElementById('mtrPhoto');
+    if (photoEl) { photoEl.value = ''; delete photoEl.dataset.base64; }
+  }
+
+  window.editMeterReading = function(id) {
+    const rec = meterReadings.find(r => r.id === id);
+    if (!rec) return;
+    document.getElementById('mtrFlat').value = rec.flat;
+    document.getElementById('mtrMonth').value = rec.month;
+    document.getElementById('mtrReading').value = rec.reading;
+    document.getElementById('mtrEditId').value = rec.id;
+    if (rec.photo) {
+      document.getElementById('mtrPhotoImg').src = rec.photo;
+      document.getElementById('mtrPhotoPreview').style.display = 'block';
+    }
+    // Auto-open the form when editing
+    const fields = document.getElementById('meterFormFields');
+    const arrow  = document.getElementById('meterFormArrow');
+    if (fields && fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      if (arrow) arrow.textContent = '▲';
+    }
+    // Scroll form into view
+    document.getElementById('mtrFlat').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.toggleMeterForm = function() {
+    const fields = document.getElementById('meterFormFields');
+    const arrow  = document.getElementById('meterFormArrow');
+    if (fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      arrow.textContent = '▲';
+    } else {
+      fields.style.display = 'none';
+      arrow.textContent = '▼';
+    }
+  };
+
+  function renderMeterReadings() {
+    const container = document.getElementById('meterReadingsContainer');
+    if (!container) return;
+
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    if (meterReadings.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No meter readings recorded yet.</div>`;
+      return;
+    }
+
+    let html = '';
+    meterReadings.forEach(r => {
+      const photoThumb = r.photo
+        ? `<img src="${r.photo}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; border:1px solid var(--line);">`
+        : '';
+
+      html += `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+          <div style="flex:1; line-height:1.5;">
+            Flat - <span style="font-weight:800;">${r.flat}</span> · ${r.monthLabel} · <span style="color:var(--forest); font-weight:800;">${Number(r.reading).toLocaleString('en-IN')} Units</span>
+            <div style="font-size:11px; color:var(--muted); font-weight:500; margin-top:2px;">Added by ${r.addedBy || 'Admin'} · ${r.addedAt || ''}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+            ${photoThumb}
+            <button onclick="editMeterReading('${r.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">✏️ Edit</button>
+            ${isAdmin ? `<button onclick="deleteMeterReading('${r.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  window.deleteMeterReading = function(id) {
+    if (!confirm('Are you sure you want to delete this meter reading? This action cannot be undone.')) return;
+
+    // Check admin permission
+    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+      alert('You do not have permission to delete meter readings.');
+      return;
+    }
+
+    // Get meter reading details before deletion for logging
+    const readingToDelete = meterReadings.find(r => r.id === id);
+
+    // Remove from meter readings array
+    meterReadings = meterReadings.filter(r => r.id !== id);
+    
+    // Update localStorage
+    localStorage.setItem('society_meter_readings', JSON.stringify(meterReadings));
+    
+    // Try to update Firebase
+    if (typeof fbSet === 'function') {
+      fbSet('society_meter_readings', meterReadings).catch(e => {
+        console.warn('Firebase update failed, localStorage updated:', e.message);
+      });
+    }
+    
+    // Log deletion details
+    logDeletion('meter_reading', id, readingToDelete);
+    
+    // Re-render meter readings
+    renderMeterReadings();
+    
+    // Show success feedback
+    alert('Meter reading deleted successfully.');
+  };
+
+
+
+  window.initMemberScores = function() {
+    const container = document.getElementById('memberScoresContainer');
+    if (!container) return;
+
+    // Load active approved users
+    let userList = [];
+    if (typeof users !== 'undefined' && users.length > 0) {
+      userList = users.filter(u => u.status === 'Approved');
+    } else {
+      const localUsers = JSON.parse(localStorage.getItem('society_users')) || [];
+      userList = localUsers.filter(u => u.status === 'Approved');
+    }
+
+    // Load complaints
+    const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+
+    userList.forEach(u => {
+      // Base score
+      let score = 80;
+      let reasons = [];
+
+      // Check maintenance payment status from localStorage/payments list
+      const userPayments = JSON.parse(localStorage.getItem('payments_' + u.email)) || [];
+      const hasPaidJuly = userPayments.some(p => p.month === 'July 2026');
+      
+      if (hasPaidJuly) {
+        score += 10;
+        reasons.push('Timely Payment');
+      } else {
+        score -= 15;
+        reasons.push('Unpaid Maintenance');
+      }
+
+      // Check complaints associated with this user's flat
+      const userComplaints = complaints.filter(c => c.flat === u.flat || c.email === u.email);
+      const openComplaints = userComplaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
+      const resolvedComplaints = userComplaints.filter(c => c.status === 'Resolved').length;
+
+      if (openComplaints > 0) {
+        score -= (openComplaints * 10);
+        reasons.push(`${openComplaints} Open Complaint${openComplaints > 1 ? 's' : ''}`);
+      }
+      if (resolvedComplaints > 0) {
+        score += (resolvedComplaints * 5);
+        reasons.push(`${resolvedComplaints} Resolved Complaint${resolvedComplaints > 1 ? 's' : ''}`);
+      }
+
+      // Cap score between 0 and 100
+      score = Math.max(0, Math.min(100, score));
+
+      // Color coding score
+      let scoreColor = 'var(--forest)';
+      if (score < 60) scoreColor = 'var(--terracotta)';
+      else if (score < 85) scoreColor = 'var(--marigold)';
+
+      // Flat - score shown - details format
+      const detailText = reasons.join(', ') || 'Good Standing';
+
+      html += `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; line-height:1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.01);">
+          Flat - <span style="font-weight:700; color:var(--forest-dark);">${u.tower}-${u.flat}</span> - Score: <span style="color:${scoreColor}; font-weight:800; font-size:13.5px;">${score}</span> - (${detailText})
+        </div>
+      `;
+    });
+
+    html += '</div>';
+
+    if (userList.length === 0) {
+      html = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No active residents registered to score yet.</div>`;
+    }
+
+    container.innerHTML = html;
+  };
 
   // Load and apply stats from localStorage / Firebase Realtime Database
   let isListeningStats = false;
@@ -795,6 +1394,40 @@
       document.getElementById('sealImage').style.display = 'none';
     }
 
+    // 1. Always load from Local Storage immediately on load
+    const loadLocalStorageStats = () => {
+      const payments = JSON.parse(localStorage.getItem('payments_' + currentUser.email)) || [];
+      const isPaidJuly = payments.some(p => p.month === 'July 2026');
+      const maintValEl = document.getElementById('statMaintenanceVal');
+      const maintCardEl = document.getElementById('statMaintenance');
+      if (maintValEl && maintCardEl) {
+        if (isPaidJuly) {
+          maintValEl.textContent = '₹0';
+          maintCardEl.classList.remove('warn');
+          maintValEl.style.color = 'var(--forest)';
+        } else {
+          maintValEl.textContent = '₹2,000';
+          maintCardEl.classList.add('warn');
+          maintValEl.style.color = '';
+        }
+      }
+
+      const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+      const customOpenCount = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
+      const compValEl = document.getElementById('statComplaintsVal');
+      if (compValEl) compValEl.textContent = 7 + customOpenCount;
+
+      const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
+      const visValEl = document.getElementById('statVisitorsVal');
+      if (visValEl) visValEl.textContent = 25 + visitors.length;
+
+      const notifications = JSON.parse(localStorage.getItem('society_notifications')) || [];
+      renderNotificationsUI(notifications);
+    };
+
+    loadLocalStorageStats();
+
+    // 2. Set up Firebase listeners if available to override/sync in real-time
     if (typeof fbListen === 'function' && !isListeningStats) {
       isListeningStats = true;
       
@@ -804,15 +1437,17 @@
         const myPending = pending.filter(i => String(i.flat) === String(currentUser.flat));
         const maintValEl = document.getElementById('statMaintenanceVal');
         const maintCardEl = document.getElementById('statMaintenance');
-        if (myPending.length === 0) {
-          maintValEl.textContent = '₹0';
-          maintCardEl.classList.remove('warn');
-          maintValEl.style.color = 'var(--forest)';
-        } else {
-          const totalAmt = myPending.reduce((sum, i) => sum + Number(i.total), 0);
-          maintValEl.textContent = `₹${totalAmt.toLocaleString()}`;
-          maintCardEl.classList.add('warn');
-          maintValEl.style.color = '';
+        if (maintValEl && maintCardEl) {
+          if (myPending.length === 0) {
+            maintValEl.textContent = '₹0';
+            maintCardEl.classList.remove('warn');
+            maintValEl.style.color = 'var(--forest)';
+          } else {
+            const totalAmt = myPending.reduce((sum, i) => sum + Number(i.total), 0);
+            maintValEl.textContent = `₹${totalAmt.toLocaleString()}`;
+            maintCardEl.classList.add('warn');
+            maintValEl.style.color = '';
+          }
         }
       });
 
@@ -820,15 +1455,15 @@
       fbListen('society_complaints', (data) => {
         const complaints = data || [];
         const customOpenCount = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
-        const openComplaintsCount = 7 + customOpenCount;
-        document.getElementById('statComplaintsVal').textContent = openComplaintsCount;
+        const compValEl = document.getElementById('statComplaintsVal');
+        if (compValEl) compValEl.textContent = 7 + customOpenCount;
       });
 
       // Listen to Visitors
       fbListen('society_visitors', (data) => {
         const visitors = data || [];
-        const visitorsCount = 25 + visitors.length;
-        document.getElementById('statVisitorsVal').textContent = visitorsCount;
+        const visValEl = document.getElementById('statVisitorsVal');
+        if (visValEl) visValEl.textContent = 25 + visitors.length;
       });
 
       // Listen to Notifications
@@ -836,31 +1471,39 @@
         const notifications = data || [];
         renderNotificationsUI(notifications);
       });
-    } else if (!isListeningStats) {
-      // Offline local storage fallback
-      const payments = JSON.parse(localStorage.getItem('payments_' + currentUser.email)) || [];
-      const isPaidJuly = payments.some(p => p.month === 'July 2026');
-      const maintValEl = document.getElementById('statMaintenanceVal');
-      const maintCardEl = document.getElementById('statMaintenance');
-      if (isPaidJuly) {
-        maintValEl.textContent = '₹0';
-        maintCardEl.classList.remove('warn');
-        maintValEl.style.color = 'var(--forest)';
+
+      // Listen to Gate Requests
+      fbListen('society_pending_visitor_approvals', (data) => {
+        handleGateRequestsCheck(data || []);
+      });
+    } else {
+      // Local fallback checking
+      setInterval(() => {
+        const data = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+        handleGateRequestsCheck(data);
+      }, 2000);
+    }
+  }
+
+  function handleGateRequestsCheck(approvals) {
+    if (!currentUser) return;
+    const normalise = s => String(s).replace(/flat\s*/i, '').trim();
+    const myFlat = normalise(currentUser.flat || '');
+    
+    const myPending = approvals.filter(req => 
+      normalise(req.flatNo) === myFlat && req.status === 'Pending'
+    );
+
+    const banner = document.getElementById('gateAlertBanner');
+    const bannerText = document.getElementById('gateAlertBannerText');
+    if (banner) {
+      if (myPending.length > 0) {
+        const latestReq = myPending[0];
+        if (bannerText) bannerText.textContent = `${latestReq.visitorName} (${latestReq.purpose}) is requesting entry approval.`;
+        banner.style.display = 'flex';
       } else {
-        maintValEl.textContent = '₹2,000';
-        maintCardEl.classList.add('warn');
-        maintValEl.style.color = '';
+        banner.style.display = 'none';
       }
-
-      const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
-      const customOpenCount = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
-      document.getElementById('statComplaintsVal').textContent = 7 + customOpenCount;
-
-      const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
-      document.getElementById('statVisitorsVal').textContent = 25 + visitors.length;
-
-      const notifications = JSON.parse(localStorage.getItem('society_notifications')) || [];
-      renderNotificationsUI(notifications);
     }
   }
 
@@ -1122,17 +1765,7 @@
   }
 
   // Load and display all users
-  const sampleDirectoryUsers = [
-    defaultUser,
-    { name: "Admin User", phone: "+91 99999 88888", email: "admin@society.com", role: "Super Admin", tower: "Tower B", flat: "101", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Priya Mehta", flat: "202", tower: "Tower A", phone: "+91 98888 11111", email: "priya@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Amit Singh", flat: "301", tower: "Tower A", phone: "+91 97777 22222", email: "amit@email.com", role: "Committee Member", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Rajesh Kumar", flat: "302", tower: "Tower A", phone: "+91 96666 33333", email: "rajesh@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Neha Verma", flat: "401", tower: "Tower B", phone: "+91 95555 44444", email: "neha@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Suresh Patil", flat: "402", tower: "Tower B", phone: "+91 94444 55555", email: "suresh@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Deepa Shah", flat: "501", tower: "Tower C", phone: "+91 93333 66666", email: "deepa@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" },
-    { name: "Kiran Joshi", flat: "502", tower: "Tower C", phone: "+91 92222 77777", email: "kiran@email.com", role: "Resident", status: "Approved", adminEmail: "admin@society.com" }
-  ];
+  const sampleDirectoryUsers = [];
 
   // Load and display all users
   async function loadAllUsers() {
@@ -1192,21 +1825,40 @@
           statusBadgeHtml = `
             <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
               <span style="font-size: 9px; background: var(--marigold-soft); color: var(--marigold); padding: 2px 6px; border-radius: 6px; font-weight: 600;">Pending</span>
-              ${isAdmin ? `<button onclick="approveUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--forest); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Approve</button>` : ''}
+              ${isAdmin ? `
+                <div style="display: flex; gap: 4px;">
+                  <button onclick="approveUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--forest); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Approve</button>
+                  <button onclick="deleteUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--terracotta); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Delete</button>
+                </div>
+              ` : ''}
             </div>
           `;
         } else if (isRevoked) {
           statusBadgeHtml = `
             <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
               <span style="font-size: 9px; background: #F5E1DC; color: var(--terracotta); padding: 2px 6px; border-radius: 6px; font-weight: 600;">Revoked</span>
-              ${isAdmin ? `<button onclick="approveUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--forest); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Re-Approve</button>` : ''}
+              ${isAdmin ? `
+                <div style="display: flex; gap: 4px;">
+                  <button onclick="approveUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--forest); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Re-Approve</button>
+                  <button onclick="deleteUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--terracotta); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Delete</button>
+                </div>
+              ` : ''}
             </div>
           `;
         } else {
           statusBadgeHtml = `
             <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
               <span style="font-size: 9px; background: #e4eee8; color: var(--forest); padding: 2px 6px; border-radius: 6px; font-weight: 600;">Active</span>
-              ${(isAdmin && !isSelf) ? `<button onclick="revokeUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--terracotta); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Revoke Access</button>` : ''}
+              ${(isAdmin && !isSelf) ? `
+                <div style="display: flex; gap: 4px;">
+                  <button onclick="revokeUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: var(--terracotta); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Revoke</button>
+                  ${user.role === 'Super Admin' ? 
+                    `<button onclick="toggleAdminDirect('${user.email}', false)" style="font-size: 10px; padding: 4px 8px; background: var(--marigold); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Demote</button>` : 
+                    `<button onclick="toggleAdminDirect('${user.email}', true)" style="font-size: 10px; padding: 4px 8px; background: var(--sky); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Make Admin</button>`
+                  }
+                  <button onclick="deleteUserDirect('${user.email}')" style="font-size: 10px; padding: 4px 8px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: sans-serif; line-height: 1;">Delete</button>
+                </div>
+              ` : ''}
             </div>
           `;
         }
@@ -1347,7 +1999,71 @@
     }
   };
 
+  // Direct delete user logic from All Users list modal
+  window.deleteUserDirect = async function(email) {
+    if (!confirm('Are you sure you want to delete this user permanently? This action cannot be undone.')) return;
+    try {
+      let usersList = await getAllCurrentUsers();
+      const targetEmail = String(email).toLowerCase();
+      const idx = usersList.findIndex(u => u.email && u.email.toLowerCase() === targetEmail);
+      
+      if (idx !== -1) {
+        const deletedUserName = usersList[idx].name;
+        usersList.splice(idx, 1); // remove from array
+        localStorage.setItem('society_users', JSON.stringify(usersList));
+        localStorage.setItem('users', JSON.stringify(usersList));
+        
+        if (typeof fbSet === 'function') {
+          fbSet('society_users', usersList).catch(err => console.log(err));
+        }
+        
+        if (typeof pushNotification === 'function') {
+          pushNotification(`User deleted: ${deletedUserName} was removed from the society directory by Admin.`, "notice");
+        }
+        
+        alert(`Deleted ${deletedUserName} successfully!`);
+        await loadAllUsers(); // Reload directory modal
+      } else {
+        alert('User profile not found.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error deleting user: ' + e.message);
+    }
+  };
 
+  // Toggle Admin role direct logic from All Users list modal
+  window.toggleAdminDirect = async function(email, makeAdmin) {
+    const actionText = makeAdmin ? 'promote this user to Admin' : 'demote this Admin to Resident';
+    if (!confirm(`Are you sure you want to ${actionText}?`)) return;
+    try {
+      let usersList = await getAllCurrentUsers();
+      const targetEmail = String(email).toLowerCase();
+      const idx = usersList.findIndex(u => u.email && u.email.toLowerCase() === targetEmail);
+      
+      if (idx !== -1) {
+        usersList[idx].role = makeAdmin ? 'Super Admin' : 'Resident';
+        localStorage.setItem('society_users', JSON.stringify(usersList));
+        localStorage.setItem('users', JSON.stringify(usersList));
+        
+        if (typeof fbSet === 'function') {
+          fbSet('society_users', usersList).catch(err => console.log(err));
+        }
+        
+        if (typeof pushNotification === 'function') {
+          pushNotification(`Role updated: ${usersList[idx].name} is now a ${usersList[idx].role}.`, "notice");
+        }
+        
+        alert(`Successfully updated role for ${usersList[idx].name}!`);
+        await loadAllUsers(); // Reload directory modal
+      } else {
+        alert('User profile not found.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error updating user role: ' + e.message);
+    }
+  };
 
   // Run on dashboard setup
   initDashboardStats();
