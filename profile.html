@@ -589,13 +589,6 @@
   <!-- AUTH SCREEN (shown when logged out) -->
   <div class="content" id="authScreen" style="display:none;">
     <div class="card" style="padding: 24px 20px; box-shadow: 0 10px 30px rgba(21,53,41,0.06); border-radius: 18px;">
-      <div class="brand" style="justify-content: center; margin-bottom: 24px; align-items: center; gap: 12px;">
-        <div class="seal" style="width: 44px; height: 44px; font-size: 16px;">SS</div>
-        <div>
-          <div class="brand-name" style="color: var(--forest-dark); font-size: 20px; font-weight: 700; font-family:'Space Grotesk',sans-serif;">Surakshit Society</div>
-          <div class="brand-sub" style="color: var(--muted); font-size: 11px;">Digital Resident Portal</div>
-        </div>
-      </div>
       
       <!-- Sliding Tab Selector -->
       <div class="auth-tabs">
@@ -633,6 +626,11 @@
 
         <!-- Register Form -->
         <div id="registerForm" class="auth-form hidden-right">
+          <div class="form-group">
+            <div class="form-label">Society Name</div>
+            <input type="text" class="form-input" id="regSociety" placeholder="e.g., Galaxy Apartments" oninput="validateRegSociety()">
+            <div id="regSocietyFeedback" class="val-feedback"></div>
+          </div>
           <div class="form-group">
             <div class="form-label">Full Name</div>
             <input type="text" class="form-input" id="regName" placeholder="e.g., Priya Sharma" oninput="validateRegName()">
@@ -688,6 +686,10 @@
               <option value="Committee Member">Committee Member</option>
               <option value="Super Admin">Super Admin</option>
             </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Admin Email ID (for approval)</div>
+            <input type="email" class="form-input" id="regAdminEmail" placeholder="e.g., admin@society.com" value="admin@society.com">
           </div>
           <button class="btn btn-primary" onclick="processRegister()" id="btnRegister" style="margin-top: 8px;">Register Profile</button>
         </div>
@@ -837,6 +839,17 @@
           <div class="detail-label">Flat Type</div>
           <div class="detail-value">3 BHK</div>
         </div>
+      </div>
+    </div>
+
+    <!-- PENDING APPROVALS SECTION (only for Super Admins / Committee) -->
+    <div id="pendingApprovalsCard" class="card" style="display:none; padding:20px; border:1px solid var(--line); border-radius:var(--radius); margin-bottom:16px; text-align: left;">
+      <div class="card-title" style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:var(--forest-dark); margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; border:none; text-transform:none; padding:0;">
+        <span>👥 Pending Registrations</span>
+        <span id="pendingApprovalsCount" style="font-size:11px; background:var(--terracotta); color:white; padding:2px 8px; border-radius:10px; font-weight:700;">0</span>
+      </div>
+      <div id="pendingApprovalsList" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Filled dynamically -->
       </div>
     </div>
 
@@ -1093,6 +1106,22 @@
     </div>
   </div>
 
+  <!-- DELETION LOG MODAL -->
+  <div class="modal-overlay" id="deletionLogModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🗑️ Deletion Log</div>
+        <div class="modal-close" onclick="closeModal('deletionLogModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div id="deletionLogContent" style="max-height: 400px; overflow-y: auto;">
+        <!-- Populated dynamically -->
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('deletionLogModal')" style="margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <a href="index.html" class="nav-item">
@@ -1122,6 +1151,7 @@
     phone: "+91 98765 43210",
     email: "sujeet@email.com",
     role: "Super Admin",
+    societyName: "Surakshit Society",
     tower: "Tower A",
     flat: "201",
     memberSince: "Jan 2024",
@@ -1143,15 +1173,89 @@
     }
   };
 
-  // Ensure default structure
-  let users = JSON.parse(localStorage.getItem('users')) || [defaultUser];
-  localStorage.setItem('users', JSON.stringify(users));
+  const secondAdmin = {
+    name: "Admin User",
+    phone: "+91 99999 88888",
+    email: "admin@society.com",
+    role: "Super Admin",
+    societyName: "Surakshit Society",
+    tower: "Tower B",
+    flat: "101",
+    memberSince: "Jan 2024",
+    flatType: "2 BHK",
+    password: "123456",
+    privacy: {
+      showPhone: true,
+      showEmail: true,
+      allowVisitors: true,
+      profileVisible: true
+    },
+    notifications: {
+      maintenance: true,
+      visitor: true,
+      notice: true,
+      complaint: true,
+      chat: true,
+      payment: true
+    }
+  };
+
+  // Ensure default users have Approved status
+  defaultUser.status = "Approved";
+  secondAdmin.status = "Approved";
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser && !localStorage.getItem('loggedOutFlag')) {
     currentUser = defaultUser;
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
   }
+  let users = [];
+  let isListeningUsers = false;
+
+  function initUsersSync() {
+    if (typeof fbListen === 'function') {
+      if (!isListeningUsers) {
+        isListeningUsers = true;
+        fbListen('society_users', (data) => {
+          users = data || [];
+          if (users.length === 0) {
+            users = [defaultUser, secondAdmin];
+            fbSet('society_users', users);
+          }
+          // Make sure default users are always present
+          let changed = false;
+          if (!users.some(u => u.email === defaultUser.email)) {
+            users.push(defaultUser);
+            changed = true;
+          }
+          if (!users.some(u => u.email === secondAdmin.email)) {
+            users.push(secondAdmin);
+            changed = true;
+          }
+          
+          // Ensure default admins are marked Approved
+          users.forEach(u => {
+            if ((u.email === defaultUser.email || u.email === secondAdmin.email) && u.status !== 'Approved') {
+              u.status = 'Approved';
+              changed = true;
+            }
+          });
+
+          if (changed) {
+            fbSet('society_users', users);
+          }
+          
+          updateProfileUI();
+        });
+      }
+    } else {
+      users = JSON.parse(localStorage.getItem('society_users')) || [defaultUser, secondAdmin];
+      updateProfileUI();
+    }
+  }
+
+  // Initial call to sync
+  initUsersSync();
 
   // Auth toggle
   function toggleAuthTab(type) {
@@ -1230,6 +1334,25 @@
     } else {
       feedback.textContent = '';
       feedback.className = 'val-feedback';
+      return true;
+    }
+  }
+
+  function validateRegSociety() {
+    const val = document.getElementById('regSociety').value.trim();
+    const feedback = document.getElementById('regSocietyFeedback');
+    if (!val) {
+      feedback.textContent = '';
+      feedback.className = 'val-feedback';
+      return false;
+    }
+    if (val.length < 3) {
+      feedback.textContent = 'Society name should be at least 3 characters long';
+      feedback.className = 'val-feedback error';
+      return false;
+    } else {
+      feedback.textContent = 'Looks good!';
+      feedback.className = 'val-feedback success';
       return true;
     }
   }
@@ -1393,6 +1516,19 @@
     const matchedUser = users.find(u => (u.email === loginId || u.phone === loginId) && u.password === loginPass);
 
     if (matchedUser) {
+      if (matchedUser.status === 'Pending') {
+        showToast('Your profile is pending admin approval. You will be notified once active.', 'error');
+        return;
+      }
+      if (matchedUser.status === 'Rejected') {
+        showToast('Your registration was rejected by the admin. Please contact support.', 'error');
+        return;
+      }
+      if (matchedUser.status === 'Revoked') {
+        showToast('Your account access has been revoked by society admin. Please contact management.', 'error');
+        return;
+      }
+
       localStorage.removeItem('loggedOutFlag');
       localStorage.setItem('currentUser', JSON.stringify(matchedUser));
       showToast('Logged in successfully! Redirecting...', 'success');
@@ -1406,6 +1542,7 @@
 
   // Process Register
   function processRegister() {
+    const societyName = document.getElementById('regSociety').value.trim();
     const name = document.getElementById('regName').value.trim();
     const phone = document.getElementById('regPhone').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -1413,9 +1550,15 @@
     const tower = document.getElementById('regTower').value;
     const flat = document.getElementById('regFlat').value.trim();
     const role = document.getElementById('regRole').value;
+    const adminEmail = document.getElementById('regAdminEmail').value.trim().toLowerCase();
 
-    if (!validateRegName() || !validateRegPhone() || !validateRegEmail() || !password || !validateRegFlat()) {
+    if (!validateRegSociety() || !validateRegName() || !validateRegPhone() || !validateRegEmail() || !password || !validateRegFlat()) {
       showToast('Please fix validation errors before registering', 'error');
+      return;
+    }
+
+    if (!adminEmail || !adminEmail.includes('@')) {
+      showToast('Please enter a valid Admin Email ID for approval', 'error');
       return;
     }
 
@@ -1425,6 +1568,7 @@
     }
 
     const newUser = {
+      societyName,
       name,
       phone,
       email,
@@ -1432,6 +1576,8 @@
       tower,
       flat,
       role,
+      adminEmail, // Admin assigned to approve this registration
+      status: "Pending", // Requires Super Admin / Committee approval
       memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       flatType: "3 BHK",
       privacy: {
@@ -1451,25 +1597,49 @@
     };
 
     users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.removeItem('loggedOutFlag');
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-
-    showToast('Profile registered successfully! Logging you in...', 'success');
-    setTimeout(() => {
-      location.reload();
-    }, 1000);
-  }
-
-  // Process Logout
-  function processLogout() {
-    if (confirm('Are you sure you want to log out?')) {
-      localStorage.removeItem('currentUser');
-      localStorage.setItem('loggedOutFlag', 'true');
-      alert('Logged out successfully!');
-      location.reload();
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        if (typeof pushNotification === 'function') {
+          pushNotification(`New signup: ${name} (Flat ${flat}) requested approval from Admin: ${adminEmail}`, "notice");
+        }
+        showToast('Registration submitted! Pending administrator approval.', 'success');
+        setTimeout(() => {
+          toggleAuthTab('login');
+          document.getElementById('loginId').value = email;
+          document.getElementById('loginPassword').value = '';
+          document.getElementById('loginPasswordFeedback').textContent = '';
+        }, 1500);
+      });
+    } else {
+      localStorage.setItem('society_users', JSON.stringify(users));
+      if (typeof pushNotification === 'function') {
+        pushNotification(`New signup: ${name} (Flat ${flat}) requested approval from Admin: ${adminEmail}`, "notice");
+      }
+      showToast('Registration submitted! Pending administrator approval.', 'success');
+      setTimeout(() => {
+        toggleAuthTab('login');
+        document.getElementById('loginId').value = email;
+      }, 1500);
     }
   }
+
+  // Process Logout — defined as a global immediately so onclick attribute always works
+  window.processLogout = function processLogout() {
+    localStorage.removeItem('currentUser');
+    localStorage.setItem('loggedOutFlag', 'true');
+    currentUser = null;
+    // Hide profile dashboard, show login screen immediately
+    const pd = document.getElementById('profileDashboard');
+    const as = document.getElementById('authScreen');
+    const bn = document.querySelector('.bottom-nav');
+    if (pd) pd.style.display = 'none';
+    if (as) as.style.display = 'block';
+    if (bn) bn.style.display = 'none';
+    const card = document.getElementById('pendingApprovalsCard');
+    if (card) card.style.display = 'none';
+    showToast('Logged out successfully!', 'success');
+  };
 
   // Update UI and load data
   function updateProfileUI() {
@@ -1531,10 +1701,15 @@
       setToggleState('toggleChat', currentUser.notifications?.chat);
       setToggleState('togglePayment', currentUser.notifications?.payment);
 
+      // Render Admin Approval list for pending accounts
+      renderPendingApprovals();
     } else {
       profileDashboard.style.display = 'none';
       authScreen.style.display = 'block';
       bottomNav.style.display = 'none';
+      
+      const card = document.getElementById('pendingApprovalsCard');
+      if (card) card.style.display = 'none';
     }
   }
 
@@ -1733,6 +1908,7 @@
       tower,
       flat,
       password: 'password123', // default
+      status: "Approved", // Admins create already approved users
       memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       flatType: "3 BHK",
       privacy: {
@@ -1752,9 +1928,15 @@
     };
 
     users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    alert(`Resident ${name} registered successfully with default password 'password123'!`);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        alert(`Resident ${name} registered successfully with default password 'password123'!`);
+      });
+    } else {
+      localStorage.setItem('society_users', JSON.stringify(users));
+      alert(`Resident ${name} registered successfully with default password 'password123'!`);
+    }
     
     // Clear fields
     document.getElementById('addName').value = '';
@@ -1796,6 +1978,373 @@
     };
     reader.readAsDataURL(file);
   }
+
+
+  // ─── Forgot Password JavaScript Handlers ───
+  let fpUserIndex = -1;
+  let fpGeneratedCode = '';
+  let fpTargetId = '';
+  let fpResendTimerVal = 0;
+  let fpResendInterval = null;
+
+  window.openForgotPassword = function openForgotPassword() {
+    document.getElementById('fpOverlay').classList.add('active');
+    fpGoStep(1);
+    document.getElementById('fpEmail').value = '';
+    document.getElementById('fpEmail').focus();
+    fpClearError();
+  }
+
+  window.closeForgotPassword = function closeForgotPassword() {
+    document.getElementById('fpOverlay').classList.remove('active');
+    if (fpResendInterval) clearInterval(fpResendInterval);
+  }
+
+  window.fpOverlayClick = function fpOverlayClick(e) {
+    if (e.target === document.getElementById('fpOverlay')) {
+      closeForgotPassword();
+    }
+  }
+
+  window.fpGoStep = function fpGoStep(stepNum) {
+    document.querySelectorAll('.fp-step').forEach(step => step.classList.remove('active'));
+    document.getElementById(`fpStep${stepNum}`).classList.add('active');
+    
+    if (stepNum === 2) {
+      document.getElementById('fpSentTo').textContent = fpTargetId;
+      document.getElementById('otp0').focus();
+      // Reset otp boxes
+      for (let i = 0; i < 6; i++) {
+        document.getElementById(`otp${i}`).value = '';
+      }
+      document.getElementById('fpOtpError').style.display = 'none';
+      startFpResendTimer();
+    } else if (stepNum === 3) {
+      document.getElementById('fpNewPwd').value = '';
+      document.getElementById('fpConfirmPwd').value = '';
+      document.getElementById('fpConfirmError').style.display = 'none';
+      document.getElementById('fpPwdStrBar').style.display = 'none';
+    }
+  }
+
+  window.fpClearError = function fpClearError() {
+    document.getElementById('fpEmailError').style.display = 'none';
+  }
+
+  window.sendFpCode = function sendFpCode() {
+    const val = document.getElementById('fpEmail').value.trim();
+    const errDiv = document.getElementById('fpEmailError');
+    if (!val) {
+      errDiv.textContent = 'Please enter your email or phone number';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(\+91[\-\s]?)?[0-9]{10}$/;
+    if (!emailRegex.test(val) && !phoneRegex.test(val)) {
+      errDiv.textContent = 'Enter a valid email or 10-digit phone number';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    // Try finding user in users db
+    fpUserIndex = users.findIndex(u => u.email === val || u.phone === val || u.phone.replace(/[\s+-]/g, '').includes(val.replace(/[\s+-]/g, '')));
+    
+    if (fpUserIndex === -1) {
+      errDiv.textContent = 'Account not found. Verify email/phone or register.';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    // Generate random code for demo/simulation
+    fpTargetId = val;
+    fpGeneratedCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`[SURAKSHIT SOCIETY] Reset code for ${val} is: ${fpGeneratedCode}`);
+    
+    // Simulate SMS / Email sending via toast
+    showToast(`Verification code sent to ${val}! Code is: ${fpGeneratedCode}`, 'success');
+    
+    fpGoStep(2);
+  }
+
+  window.fpOtpNext = function fpOtpNext(idx) {
+    if (document.getElementById(`otp${idx}`).value.length === 1) {
+      if (idx < 5) document.getElementById(`otp${idx + 1}`).focus();
+    }
+  }
+
+  window.fpOtpBack = function fpOtpBack(e, idx) {
+    if (e.key === 'Backspace' && !document.getElementById(`otp${idx}`).value && idx > 0) {
+      document.getElementById(`otp${idx - 1}`).focus();
+    }
+  }
+
+  window.verifyFpCode = function verifyFpCode() {
+    let enteredCode = '';
+    for (let i = 0; i < 6; i++) {
+      enteredCode += document.getElementById(`otp${i}`).value.trim();
+    }
+
+    const errDiv = document.getElementById('fpOtpError');
+    if (enteredCode.length < 6) {
+      errDiv.textContent = 'Please enter the full 6-digit code';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    if (enteredCode !== fpGeneratedCode) {
+      errDiv.textContent = 'Invalid verification code. Try again.';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    errDiv.style.display = 'none';
+    fpGoStep(3);
+  }
+
+  window.fpResend = function fpResend() {
+    if (fpResendTimerVal > 0) return;
+    fpGeneratedCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`[SURAKSHIT SOCIETY] Resent reset code: ${fpGeneratedCode}`);
+    showToast(`New code sent! Code is: ${fpGeneratedCode}`, 'success');
+    fpGoStep(2);
+  }
+
+  window.startFpResendTimer = function startFpResendTimer() {
+    fpResendTimerVal = 30;
+    const btn = document.getElementById('fpResendBtn');
+    const timerText = document.getElementById('fpResendTimer');
+    
+    btn.style.display = 'none';
+    timerText.style.display = 'inline';
+    timerText.textContent = ` (Resend in ${fpResendTimerVal}s)`;
+
+    if (fpResendInterval) clearInterval(fpResendInterval);
+    fpResendInterval = setInterval(() => {
+      fpResendTimerVal--;
+      if (fpResendTimerVal <= 0) {
+        clearInterval(fpResendInterval);
+        btn.style.display = 'inline';
+        timerText.style.display = 'none';
+      } else {
+        timerText.textContent = ` (Resend in ${fpResendTimerVal}s)`;
+      }
+    }, 1000);
+  }
+
+  window.fpCheckPwd = function fpCheckPwd() {
+    const val = document.getElementById('fpNewPwd').value;
+    const bar = document.getElementById('fpPwdStrBar');
+    const label = document.getElementById('fpPwdStrTxt');
+    const bar1 = document.getElementById('fpBar1');
+    const bar2 = document.getElementById('fpBar2');
+    const bar3 = document.getElementById('fpBar3');
+
+    if (!val) {
+      bar.style.display = 'none';
+      return;
+    }
+
+    bar.style.display = 'block';
+    let score = 0;
+    if (val.length >= 6) score++;
+    if (/[0-9]/.test(val) && /[a-zA-Z]/.test(val)) score++;
+    if (/[^a-zA-Z0-9]/.test(val)) score++;
+
+    bar1.style.backgroundColor = 'var(--line)';
+    bar2.style.backgroundColor = 'var(--line)';
+    bar3.style.backgroundColor = 'var(--line)';
+
+    if (score === 1) {
+      label.textContent = 'Weak';
+      label.style.color = 'var(--terracotta)';
+      bar1.style.backgroundColor = 'var(--terracotta)';
+    } else if (score === 2) {
+      label.textContent = 'Medium';
+      label.style.color = 'var(--marigold)';
+      bar1.style.backgroundColor = 'var(--marigold)';
+      bar2.style.backgroundColor = 'var(--marigold)';
+    } else if (score === 3) {
+      label.textContent = 'Strong';
+      label.style.color = 'var(--forest)';
+      bar1.style.backgroundColor = 'var(--forest)';
+      bar2.style.backgroundColor = 'var(--forest)';
+      bar3.style.backgroundColor = 'var(--forest)';
+    }
+  }
+
+  window.fpCheckConfirm = function fpCheckConfirm() {
+    const p1 = document.getElementById('fpNewPwd').value;
+    const p2 = document.getElementById('fpConfirmPwd').value;
+    const err = document.getElementById('fpConfirmError');
+    if (p2 && p1 !== p2) {
+      err.style.display = 'block';
+    } else {
+      err.style.display = 'none';
+    }
+  }
+
+  window.applyNewPassword = function applyNewPassword() {
+    const newPass = document.getElementById('fpNewPwd').value;
+    const confirmPass = document.getElementById('fpConfirmPwd').value;
+    
+    if (newPass.length < 6) {
+      showToast('Password must be at least 6 characters', 'error');
+      return;
+    }
+    if (newPass !== confirmPass) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+
+    if (fpUserIndex > -1) {
+      users[fpUserIndex].password = newPass;
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Also update currentUser if it is the one getting reset
+      if (currentUser && (currentUser.email === users[fpUserIndex].email || currentUser.phone === users[fpUserIndex].phone)) {
+        currentUser.password = newPass;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+    }
+
+    fpGoStep(4);
+  }
+
+  window.fpDone = function fpDone() {
+    closeForgotPassword();
+  }
+
+  // ─── Admin Registrations Approval Helpers ───
+  function renderPendingApprovals() {
+    const card = document.getElementById('pendingApprovalsCard');
+    const list = document.getElementById('pendingApprovalsList');
+    const countBadge = document.getElementById('pendingApprovalsCount');
+    if (!card || !list || !countBadge) return;
+
+    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+      card.style.display = 'none';
+      return;
+    }
+
+    // Filter so only the assigned admin (or any admin if not specified) sees this user
+    const pendingUsers = users.filter(u => u.status === 'Pending' && (!u.adminEmail || String(u.adminEmail).toLowerCase() === String(currentUser.email).toLowerCase()));
+    countBadge.textContent = pendingUsers.length;
+
+    if (pendingUsers.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+
+    card.style.display = 'block';
+    list.innerHTML = '';
+
+    pendingUsers.forEach(u => {
+      const initials = u.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      const row = document.createElement('div');
+      row.className = 'member-row';
+      row.style.background = 'var(--paper)';
+      row.style.borderRadius = '12px';
+      row.style.padding = '12px';
+      row.style.display = 'flex';
+      row.style.flexDirection = 'column';
+      row.style.gap = '8px';
+      row.style.border = '1px solid var(--line)';
+      row.style.marginBottom = '6px';
+      
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="member-row-avatar" style="background:var(--forest); width:36px; height:36px; font-size:12px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center; border-radius:50%;">${initials}</div>
+          <div class="member-row-info" style="flex:1; text-align:left;">
+            <div class="member-row-name" style="font-weight:600; font-size:13px; color:var(--forest-dark);">${u.name}</div>
+            <div class="member-row-flat" style="font-size:11px; color:var(--muted);">${u.role} · ${u.tower}, Flat ${u.flat}</div>
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--muted); line-height:1.4; text-align:left;">
+          <div>📞 ${u.phone}</div>
+          <div>✉️ ${u.email}</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button class="btn" onclick="approveUser('${u.email}')" style="flex:1; padding:8px; font-size:12px; background:var(--forest); color:white; border-radius:8px; height:auto;">Approve</button>
+          <button class="btn" onclick="rejectUser('${u.email}')" style="flex:1; padding:8px; font-size:12px; background:var(--terracotta); color:white; border-radius:8px; height:auto;">Reject</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  window.approveUser = function(email) {
+    const idx = users.findIndex(u => u.email === email);
+    if (idx !== -1) {
+      users[idx].status = 'Approved';
+      localStorage.setItem('society_users', JSON.stringify(users));
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      if (typeof fbSet === 'function') {
+        fbSet('society_users', users).then(() => {
+          showToast('User approved successfully!', 'success');
+          if (typeof pushNotification === 'function') {
+            pushNotification(`User approved: ${users[idx].name} (Flat ${users[idx].flat}) joined the society!`, "notice");
+          }
+          updateProfileUI();
+        });
+      } else {
+        showToast('User approved successfully!', 'success');
+        if (typeof pushNotification === 'function') {
+          pushNotification(`User approved: ${users[idx].name} (Flat ${users[idx].flat}) joined the society!`, "notice");
+        }
+        updateProfileUI();
+      }
+    }
+  };
+
+  window.revokeUser = function(email) {
+    if (!confirm('Are you sure you want to revoke access for this user?')) return;
+    const idx = users.findIndex(u => u.email === email);
+    if (idx !== -1) {
+      users[idx].status = 'Revoked';
+      localStorage.setItem('society_users', JSON.stringify(users));
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      if (typeof fbSet === 'function') {
+        fbSet('society_users', users).then(() => {
+          showToast('User access revoked!', 'error');
+          if (typeof pushNotification === 'function') {
+            pushNotification(`Access revoked: ${users[idx].name} (Flat ${users[idx].flat}) has been suspended by Admin.`, "notice");
+          }
+          updateProfileUI();
+        });
+      } else {
+        showToast('User access revoked!', 'error');
+        if (typeof pushNotification === 'function') {
+          pushNotification(`Access revoked: ${users[idx].name} (Flat ${users[idx].flat}) has been suspended by Admin.`, "notice");
+        }
+        updateProfileUI();
+      }
+    }
+  };
+
+  window.rejectUser = function(email) {
+    if (!confirm('Are you sure you want to reject this registration?')) return;
+    const idx = users.findIndex(u => u.email === email);
+    if (idx !== -1) {
+      const name = users[idx].name;
+      users.splice(idx, 1);
+      localStorage.setItem('society_users', JSON.stringify(users));
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      if (typeof fbSet === 'function') {
+        fbSet('society_users', users).then(() => {
+          showToast('User registration rejected!', 'error');
+          updateProfileUI();
+        });
+      } else {
+        showToast('User registration rejected!', 'error');
+        updateProfileUI();
+      }
+    }
+  };
 
   // Initial Run
   updateProfileUI();

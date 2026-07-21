@@ -634,12 +634,11 @@
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
+    if (!localStorage.getItem('loggedOutFlag')) {
       currentUser = defaultUser;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      window.location.href = 'profile.html';
     }
   }
 

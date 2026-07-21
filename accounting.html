@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -368,7 +368,8 @@
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
-      <div class="page-title">Accounting Desk</div>
+      <div class="page-title" style="flex:1;">Accounting Desk</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;">● Live</span>
     </div>
   </div>
 
@@ -615,34 +616,56 @@
   let incomes = [];
   let expenses = [];
 
+  let incomes = [];
+  let expenses = [];
+  let isListeningIncomes = false;
+  let isListeningExpenses = false;
+
   function initAccountingModule() {
-    incomes = JSON.parse(localStorage.getItem('society_incomes'));
-    expenses = JSON.parse(localStorage.getItem('society_expenses'));
+    if (typeof fbListen === 'function') {
+      if (!isListeningIncomes) {
+        isListeningIncomes = true;
+        fbListen('society_incomes', (data) => {
+          incomes = data || [];
+          if (incomes.length === 0) {
+            incomes = [
+              { id: 'INC-201', head: 'Maintenance', amount: 2000, flat: '201', mode: 'UPI', date: '20 Jul 2026 · 11:30 AM', note: 'July Maintenance paid by Sujeet Sharma' },
+              { id: 'INC-202', head: 'Parking', amount: 300, flat: '102', mode: 'Cash', date: '19 Jul 2026 · 04:00 PM', note: 'Extra slot parking fine reservation fee' },
+              { id: 'INC-203', head: 'Fine', amount: 500, flat: '405', mode: 'UPI', date: '18 Jul 2026 · 09:15 AM', note: 'Penalty for late garbage disposal' },
+              { id: 'INC-204', head: 'Rent', amount: 15000, flat: 'Clubhouse', mode: 'Bank Transfer', date: '15 Jul 2026 · 02:30 PM', note: 'Rent collection for social event wedding' },
+              { id: 'INC-205', head: 'Interest', amount: 4500, flat: 'Bank', mode: 'Bank Transfer', date: '01 Jul 2026 · 10:00 AM', note: 'Quarterly FD interest payouts' }
+            ];
+            fbSet('society_incomes', incomes);
+          }
+          renderLogs();
+          calculateSummaries();
+        });
+      }
 
-    // Seed mock invoices / incomes if empty
-    if (!incomes) {
-      incomes = [
-        { id: 'INC-201', head: 'Maintenance', amount: 2000, flat: '201', mode: 'UPI', date: '20 Jul 2026 · 11:30 AM', note: 'July Maintenance paid by Sujeet Sharma' },
-        { id: 'INC-202', head: 'Parking', amount: 300, flat: '102', mode: 'Cash', date: '19 Jul 2026 · 04:00 PM', note: 'Extra slot parking fine reservation fee' },
-        { id: 'INC-203', head: 'Fine', amount: 500, flat: '405', mode: 'UPI', date: '18 Jul 2026 · 09:15 AM', note: 'Penalty for late garbage disposal' },
-        { id: 'INC-204', head: 'Rent', amount: 15000, flat: 'Clubhouse', mode: 'Bank Transfer', date: '15 Jul 2026 · 02:30 PM', note: 'Rent collection for social event wedding' },
-        { id: 'INC-205', head: 'Interest', amount: 4500, flat: 'Bank', mode: 'Bank Transfer', date: '01 Jul 2026 · 10:00 AM', note: 'Quarterly FD interest payouts' }
-      ];
-      localStorage.setItem('society_incomes', JSON.stringify(incomes));
+      if (!isListeningExpenses) {
+        isListeningExpenses = true;
+        fbListen('society_expenses', (data) => {
+          expenses = data || [];
+          if (expenses.length === 0) {
+            expenses = [
+              { id: 'EXP-101', head: 'Electricity', amount: 12500, vendor: 'BESCOM', mode: 'Bank Transfer', date: '18 Jul 2026 · 03:00 PM', note: 'Tower A & B corridor lighting' },
+              { id: 'EXP-102', head: 'Salary', amount: 35000, vendor: 'Ramu & Staff', mode: 'Bank Transfer', date: '05 Jul 2026 · 11:00 AM', note: 'Staff salary disbursements' },
+              { id: 'EXP-103', head: 'Water', amount: 8000, vendor: 'Municipal Board', mode: 'Cheque', date: '10 Jul 2026 · 02:45 PM', note: 'Bulk water tanker supply' },
+              { id: 'EXP-104', head: 'Repairs', amount: 4500, vendor: 'Plumbing Experts', mode: 'Cash', date: '15 Jul 2026 · 10:15 AM', note: 'Corridor overhead leak fixes' }
+            ];
+            fbSet('society_expenses', expenses);
+          }
+          renderLogs();
+          calculateSummaries();
+        });
+      }
+    } else {
+      // LocalStorage offline fallback
+      incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+      expenses = JSON.parse(localStorage.getItem('society_expenses')) || [];
+      renderLogs();
+      calculateSummaries();
     }
-
-    if (!expenses) {
-      expenses = [
-        { id: 'EXP-101', head: 'Electricity', amount: 12500, vendor: 'BESCOM', mode: 'Bank Transfer', date: '18 Jul 2026 · 03:00 PM', note: 'Tower A & B corridor lighting' },
-        { id: 'EXP-102', head: 'Salary', amount: 35000, vendor: 'Ramu & Staff', mode: 'Bank Transfer', date: '05 Jul 2026 · 11:00 AM', note: 'Staff salary disbursements' },
-        { id: 'EXP-103', head: 'Water', amount: 8000, vendor: 'Municipal Board', mode: 'Cheque', date: '10 Jul 2026 · 02:45 PM', note: 'Bulk water tanker supply' },
-        { id: 'EXP-104', head: 'Repairs', amount: 4500, vendor: 'Plumbing Experts', mode: 'Cash', date: '15 Jul 2026 · 10:15 AM', note: 'Corridor overhead leak fixes' }
-      ];
-      localStorage.setItem('society_expenses', JSON.stringify(expenses));
-    }
-
-    renderLogs();
-    calculateSummaries();
   }
 
   function calculateSummaries() {
@@ -718,15 +741,22 @@
     };
 
     incomes.unshift(newInc);
-    localStorage.setItem('society_incomes', JSON.stringify(incomes));
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_incomes', incomes).then(() => {
+        alert('Income entry recorded and synced successfully!');
+      });
+    } else {
+      localStorage.setItem('society_incomes', JSON.stringify(incomes));
+      renderLogs();
+      calculateSummaries();
+      alert('Income entry recorded successfully!');
+    }
 
     // Reset Inputs
     document.getElementById('incAmount').value = '';
     document.getElementById('incFlat').value = '';
     document.getElementById('incNote').value = '';
-
-    initAccountingModule();
-    alert('Income entry recorded successfully!');
   }
 
   // Add Expense
@@ -760,15 +790,22 @@
     };
 
     expenses.unshift(newExp);
-    localStorage.setItem('society_expenses', JSON.stringify(expenses));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_expenses', expenses).then(() => {
+        alert('Expense entry recorded and synced successfully!');
+      });
+    } else {
+      localStorage.setItem('society_expenses', JSON.stringify(expenses));
+      renderLogs();
+      calculateSummaries();
+      alert('Expense entry recorded successfully!');
+    }
 
     // Reset Inputs
     document.getElementById('expAmount').value = '';
     document.getElementById('expVendor').value = '';
     document.getElementById('expNote').value = '';
-
-    initAccountingModule();
-    alert('Expense entry recorded successfully!');
   }
 
   // Dynamic Reports Generator

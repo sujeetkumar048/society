@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -139,6 +139,28 @@
     text-transform:uppercase;
     letter-spacing:.3px;
   }
+  .delete-btn{
+    background:var(--terracotta);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:10px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:4px;
+    transition:background .2s;
+  }
+  .delete-btn:hover{
+    background:#a64232;
+  }
+  .delete-btn svg{
+    width:12px;
+    height:12px;
+    stroke:#fff;
+  }
   .status-pending{
     background:var(--marigold-soft);
     color:#9C7412;
@@ -150,6 +172,14 @@
   .status-resolved{
     background:#E4EEE8;
     color:var(--forest);
+  }
+  .status-on-hold{
+    background:#F5E1DC;
+    color:var(--terracotta);
+  }
+  .status-closed{
+    background:var(--line);
+    color:var(--muted);
   }
   .complaint-title{
     font-family:'Space Grotesk',sans-serif;
@@ -256,6 +286,20 @@
     background:linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
     color:#fff;
   }
+  .form-select{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .form-select:focus{
+    outline:none;
+    border-color:var(--forest);
+  }
 
   /* ===== BOTTOM NAV ===== */
   .bottom-nav{
@@ -299,7 +343,8 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-top">
-      <div class="page-title">Complaints</div>
+      <div class="page-title" style="flex:1;">Complaints</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;margin-right:12px;">● Live</span>
       <a href="add-complaint.html" class="add-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </a>
@@ -312,7 +357,9 @@
       <div class="filter-tab active" onclick="filterComplaints('all')">All</div>
       <div class="filter-tab" onclick="filterComplaints('pending')">Pending</div>
       <div class="filter-tab" onclick="filterComplaints('in-progress')">In Progress</div>
+      <div class="filter-tab" onclick="filterComplaints('on-hold')">On Hold</div>
       <div class="filter-tab" onclick="filterComplaints('resolved')">Resolved</div>
+      <div class="filter-tab" onclick="filterComplaints('closed')">Closed</div>
     </div>
 
     <div id="complaintsList">
@@ -355,6 +402,17 @@
       <div class="detail-row">
         <div class="detail-label">Status</div>
         <div class="detail-value" id="modalStatus" style="font-weight: 700;">Pending</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Change Status</div>
+        <select id="statusChangeSelect" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="updateComplaintStatus()">
+          <option value="">Select new status...</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
+        </select>
       </div>
       <div class="detail-row" id="assignedWorkerRow" style="display:none;">
         <div class="detail-label">Assigned Worker</div>
@@ -412,14 +470,27 @@
     notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
   };
 
+  const secondAdmin = {
+    name: "Admin User",
+    phone: "+91 99999 88888",
+    email: "admin@society.com",
+    role: "Super Admin",
+    tower: "Tower B",
+    flat: "101",
+    memberSince: "Jan 2024",
+    flatType: "2 BHK",
+    password: "123456",
+    privacy: { showPhone: true, showEmail: true, allowVisitors: true, profileVisible: true },
+    notifications: { maintenance: true, visitor: true, notice: true, complaint: true, chat: true, payment: true }
+  };
+
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
+    if (!localStorage.getItem('loggedOutFlag')) {
       currentUser = defaultUser;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      window.location.href = 'profile.html';
     }
   }
 
@@ -433,23 +504,44 @@
 
   // Load complaints database
   let complaints = [];
+  let currentComplaintId = null;
+  let isListeningComplaints = false;
+
   function initComplaints() {
     if (!currentUser) return;
 
-    const stored = JSON.parse(localStorage.getItem('society_complaints')) || [];
-    
-    // Default list
-    const defaults = [
-      { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding to calls from floors 3-5.", priority: "High", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
-      { id: "CMP-2026-041", title: "Water leakage in corridor", desc: "Water leaking from ceiling on 4th floor corridor, Tower B.", priority: "High", location: "Tower B", time: "17 Jul 2026 · 11:30 AM", status: "Pending" },
-      { id: "CMP-2026-040", title: "Garden lights not working", desc: "Multiple garden lights in central lawn area are not functioning.", priority: "Medium", location: "Garden", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" },
-      { id: "CMP-2026-039", title: "Parking slot dispute", desc: "Vehicle parked in reserved slot B-201 without authorization.", priority: "Low", location: "Parking B", time: "13 Jul 2026 · 09:15 AM", status: "Resolved" },
-      { id: "CMP-2026-038", title: "Common area cleaning", desc: "Staircase area in Tower B needs thorough cleaning.", priority: "Medium", location: "Tower B", time: "13 Jul 2026 · 04:00 PM", status: "In Progress" }
-    ];
-
-    // Combine them
-    complaints = [...stored, ...defaults];
-    renderComplaints('all');
+    if (typeof fbListen === 'function') {
+      if (!isListeningComplaints) {
+        isListeningComplaints = true;
+        fbListen('society_complaints', (data) => {
+          complaints = data || [];
+          if (complaints.length === 0) {
+            complaints = [
+              { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding to calls from floors 3-5.", priority: "High", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
+              { id: "CMP-2026-041", title: "Water leakage in corridor", desc: "Water leaking from ceiling on 4th floor corridor, Tower B.", priority: "High", location: "Tower B", time: "17 Jul 2026 · 11:30 AM", status: "Pending" },
+              { id: "CMP-2026-040", title: "Garden lights not working", desc: "Multiple garden lights in central lawn area are not functioning.", priority: "Medium", location: "Garden", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" },
+              { id: "CMP-2026-039", title: "Parking slot dispute", desc: "Vehicle parked in reserved slot B-201 without authorization.", priority: "Low", location: "Parking B", time: "13 Jul 2026 · 09:15 AM", status: "Resolved" },
+              { id: "CMP-2026-038", title: "Common area cleaning", desc: "Staircase area in Tower B needs thorough cleaning.", priority: "Medium", location: "Tower B", time: "13 Jul 2026 · 04:00 PM", status: "In Progress" }
+            ];
+            fbSet('society_complaints', complaints);
+          }
+          localStorage.setItem('society_complaints', JSON.stringify(complaints));
+          const activeFilter = document.querySelector('.filter-tab.active')?.textContent.toLowerCase().replace(' ', '-') || 'all';
+          renderComplaints(activeFilter === 'all' ? 'all' : activeFilter);
+        });
+      }
+    } else {
+      const stored = JSON.parse(localStorage.getItem('society_complaints')) || [];
+      const defaults = [
+        { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding to calls from floors 3-5.", priority: "High", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
+        { id: "CMP-2026-041", title: "Water leakage in corridor", desc: "Water leaking from ceiling on 4th floor corridor, Tower B.", priority: "High", location: "Tower B", time: "17 Jul 2026 · 11:30 AM", status: "Pending" },
+        { id: "CMP-2026-040", title: "Garden lights not working", desc: "Multiple garden lights in central lawn area are not functioning.", priority: "Medium", location: "Garden", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" },
+        { id: "CMP-2026-039", title: "Parking slot dispute", desc: "Vehicle parked in reserved slot B-201 without authorization.", priority: "Low", location: "Parking B", time: "13 Jul 2026 · 09:15 AM", status: "Resolved" },
+        { id: "CMP-2026-038", title: "Common area cleaning", desc: "Staircase area in Tower B needs thorough cleaning.", priority: "Medium", location: "Tower B", time: "13 Jul 2026 · 04:00 PM", status: "In Progress" }
+      ];
+      complaints = [...stored, ...defaults];
+      renderComplaints('all');
+    }
   }
 
   function renderComplaints(filter) {
@@ -464,19 +556,26 @@
       let statusClass = 'status-pending';
       if (c.status === 'In Progress') statusClass = 'status-in-progress';
       if (c.status === 'Resolved') statusClass = 'status-resolved';
+      if (c.status === 'On Hold') statusClass = 'status-on-hold';
+      if (c.status === 'Closed') statusClass = 'status-closed';
+
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
 
       const card = document.createElement('div');
       card.className = 'complaint-card';
       card.setAttribute('data-status', statusKey);
-      card.onclick = function() {
-        viewComplaint(c.id, c.title, c.desc, c.priority, c.location, c.time);
-      };
       card.innerHTML = `
         <div class="complaint-header">
           <div class="complaint-id">#${c.id}</div>
-          <div class="complaint-status ${statusClass}">${c.status}</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div class="complaint-status ${statusClass}">${c.status}</div>
+            ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteComplaint('${c.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>` : ''}
+          </div>
         </div>
-        <div class="complaint-title">${c.title}</div>
+        <div class="complaint-title" style="cursor:pointer;" onclick="viewComplaint('${c.id}', '${c.title}', '${c.desc}', '${c.priority}', '${c.location}', '${c.time}', '${c.status}')">${c.title}</div>
         <div class="complaint-desc">${c.desc}</div>
         <div class="complaint-meta">
           <div class="meta-item">
@@ -504,14 +603,112 @@
     renderComplaints(filter);
   }
 
-  function viewComplaint(id, title, desc, priority, location, date) {
+  function viewComplaint(id, title, desc, priority, location, date, status) {
+    currentComplaintId = id;
     document.getElementById('modalId').textContent = '#' + id;
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalDesc').textContent = desc;
     document.getElementById('modalPriority').textContent = priority.charAt(0).toUpperCase() + priority.slice(1);
     document.getElementById('modalLocation').textContent = location;
     document.getElementById('modalDate').textContent = date;
+    document.getElementById('modalStatus').textContent = status || 'Pending';
+    
+    // Set dropdown to current status
+    document.getElementById('statusChangeSelect').value = status || 'Pending';
+    
     openModal('complaintModal');
+  }
+
+  async function updateComplaintStatus() {
+    const newStatus = document.getElementById('statusChangeSelect').value;
+    if (!newStatus || !currentComplaintId) return;
+
+    // Update in complaints array
+    const complaintIndex = complaints.findIndex(c => c.id === currentComplaintId);
+    if (complaintIndex !== -1) {
+      complaints[complaintIndex].status = newStatus;
+      
+      // Update localStorage
+      localStorage.setItem('society_complaints', JSON.stringify(complaints));
+      
+      // Try to update Firebase
+      try {
+        await fbSet('society_complaints', complaints);
+        if (typeof pushNotification === 'function') {
+          pushNotification(`Complaint ${currentComplaintId} status updated: ${newStatus}`, "complaint");
+        }
+      } catch (e) {
+        console.warn('Firebase update failed, localStorage updated:', e.message);
+      }
+      
+      // Update modal display
+      document.getElementById('modalStatus').textContent = newStatus;
+      
+      // Re-render complaints list
+      const activeFilter = document.querySelector('.filter-tab.active')?.textContent.toLowerCase().replace(' ', '-') || 'all';
+      renderComplaints(activeFilter === 'all' ? 'all' : activeFilter);
+      
+      // Show success feedback
+      alert('Status updated to: ' + newStatus);
+    }
+  }
+
+  async function deleteComplaint(complaintId) {
+    if (!confirm('Are you sure you want to delete this complaint? This action cannot be undone.')) return;
+
+    // Check admin permission
+    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+      alert('You do not have permission to delete complaints.');
+      return;
+    }
+
+    // Get complaint details before deletion for logging
+    const complaintToDelete = complaints.find(c => c.id === complaintId);
+
+    // Remove from complaints array
+    complaints = complaints.filter(c => c.id !== complaintId);
+    
+    // Update localStorage
+    localStorage.setItem('society_complaints', JSON.stringify(complaints));
+    
+    // Try to update Firebase
+    try {
+      await fbSet('society_complaints', complaints);
+    } catch (e) {
+      console.warn('Firebase update failed, localStorage updated:', e.message);
+    }
+    
+    // Log deletion details
+    logDeletion('complaint', complaintId, complaintToDelete);
+    
+    // Re-render complaints list
+    const activeFilter = document.querySelector('.filter-tab.active').textContent.toLowerCase().replace(' ', '-');
+    renderComplaints(activeFilter === 'all' ? 'all' : activeFilter);
+    
+    // Show success feedback
+    alert('Complaint deleted successfully.');
+  }
+
+  function logDeletion(type, id, details) {
+    const deletionLogs = JSON.parse(localStorage.getItem('deletion_logs') || '[]');
+    
+    const logEntry = {
+      id: Date.now(),
+      type: type,
+      itemId: id,
+      details: details,
+      deletedBy: currentUser.name,
+      deletedByRole: currentUser.role,
+      deletedByFlat: currentUser.flat,
+      timestamp: new Date().toISOString(),
+      timestampFormatted: new Date().toLocaleString('en-IN', { 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      })
+    };
+    
+    deletionLogs.unshift(logEntry);
+    localStorage.setItem('deletion_logs', JSON.stringify(deletionLogs));
   }
 
   // Close modal when clicking outside

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -127,6 +127,28 @@
     font-family:'IBM Plex Mono',monospace;
     font-size:11px;
     color:var(--muted);
+  }
+  .delete-btn{
+    background:var(--terracotta);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:10px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:4px;
+    transition:background .2s;
+  }
+  .delete-btn:hover{
+    background:#a64232;
+  }
+  .delete-btn svg{
+    width:12px;
+    height:12px;
+    stroke:#fff;
   }
   .notice-title{
     font-family:'Space Grotesk',sans-serif;
@@ -300,7 +322,8 @@
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
-      <div class="page-title">Notice Board</div>
+      <div class="page-title" style="flex:1;">Notice Board</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;">● Live</span>
     </div>
   </div>
 
@@ -407,12 +430,11 @@
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
+    if (!localStorage.getItem('loggedOutFlag')) {
       currentUser = defaultUser;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      window.location.href = 'profile.html';
     }
   }
 
@@ -426,53 +448,66 @@
 
   // Load notices database
   let notices = [];
+  let isListeningNotices = false;
+
   function initNotices() {
-    notices = JSON.parse(localStorage.getItem('society_notices'));
-
-    if (!notices) {
-      notices = [
-        {
-          type: "urgent",
-          title: "Water Supply Maintenance",
-          desc: "Water supply will be interrupted tomorrow from 10 AM to 2 PM for pipeline maintenance in Tower B.",
-          date: "Jul 20, 2026",
-          author: "Committee",
-          views: 45
-        },
-        {
-          type: "event",
-          title: "Annual General Meeting",
-          desc: "AGM scheduled for July 25th at 6 PM in the community hall. All residents are requested to attend.",
-          date: "Jul 18, 2026",
-          author: "Secretary",
-          views: 78
-        },
-        {
-          type: "general",
-          title: "New Security Guidelines",
-          desc: "Updated security protocols effective from August 1st. All visitors must pre-register through the app.",
-          date: "Jul 15, 2026",
-          author: "Security",
-          views: 92
-        },
-        {
-          type: "general",
-          title: "Garden Maintenance Schedule",
-          desc: "Regular garden maintenance every Sunday morning. Please cooperate with the maintenance staff.",
-          date: "Jul 10, 2026",
-          author: "Committee",
-          views: 56
-        }
-      ];
-      localStorage.setItem('society_notices', JSON.stringify(notices));
+    if (typeof fbListen === 'function') {
+      if (!isListeningNotices) {
+        isListeningNotices = true;
+        fbListen('society_notices', (data) => {
+          notices = data || [];
+          if (notices.length === 0) {
+            notices = [
+              {
+                type: "urgent",
+                title: "Water Supply Maintenance",
+                desc: "Water supply will be interrupted tomorrow from 10 AM to 2 PM for pipeline maintenance in Tower B.",
+                date: "Jul 20, 2026",
+                author: "Committee",
+                views: 45
+              },
+              {
+                type: "event",
+                title: "Annual General Meeting",
+                desc: "AGM scheduled for July 25th at 6 PM in the community hall. All residents are requested to attend.",
+                date: "Jul 18, 2026",
+                author: "Secretary",
+                views: 78
+              },
+              {
+                type: "general",
+                title: "New Security Guidelines",
+                desc: "Updated security protocols effective from August 1st. All visitors must pre-register through the app.",
+                date: "Jul 15, 2026",
+                author: "Security",
+                views: 92
+              },
+              {
+                type: "general",
+                title: "Garden Maintenance Schedule",
+                desc: "Regular garden maintenance every Sunday morning. Please cooperate with the maintenance staff.",
+                date: "Jul 10, 2026",
+                author: "Committee",
+                views: 56
+              }
+            ];
+            fbSet('society_notices', notices);
+          }
+          localStorage.setItem('society_notices', JSON.stringify(notices));
+          renderNoticesList();
+        });
+      }
+    } else {
+      notices = JSON.parse(localStorage.getItem('society_notices')) || [];
+      renderNoticesList();
     }
-
-    renderNoticesList();
   }
 
   function renderNoticesList() {
     const listContainer = document.getElementById('noticesList');
     listContainer.innerHTML = '';
+
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
 
     notices.forEach((n, idx) => {
       const tagClass = n.type === 'urgent' ? 'tag-urgent' : n.type === 'event' ? 'tag-event' : 'tag-general';
@@ -480,13 +515,18 @@
       
       const card = document.createElement('div');
       card.className = 'notice-card';
-      card.onclick = function() { viewNoticeDetail(idx); };
       card.innerHTML = `
         <div class="notice-header">
-          <span class="notice-tag ${tagClass}">${tagLabel}</span>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="notice-tag ${tagClass}">${tagLabel}</span>
+            ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteNotice(${idx})">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>` : ''}
+          </div>
           <span class="notice-date">${n.date}</span>
         </div>
-        <div class="notice-title">${n.title}</div>
+        <div class="notice-title" style="cursor:pointer;" onclick="viewNoticeDetail(${idx})">${n.title}</div>
         <div class="notice-preview">${n.desc.substring(0, 100)}${n.desc.length > 100 ? '...' : ''}</div>
         <div class="notice-meta">
           <div class="meta-item">
@@ -529,24 +569,40 @@
     };
 
     notices.unshift(newNotice);
-    localStorage.setItem('society_notices', JSON.stringify(notices));
-
-    renderNoticesList();
     
+    if (typeof fbSet === 'function') {
+      fbSet('society_notices', notices).then(() => {
+        if (typeof pushNotification === 'function') {
+          pushNotification(`New Notice published: ${title}`, "notice");
+        }
+        alert('Notice published successfully!');
+      });
+    } else {
+      localStorage.setItem('society_notices', JSON.stringify(notices));
+      if (typeof pushNotification === 'function') {
+        pushNotification(`New Notice published: ${title}`, "notice");
+      }
+      alert('Notice published successfully!');
+    }
+
     // Reset form
     document.getElementById('noticeTitle').value = '';
     document.getElementById('noticeDescription').value = '';
     document.getElementById('noticeType').value = 'general';
     
     closeModal('addNoticeModal');
-    alert('Notice published successfully!');
   }
 
   function viewNoticeDetail(idx) {
     const n = notices[idx];
     n.views = (n.views || 0) + 1;
-    localStorage.setItem('society_notices', JSON.stringify(notices));
-    renderNoticesList();
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_notices', notices);
+    } else {
+      localStorage.setItem('society_notices', JSON.stringify(notices));
+      renderNoticesList();
+    }
 
     const tagClass = n.type === 'urgent' ? 'tag-urgent' : n.type === 'event' ? 'tag-event' : 'tag-general';
     const tagLabel = n.type.charAt(0).toUpperCase() + n.type.slice(1);
@@ -563,6 +619,58 @@
     document.getElementById('viewModalViews').textContent = `${n.views} views`;
 
     openModal('viewNoticeModal');
+  }
+
+  function deleteNotice(idx) {
+    if (!confirm('Are you sure you want to delete this notice? This action cannot be undone.')) return;
+
+    // Check admin permission
+    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+      alert('You do not have permission to delete notices.');
+      return;
+    }
+
+    // Get notice details before deletion for logging
+    const noticeToDelete = notices[idx];
+
+    // Remove from notices array
+    notices.splice(idx, 1);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_notices', notices).then(() => {
+        // Log deletion details
+        logDeletion('notice', noticeToDelete.title, noticeToDelete);
+      });
+    } else {
+      localStorage.setItem('society_notices', JSON.stringify(notices));
+      logDeletion('notice', noticeToDelete.title, noticeToDelete);
+      renderNoticesList();
+    }
+    
+    // Show success feedback
+    alert('Notice deleted successfully.');
+  }
+
+  function logDeletion(type, id, details) {
+    const deletionLogs = JSON.parse(localStorage.getItem('deletion_logs') || '[]');
+    
+    const logEntry = {
+      id: Date.now(),
+      type: type,
+      itemId: id,
+      details: details,
+      deletedBy: currentUser.name,
+      deletedByRole: currentUser.role,
+      deletedByFlat: currentUser.flat,
+      timestamp: new Date().toISOString(),
+      timestampFormatted: new Date().toLocaleString('en-IN', { 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      })
+    };
+    
+    deletionLogs.unshift(logEntry);
+    localStorage.setItem('deletion_logs', JSON.stringify(deletionLogs));
   }
 
   // Close modals clicking outside

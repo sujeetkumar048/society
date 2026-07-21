@@ -45,11 +45,13 @@ const DB_PATHS = {
   'society_parking_visitors'           : '/parking/visitors',
   'society_expenses'                   : '/accounting/expenses',
   'society_income'                     : '/accounting/income',
+  'society_incomes'                    : '/accounting/income',
   'society_directory_workers'          : '/directory/workers',
   'society_worker_bookings'            : '/worker_bookings',
   'chat_messages'                      : '/chat',
   'society_documents'                  : '/documents',
   'society_gate_log'                   : '/gate_log',
+  'society_notifications'             : '/notifications',
 };
 
 // ─── Core Helper: fbDB ──────────────────────────────────────────────────────
@@ -218,6 +220,35 @@ db.ref('.info/connected').on('value', snap => {
     badge.textContent = window._fbOnline ? '🟢 Live' : '🔴 Offline';
     badge.style.color  = window._fbOnline ? '#1F4D3D' : '#D36B53';
   }
-});
+// ─── Global Notification Helper ──────────────────────────────────────────────
+window.pushNotification = function(title, type) {
+  if (typeof fbGet === 'function') {
+    fbGet('society_notifications').then(list => {
+      const arr = list || [];
+      const newNotif = {
+        id: 'NOTIF-' + Date.now() + '-' + Math.floor(Math.random() * 100),
+        title: title,
+        time: Date.now(),
+        type: type
+      };
+      arr.unshift(newNotif);
+      if (arr.length > 20) {
+        arr.length = 20;
+      }
+      fbSet('society_notifications', arr);
+    });
+  } else {
+    const arr = JSON.parse(localStorage.getItem('society_notifications')) || [];
+    const newNotif = {
+      id: 'NOTIF-' + Date.now(),
+      title: title,
+      time: Date.now(),
+      type: type
+    };
+    arr.unshift(newNotif);
+    if (arr.length > 20) arr.length = 20;
+    localStorage.setItem('society_notifications', JSON.stringify(arr));
+  }
+};
 
 console.log('[SR Gold Society] Firebase initialised → project: society048');

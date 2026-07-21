@@ -51,8 +51,8 @@
   .member-chip{font-size:10px;background:#E4EEE8;color:var(--forest);padding:2px 7px;border-radius:6px;font-weight:600;}
 
   /* ── FAB ── */
-  .fab{position:fixed;bottom:80px;right:50%;transform:translateX(calc(50% - 180px));width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--forest-dark));color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 6px 22px rgba(21,53,41,.3);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .2s;}
-  .fab:active{transform:translateX(calc(50% - 180px)) scale(.92);}
+  .fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--forest-dark));color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 6px 22px rgba(21,53,41,.3);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .2s;}
+  .fab:active{transform:scale(.92);}
 
   /* ── FULL-SCREEN CHAT WINDOW ── */
   .chat-window{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:200;display:none;flex-direction:column;}
@@ -112,7 +112,7 @@
   .nav-item svg{width:19px;height:19px;stroke:var(--muted);}
   .nav-item.active{color:var(--forest);}
   .nav-item.active svg{stroke:var(--forest);}
-  @media(min-width:481px){body{background:#E9ECE5;}.app{margin:24px 0;border-radius:26px;box-shadow:0 24px 60px rgba(21,53,41,.14);overflow:hidden;}.fab{transform:translateX(202px);}.chat-window,.settings-panel{border-radius:26px;overflow:hidden;}}
+  @media(min-width:481px){body{background:#E9ECE5;}.app{margin:24px 0;border-radius:26px;box-shadow:0 24px 60px rgba(21,53,41,.14);overflow:hidden;}.fab{right:calc(50% - 240px);}.chat-window,.settings-panel{border-radius:26px;overflow:hidden;}}
 </style>
   <!-- ═══ Firebase SDK (Compat) ═══ -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -137,6 +137,7 @@
   <div class="tab-row">
     <button class="tab-btn active" id="tabIndividual" onclick="switchTab('individual')">Individual</button>
     <button class="tab-btn" id="tabGroup" onclick="switchTab('group')">Groups</button>
+    <button class="tab-btn" id="tabSMS" onclick="switchTab('sms')">SMS Log</button>
   </div>
 
   <!-- CONTENT -->
@@ -216,20 +217,29 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">💬 New Individual Chat</div>
+    
     <div class="form-group">
-      <label class="form-label">Flat Number to Chat With</label>
-      <input class="form-input" id="indFlatNo" placeholder="e.g. 302, 104, 501…">
+      <label class="form-label">Search Resident (Name, Phone, Email, or Flat)</label>
+      <input class="form-input" id="indSearchVal" placeholder="Type name, phone, email or flat..." oninput="searchResident()">
     </div>
-    <div id="flatResidentPreview" style="display:none; background:var(--paper); border-radius:10px; padding:12px; border:1px solid var(--line); margin-bottom:14px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Flat Resident</div>
-      <div id="flatResidentName" style="font-weight:700;font-size:14px;color:var(--forest-dark);"></div>
-      <div id="flatResidentPhone" style="font-size:12px;color:var(--muted);"></div>
+    
+    <!-- Real-time search results list -->
+    <div id="indSearchResults" style="max-height: 180px; overflow-y: auto; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+      <!-- Populated dynamically -->
     </div>
-    <button class="btn-outline" style="width:100%;margin-bottom:10px;" onclick="lookupFlat()">🔍 Find Resident</button>
+    
+    <!-- Selected user preview -->
+    <div id="selectedUserPreview" style="display:none; background:#E4EEE8; border-radius:12px; padding:12px; border:1px solid var(--line); margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Selected Resident</div>
+      <div id="selectedUserName" style="font-weight:700;font-size:14px;color:var(--forest-dark);"></div>
+      <div id="selectedUserFlat" style="font-size:12px;color:var(--muted);"></div>
+    </div>
+    
     <div class="form-group">
       <label class="form-label">First Message</label>
       <input class="form-input" id="indFirstMsg" placeholder="Type your message…">
     </div>
+    
     <button class="btn-primary" onclick="startIndividualChat()">Start Chat</button>
     <button onclick="closeModal('modalIndividual')" style="width:100%;padding:12px;border:none;background:transparent;color:var(--muted);font-size:14px;cursor:pointer;margin-top:6px;">Cancel</button>
   </div>
@@ -245,7 +255,8 @@
       <input class="form-input" id="grpName" placeholder="e.g. Tower B Residents, Party Planners…">
     </div>
     <div class="form-group">
-      <label class="form-label">Add Members (select flat numbers)</label>
+      <label class="form-label">Add Members</label>
+      <input class="form-input" id="grpMemberSearch" placeholder="Filter by name, phone, email, flat..." oninput="filterGroupMemberPicker()" style="margin-bottom: 8px;">
       <div class="member-list-modal" id="grpMemberPickList">
         <!-- populated from society_users -->
       </div>
@@ -267,6 +278,14 @@ const defaultUser = {
   notifications:{maintenance:true,visitor:true,notice:true,complaint:true,chat:true,payment:true}
 };
 
+const secondAdmin = {
+  name:"Admin User", phone:"+91 99999 88888", email:"admin@society.com",
+  role:"Super Admin", tower:"Tower B", flat:"101",
+  memberSince:"Jan 2024", flatType:"2 BHK", password:"123456",
+  privacy:{showPhone:true,showEmail:true,allowVisitors:true,profileVisible:true},
+  notifications:{maintenance:true,visitor:true,notice:true,complaint:true,chat:true,payment:true}
+};
+
 let currentUser = JSON.parse(localStorage.getItem('currentUser'));
 if (!currentUser) { currentUser = defaultUser; localStorage.setItem('currentUser', JSON.stringify(currentUser)); }
 
@@ -284,6 +303,24 @@ const sampleUsers = [
 
 let allUsers = JSON.parse(localStorage.getItem('society_users')) || sampleUsers;
 
+// ── Firebase Listener for Users ──
+if (typeof fbListen === 'function') {
+  fbListen('society_users', (data) => {
+    if (data && data.length > 0) {
+      allUsers = data;
+    } else {
+      allUsers = sampleUsers;
+    }
+    // Re-populate active lists if needed
+    if (document.getElementById('modalGroup').classList.contains('active')) {
+      populateGroupMemberPicker();
+    }
+    if (document.getElementById('settingsPanel').style.display === 'flex') {
+      openGroupSettings();
+    }
+  });
+}
+
 // ══════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════
@@ -299,12 +336,30 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tabIndividual').classList.toggle('active', tab === 'individual');
   document.getElementById('tabGroup').classList.toggle('active',      tab === 'group');
-  renderChatList();
+  document.getElementById('tabSMS').classList.toggle('active',        tab === 'sms');
+  
+  // Hide FAB for SMS tab
+  document.getElementById('fabBtn').style.display = tab === 'sms' ? 'none' : 'flex';
+  
+  if (tab === 'sms') {
+    renderSMSLog();
+  } else {
+    renderChatList();
+  }
 }
 
 function onFabClick() {
-  if (currentTab === 'individual') openModal('modalIndividual');
-  else { populateGroupMemberPicker(); openModal('modalGroup'); }
+  if (currentTab === 'individual') {
+    document.getElementById('indSearchVal').value = '';
+    document.getElementById('indSearchResults').innerHTML = '';
+    document.getElementById('selectedUserPreview').style.display = 'none';
+    document.getElementById('indFirstMsg').value = '';
+    selectedUser = null;
+    openModal('modalIndividual');
+  } else { 
+    populateGroupMemberPicker(); 
+    openModal('modalGroup'); 
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -345,6 +400,52 @@ function isThreadMine(t) {
 function lastMsg(t) {
   const msgs = t.messages ? Object.values(t.messages) : [];
   return msgs.length ? msgs[msgs.length - 1] : null;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER SMS LOG
+// ══════════════════════════════════════════════
+function renderSMSLog() {
+  const el = document.getElementById('mainContent');
+  el.innerHTML = '';
+
+  const smsNotifications = JSON.parse(localStorage.getItem('sms_notifications') || '[]');
+
+  if (smsNotifications.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📱</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;margin-bottom:6px;">No SMS notifications</div>
+      <div style="font-size:13px;">SMS notifications will appear here when you send messages to flat members</div>
+    </div>`;
+    return;
+  }
+
+  // Sort by timestamp desc
+  smsNotifications.sort((a, b) => b.timestamp - a.timestamp);
+
+  let html = '<div class="section-label">SMS Notification Log</div>';
+  
+  smsNotifications.forEach(sms => {
+    const timeLabel = fmtTime(sms.timestamp);
+    const statusColor = sms.status === 'pending' ? 'var(--marigold)' : 'var(--forest)';
+    
+    html += `
+      <div class="chat-item">
+        <div class="avatar" style="background:var(--sky);">📱</div>
+        <div class="chat-info">
+          <div class="chat-meta">
+            <div class="chat-name">${sms.senderName} → ${sms.phone}</div>
+            <div class="chat-time">${timeLabel}</div>
+          </div>
+          <div class="chat-preview">${escHtml(sms.message)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">
+            Type: ${sms.type} · Status: <span style="color:${statusColor};font-weight:600;">${sms.status}</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  el.innerHTML = html;
 }
 
 // ══════════════════════════════════════════════
@@ -498,56 +599,102 @@ function sendMsg() {
     timestamp: Date.now()
   };
 
-  firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).push(msg);
+  const thread = threads[activeThreadId];
+  if (thread) {
+    // Send SMS notifications to other members
+    const otherMembers = (thread.members || []).filter(m => String(m.flat) !== String(currentUser.flat));
+    sendBulkSMSNotifications(otherMembers, currentUser.name, text, thread.type);
+  }
+
+  firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).push(msg).catch(err => {
+    alert('Error sending message: ' + err.message);
+    console.error('Message send error:', err);
+  });
   inputEl.value = '';
 }
 
 // ══════════════════════════════════════════════
-//  INDIVIDUAL CHAT — FLAT LOOKUP
+//  INDIVIDUAL CHAT — USER SELECTION
 // ══════════════════════════════════════════════
-let foundResident = null;
+let selectedUser = null;
 
-function lookupFlat() {
-  const flat = document.getElementById('indFlatNo').value.trim();
-  if (!flat) { alert('Enter a flat number.'); return; }
-  if (String(flat) === String(currentUser.flat)) { alert('That is your own flat!'); return; }
+function searchResident() {
+  const q = document.getElementById('indSearchVal').value.trim().toLowerCase();
+  const resultsDiv = document.getElementById('indSearchResults');
+  resultsDiv.innerHTML = '';
 
-  const norm = s => String(s).replace(/flat\s*/i,'').trim();
-  const res = allUsers.find(u => norm(u.flat) === norm(flat));
-
-  const preview = document.getElementById('flatResidentPreview');
-  if (res) {
-    foundResident = res;
-    document.getElementById('flatResidentName').textContent  = `${res.name} (Flat ${res.flat})`;
-    document.getElementById('flatResidentPhone').textContent = res.phone || '';
-    preview.style.display = 'block';
-  } else {
-    foundResident = null;
-    preview.style.display = 'block';
-    document.getElementById('flatResidentName').textContent  = `Flat ${flat} — resident details pending`;
-    document.getElementById('flatResidentPhone').textContent = 'They can reply once they open the app';
-    // Create a stub user for that flat
-    foundResident = { name: `Flat ${flat} Resident`, flat: flat, email: `flat${flat}@society.app` };
+  if (!q) {
+    return;
   }
+
+  const matches = allUsers.filter(u => {
+    if (String(u.flat) === String(currentUser.flat)) return false; // skip self
+    
+    return String(u.name || '').toLowerCase().includes(q) ||
+           String(u.phone || '').toLowerCase().includes(q) ||
+           String(u.email || '').toLowerCase().includes(q) ||
+           String(u.flat || '').toLowerCase().includes(q);
+  });
+
+  if (matches.length === 0) {
+    resultsDiv.innerHTML = `<div style="text-align:center;font-size:12.5px;color:var(--muted);padding:10px;">No residents match "${q}"</div>`;
+    return;
+  }
+
+  matches.forEach(u => {
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.id = `indPick_${u.flat}`;
+    row.style.cursor = 'pointer';
+    row.onclick = () => selectIndividualUser(u, row);
+    row.innerHTML = `
+      <div class="member-row-avatar">${u.name.substring(0,2).toUpperCase()}</div>
+      <div class="member-row-info">
+        <div class="member-row-name">${u.name}</div>
+        <div class="member-row-flat">Flat ${u.flat} · ${u.tower || 'Tower A'} · ${u.phone || ''}</div>
+      </div>
+      <input type="radio" name="indUserSelect" id="radio_${u.flat}" style="width:18px;height:18px;accent-color:var(--forest);" onclick="event.stopPropagation(); selectIndividualUser(${JSON.stringify(u).replace(/"/g, '&quot;')}, this.parentNode)">
+    `;
+    resultsDiv.appendChild(row);
+  });
+}
+
+function selectIndividualUser(user, row) {
+  selectedUser = user;
+  
+  // Update radio buttons
+  document.querySelectorAll('input[name="indUserSelect"]').forEach(radio => {
+    radio.checked = false;
+  });
+  const radio = document.getElementById(`radio_${user.flat}`);
+  if (radio) radio.checked = true;
+
+  // Update row styling
+  document.querySelectorAll('#indSearchResults .member-row').forEach(r => {
+    r.style.background = 'var(--paper)';
+  });
+  row.style.background = '#E4EEE8';
+
+  // Show selected user preview
+  document.getElementById('selectedUserName').textContent = user.name;
+  document.getElementById('selectedUserFlat').textContent = `Flat ${user.flat} · ${user.tower || 'Tower A'} · ${user.phone || ''}`;
+  document.getElementById('selectedUserPreview').style.display = 'block';
 }
 
 function startIndividualChat() {
-  const flat = document.getElementById('indFlatNo').value.trim();
   const firstMsg = document.getElementById('indFirstMsg').value.trim();
 
-  if (!flat) { alert('Enter the flat number.'); return; }
-  if (String(flat) === String(currentUser.flat)) { alert('You cannot chat with yourself.'); return; }
+  if (!selectedUser) { alert('Please select a user to chat with.'); return; }
   if (!firstMsg) { alert('Enter a first message.'); return; }
-  if (!foundResident) { lookupFlat(); if (!foundResident) return; }
 
-  const tid = indThreadId(currentUser.flat, flat);
+  const tid = indThreadId(currentUser.flat, selectedUser.flat);
 
   const thread = threads[tid] || {
     type: 'individual',
-    name: `Flat ${currentUser.flat} ↔ Flat ${flat}`,
+    name: `Flat ${currentUser.flat} ↔ Flat ${selectedUser.flat}`,
     members: [
-      { flat: currentUser.flat, name: currentUser.name, email: currentUser.email },
-      { flat: foundResident.flat, name: foundResident.name, email: foundResident.email }
+      { flat: currentUser.flat, name: currentUser.name, email: currentUser.email, phone: currentUser.phone },
+      { flat: selectedUser.flat, name: selectedUser.name, email: selectedUser.email, phone: selectedUser.phone || '' }
     ],
     createdAt: Date.now()
   };
@@ -556,12 +703,19 @@ function startIndividualChat() {
 
   const ref = firebase.database().ref(`/chat_threads/${tid}`);
   ref.set({ ...thread, messages: { [Date.now()]: msg } }).then(() => {
+    // Send SMS notification to the recipient if phone number exists
+    if (selectedUser.phone) {
+      sendSMSNotification(selectedUser.phone, currentUser.name, firstMsg, 'individual');
+    }
+    
     closeModal('modalIndividual');
-    document.getElementById('indFlatNo').value  = '';
     document.getElementById('indFirstMsg').value = '';
-    document.getElementById('flatResidentPreview').style.display = 'none';
-    foundResident = null;
+    document.getElementById('selectedUserPreview').style.display = 'none';
+    selectedUser = null;
     openChat(tid);
+  }).catch(err => {
+    alert('Error starting chat: ' + err.message);
+    console.error('Chat creation error:', err);
   });
 }
 
@@ -574,6 +728,8 @@ function populateGroupMemberPicker() {
   selectedGroupMembers.clear();
   const el = document.getElementById('grpMemberPickList');
   el.innerHTML = '';
+  const searchInput = document.getElementById('grpMemberSearch');
+  if (searchInput) searchInput.value = '';
 
   allUsers.forEach(u => {
     if (String(u.flat) === String(currentUser.flat)) return; // skip self
@@ -582,16 +738,34 @@ function populateGroupMemberPicker() {
     row.className = 'member-row';
     row.id = `pick_${u.flat}`;
     row.style.cursor = 'pointer';
+    row.setAttribute('data-search', `${u.phone || ''} ${u.email || ''}`.toLowerCase());
     row.onclick = () => toggleGroupMember(u.flat, u.name, row);
     row.innerHTML = `
       <div class="member-row-avatar">${u.name.substring(0,2).toUpperCase()}</div>
       <div class="member-row-info">
         <div class="member-row-name">${u.name}</div>
-        <div class="member-row-flat">Flat ${u.flat}</div>
+        <div class="member-row-flat">Flat ${u.flat} · ${u.phone || ''}</div>
       </div>
-      <input type="checkbox" id="chk_${u.flat}" style="width:18px;height:18px;accent-color:var(--forest);" onclick="toggleGroupMember('${u.flat}','${u.name}',document.getElementById('pick_${u.flat}'))">
+      <input type="checkbox" id="chk_${u.flat}" style="width:18px;height:18px;accent-color:var(--forest);" onclick="event.stopPropagation(); toggleGroupMember('${u.flat}','${u.name}',document.getElementById('pick_${u.flat}'))">
     `;
     el.appendChild(row);
+  });
+}
+
+function filterGroupMemberPicker() {
+  const q = document.getElementById('grpMemberSearch').value.trim().toLowerCase();
+  const rows = document.querySelectorAll('#grpMemberPickList .member-row');
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.member-row-name').textContent.toLowerCase();
+    const flat = row.querySelector('.member-row-flat').textContent.toLowerCase();
+    const searchStr = row.getAttribute('data-search') || '';
+    
+    if (name.includes(q) || flat.includes(q) || searchStr.includes(q)) {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
   });
 }
 
@@ -614,11 +788,11 @@ function createGroup() {
   if (selectedGroupMembers.size === 0) { alert('Select at least one member.'); return; }
 
   const members = [
-    { flat: currentUser.flat, name: currentUser.name, email: currentUser.email, role: 'admin' }
+    { flat: currentUser.flat, name: currentUser.name, email: currentUser.email, phone: currentUser.phone, role: 'admin' }
   ];
   selectedGroupMembers.forEach(flat => {
     const u = allUsers.find(u => String(u.flat) === flat);
-    if (u) members.push({ flat: u.flat, name: u.name, email: u.email, role: 'member' });
+    if (u) members.push({ flat: u.flat, name: u.name, email: u.email, phone: u.phone || '', role: 'member' });
   });
 
   const tid  = 'grp_' + Date.now();
@@ -632,11 +806,18 @@ function createGroup() {
   };
 
   firebase.database().ref(`/chat_threads/${tid}`).set(thread).then(() => {
+    // Send SMS notifications to all group members
+    const otherMembers = members.filter(m => String(m.flat) !== String(currentUser.flat));
+    sendBulkSMSNotifications(otherMembers, currentUser.name, `You have been added to group: ${name}`, 'group');
+    
     closeModal('modalGroup');
     document.getElementById('grpName').value = '';
     selectedGroupMembers.clear();
     switchTab('group');
     openChat(tid);
+  }).catch(err => {
+    alert('Error creating group: ' + err.message);
+    console.error('Group creation error:', err);
   });
 }
 
@@ -682,17 +863,18 @@ function openGroupSettings() {
 
   if (isAdmin) {
     html += `
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 10px;">Add Member</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 6px;">Add Member</div>
+      <input class="form-input" id="settingsAddSearch" placeholder="Filter by name, phone, email, flat..." oninput="filterSettingsAddList()" style="margin-bottom: 8px;">
       <div id="settingsAddList" style="display:flex;flex-direction:column;gap:8px;">
     `;
     const memberFlats = new Set(members.map(m => String(m.flat)));
     allUsers.filter(u => !memberFlats.has(String(u.flat))).forEach(u => {
       html += `
-        <div class="member-row">
+        <div class="member-row" data-search="${String(u.phone || '').toLowerCase()} ${String(u.email || '').toLowerCase()}">
           <div class="member-row-avatar">${u.name.substring(0,2).toUpperCase()}</div>
           <div class="member-row-info">
             <div class="member-row-name">${u.name}</div>
-            <div class="member-row-flat">Flat ${u.flat}</div>
+            <div class="member-row-flat">Flat ${u.flat} · ${u.phone || ''}</div>
           </div>
           <button class="btn-outline" onclick="addMemberToGroup('${activeThreadId}','${u.flat}','${u.name}','${u.email}')">Add</button>
         </div>`;
@@ -709,6 +891,23 @@ function openGroupSettings() {
 
   document.getElementById('settingsContent').innerHTML = html;
   document.getElementById('settingsPanel').style.display = 'flex';
+}
+
+function filterSettingsAddList() {
+  const q = document.getElementById('settingsAddSearch').value.trim().toLowerCase();
+  const rows = document.querySelectorAll('#settingsAddList .member-row');
+  
+  rows.forEach(row => {
+    const name = row.querySelector('.member-row-name').textContent.toLowerCase();
+    const flat = row.querySelector('.member-row-flat').textContent.toLowerCase();
+    const searchStr = row.getAttribute('data-search') || '';
+    
+    if (name.includes(q) || flat.includes(q) || searchStr.includes(q)) {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
+  });
 }
 
 function closeGroupSettings() {
@@ -742,6 +941,41 @@ function leaveGroup(tid) {
   firebase.database().ref(`/chat_threads/${tid}/members`).set(members).then(() => {
     closeGroupSettings();
     closeChatWindow();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  SMS NOTIFICATION SYSTEM
+// ══════════════════════════════════════════════
+function sendSMSNotification(phone, senderName, message, type) {
+  // Store SMS notification in localStorage for demo purposes
+  // In production, this would integrate with an SMS API like Twilio
+  const smsNotifications = JSON.parse(localStorage.getItem('sms_notifications') || '[]');
+  
+  const notification = {
+    id: Date.now(),
+    phone: phone,
+    senderName: senderName,
+    message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+    type: type,
+    timestamp: Date.now(),
+    status: 'pending'
+  };
+  
+  smsNotifications.push(notification);
+  localStorage.setItem('sms_notifications', JSON.stringify(smsNotifications));
+  
+  console.log(`SMS Notification queued for ${phone}: ${notification.message}`);
+  
+  // In production, you would call your SMS API here
+  // Example: fetch('/api/send-sms', { method: 'POST', body: JSON.stringify(notification) });
+}
+
+function sendBulkSMSNotifications(members, senderName, message, type) {
+  members.forEach(member => {
+    if (member.phone && member.phone !== currentUser.phone) {
+      sendSMSNotification(member.phone, senderName, message, type);
+    }
   });
 }
 

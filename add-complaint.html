@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -236,7 +236,8 @@
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
-      <div class="page-title">Add Complaint</div>
+      <div class="page-title" style="flex:1;">Add Complaint</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;">● Live</span>
     </div>
   </div>
 
@@ -347,12 +348,11 @@
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
+    if (!localStorage.getItem('loggedOutFlag')) {
       currentUser = defaultUser;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      window.location.href = 'profile.html';
     }
   }
 
@@ -377,10 +377,31 @@
 
   // Load Complaints
   let complaints = [];
+  let isListeningComplaints = false;
+
   function loadComplaints() {
     if (!currentUser) return;
-    complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
-    renderRecentComplaints();
+    
+    if (typeof fbListen === 'function') {
+      if (!isListeningComplaints) {
+        isListeningComplaints = true;
+        fbListen('society_complaints', (data) => {
+          complaints = data || [];
+          if (complaints.length === 0) {
+            complaints = [
+              { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding...", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress", priority: "High" },
+              { id: "CMP-2026-021", title: "Water leakage", desc: "Water leakage in corridor ceiling...", location: "Tower B", time: "15 Jul 2026 · 02:30 PM", status: "Resolved", priority: "Medium" }
+            ];
+            fbSet('society_complaints', complaints);
+          }
+          localStorage.setItem('society_complaints', JSON.stringify(complaints));
+          renderRecentComplaints();
+        });
+      }
+    } else {
+      complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+      renderRecentComplaints();
+    }
   }
 
   function renderRecentComplaints() {
@@ -453,10 +474,22 @@
     };
 
     complaints.unshift(newC);
-    localStorage.setItem('society_complaints', JSON.stringify(complaints));
     
-    // Reload UI
-    renderRecentComplaints();
+    if (typeof fbSet === 'function') {
+      fbSet('society_complaints', complaints).then(() => {
+        if (typeof pushNotification === 'function') {
+          pushNotification(`New Complaint ${complaintId} logged: ${selectedCategory} at ${location}`, "complaint");
+        }
+        alert(`Complaint ${complaintId} submitted successfully! You will be notified when it's resolved.`);
+      });
+    } else {
+      localStorage.setItem('society_complaints', JSON.stringify(complaints));
+      if (typeof pushNotification === 'function') {
+        pushNotification(`New Complaint ${complaintId} logged: ${selectedCategory} at ${location}`, "complaint");
+      }
+      alert(`Complaint ${complaintId} submitted successfully! You will be notified when it's resolved.`);
+      renderRecentComplaints();
+    }
     
     // Reset form
     document.querySelectorAll('.category-item').forEach(i=>i.classList.remove('selected'));
@@ -465,8 +498,6 @@
     document.querySelector('.form-textarea').value = '';
     selectedCategory = null;
     selectedPriority = null;
-    
-    alert(`Complaint ${complaintId} submitted successfully! You will be notified when it's resolved.`);
   }
 
   loadComplaints();

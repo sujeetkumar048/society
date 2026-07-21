@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -325,7 +325,8 @@
       <a href="index.html" class="back-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
-      <div class="page-title">Pay Maintenance</div>
+      <div class="page-title" style="flex:1;">Pay Maintenance</div>
+      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;">● Live</span>
     </div>
   </div>
 
@@ -678,12 +679,11 @@
 
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
-    if (localStorage.getItem('loggedOutFlag')) {
-      alert('Please login to continue.');
-      window.location.href = 'profile.html';
-    } else {
+    if (!localStorage.getItem('loggedOutFlag')) {
       currentUser = defaultUser;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      window.location.href = 'profile.html';
     }
   }
 
@@ -776,8 +776,7 @@
     const flat = document.getElementById('invFlatNum').value.trim();
     if (!flat) return;
 
-    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-    const flatPending = pending.filter(i => i.flat === flat);
+    const flatPending = pendingInvoicesList.filter(i => String(i.flat) === String(flat));
     const totalDue = flatPending.reduce((sum, i) => sum + i.total, 0);
 
     document.getElementById('invPrevDue').value = totalDue;
@@ -821,41 +820,49 @@
       status: 'Pending'
     };
 
-    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-    
     // Check if duplicate month for flat
-    if (pending.some(i => i.flat === flat && i.month === month)) {
+    if (pendingInvoicesList.some(i => String(i.flat) === String(flat) && i.month === month)) {
       alert(`Invoice for Flat ${flat} for ${month} is already pending payment.`);
       return;
     }
 
-    pending.unshift(newInvoice);
-    localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
-
-    alert(`Invoice Generated Successfully!\n\nFlat: ${flat}\nMonth: ${month}\nTotal: ₹${total.toLocaleString()}\n\nResident notified.`);
+    pendingInvoicesList.unshift(newInvoice);
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_invoices', pendingInvoicesList).then(() => {
+        if (typeof pushNotification === 'function') {
+          pushNotification(`Maintenance Bill generated: Flat ${flat} for ${month} - ₹${total.toLocaleString()}`, "payment");
+        }
+        alert(`Invoice Generated Successfully!\n\nFlat: ${flat}\nMonth: ${month}\nTotal: ₹${total.toLocaleString()}\n\nResident notified.`);
+      });
+    } else {
+      localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
+      if (typeof pushNotification === 'function') {
+        pushNotification(`Maintenance Bill generated: Flat ${flat} for ${month} - ₹${total.toLocaleString()}`, "payment");
+      }
+      alert(`Invoice Generated Successfully!\n\nFlat: ${flat}\nMonth: ${month}\nTotal: ₹${total.toLocaleString()}\n\nResident notified.`);
+      renderAdminInvoicesLog();
+    }
     
     // Reset form
     document.getElementById('invFlatNum').value = '';
     document.getElementById('invPenalty').value = '0';
     document.getElementById('invPrevDue').value = '0';
     calculateTotalInvoice();
-
-    renderAdminInvoicesLog();
   }
 
   // Render Admin Log of Invoices
   function renderAdminInvoicesLog() {
     const listContainer = document.getElementById('generatedInvoicesLogList');
+    if (!listContainer) return;
     listContainer.innerHTML = '';
 
-    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-
-    if (pending.length === 0) {
+    if (pendingInvoicesList.length === 0) {
       listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12px;">No pending invoices in system.</div>`;
       return;
     }
 
-    pending.forEach(inv => {
+    pendingInvoicesList.forEach(inv => {
       const row = document.createElement('div');
       row.className = 'history-item';
       row.style.fontSize = '12px';
@@ -877,6 +884,8 @@
   let payments = [];
   let selectedBankName = "";
   let activePayingInvoiceId = null;
+  let isListeningPending = false;
+  let pendingInvoicesList = [];
 
   function loadPaymentsHistory() {
     if (!currentUser) return;
@@ -893,16 +902,29 @@
       localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
     }
 
-    // Seed default pending invoice if nothing pending
-    let pending = JSON.parse(localStorage.getItem('society_pending_invoices'));
-    if (!pending) {
-      pending = [
-        { id: 'INV-76543', flat: '201', month: 'July 2026', maint: 1100, water: 200, electric: 250, parking: 150, penalty: 0, prevDue: 0, gst: 300, total: 2000, date: '20 Jul 2026 · 10:00 AM', status: 'Pending' }
-      ];
-      localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
+    if (typeof fbListen === 'function') {
+      if (!isListeningPending) {
+        isListeningPending = true;
+        fbListen('society_pending_invoices', (data) => {
+          pendingInvoicesList = data || [];
+          if (pendingInvoicesList.length === 0) {
+            pendingInvoicesList = [
+              { id: 'INV-76543', flat: '201', month: 'July 2026', maint: 1100, water: 200, electric: 250, parking: 150, penalty: 0, prevDue: 0, gst: 300, total: 2000, date: '20 Jul 2026 · 10:00 AM', status: 'Pending' }
+            ];
+            fbSet('society_pending_invoices', pendingInvoicesList);
+          }
+          // Cache locally to keep offline fallback consistent
+          localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
+          
+          renderPendingBillsUI();
+          renderAdminInvoicesLog();
+        });
+      }
+    } else {
+      pendingInvoicesList = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+      renderPendingBillsUI();
     }
 
-    renderPendingBillsUI();
     renderHistoryUI();
   }
 
@@ -910,9 +932,7 @@
     const container = document.getElementById('pendingBillsList');
     container.innerHTML = '';
 
-    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-    const myPending = pending.filter(i => i.flat === currentUser.flat);
-
+    const myPending = pendingInvoicesList.filter(i => String(i.flat) === String(currentUser.flat));
     const payMethodGroup = document.getElementById('payMethodGroup');
 
     if (myPending.length === 0) {
@@ -976,8 +996,7 @@
 
   // Resident Pay Click
   function payPendingBillClick(id) {
-    const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-    const inv = pending.find(i => i.id === id);
+    const inv = pendingInvoicesList.find(i => i.id === id);
     if (!inv) return;
 
     activePayingInvoiceId = id;
@@ -1067,6 +1086,14 @@
         alert('Please enter a valid UPI ID (e.g. name@okhdfc)');
         return;
       }
+      
+      // Trigger UPI deep link to open installed UPI payment apps on the user's browser/phone
+      const cleanAmt = checkoutDetails.amount.replace(/[^\d.]/g, '');
+      const upiUrl = `upi://pay?pa=society048@okaxis&pn=SR%20Gold%20Society&am=${cleanAmt}&cu=INR&tn=Maint%20Flat%20${currentUser.flat}%20${checkoutDetails.month}`;
+      console.log('[UPI REDIRECT] Opening UPI deep link: ' + upiUrl);
+      
+      // Attempt to redirect the browser to the deep link
+      window.location.href = upiUrl;
     } else if (checkoutDetails.method === 'Credit/Debit Card' || checkoutDetails.method === 'Card') {
       const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
       const expiry = document.getElementById('cardExpiry').value;
@@ -1121,10 +1148,42 @@
       payments.unshift(latestTx);
       localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
 
-      // Remove paid invoice from pending invoices database
-      let pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-      pending = pending.filter(i => i.id !== activePayingInvoiceId);
-      localStorage.setItem('society_pending_invoices', JSON.stringify(pending));
+      // Remove paid invoice from pending invoices database (Firebase RTDB sync)
+      pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== activePayingInvoiceId);
+      if (typeof fbSet === 'function') {
+        fbSet('society_pending_invoices', pendingInvoicesList);
+      } else {
+        localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
+      }
+
+      // Automatically sync paid invoice amount as a new Income Entry in the Accounting / Finance Database!
+      const cleanAmt = Number(checkoutDetails.amount.replace(/[^\d.]/g, ''));
+      const newIncomeEntry = {
+        id: 'INC-' + Math.floor(100 + Math.random() * 900),
+        head: 'Maintenance',
+        amount: cleanAmt,
+        flat: currentUser.flat,
+        mode: checkoutDetails.method,
+        date: todayDate,
+        note: `Maintenance fee paid for ${checkoutDetails.month}`
+      };
+
+      if (typeof fbGet === 'function') {
+        fbGet('society_incomes').then(list => {
+          const updatedList = list || [];
+          updatedList.unshift(newIncomeEntry);
+          fbSet('society_incomes', updatedList);
+        });
+      } else {
+        const localIncomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+        localIncomes.unshift(newIncomeEntry);
+        localStorage.setItem('society_incomes', JSON.stringify(localIncomes));
+      }
+
+      // Push payment notification
+      if (typeof pushNotification === 'function') {
+        pushNotification(`Maintenance Paid: Flat ${currentUser.flat} paid ${checkoutDetails.amount} for ${checkoutDetails.month}`, "payment");
+      }
 
       // Re-load UI
       renderPendingBillsUI();
