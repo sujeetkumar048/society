@@ -485,6 +485,10 @@
     `;
     container.insertBefore(newDoc, container.firstChild);
     
+    if (typeof logActivity === 'function') {
+      logActivity(`Document (${name})`, 'Uploaded');
+    }
+
     // Reset form
     document.getElementById('docName').value = '';
     document.getElementById('docFile').value = '';

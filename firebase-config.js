@@ -49,12 +49,19 @@ const DB_PATHS = {
   'society_directory_workers'          : '/directory/workers',
   'society_worker_bookings'            : '/worker_bookings',
   'chat_messages'                      : '/chat',
+  'society_chat_threads'               : '/chat_threads',
   'society_documents'                  : '/documents',
   'society_gate_log'                   : '/gate_log',
   'society_notifications'              : '/notifications',
   'society_services'                   : '/local_services',
   'society_meter_readings'             : '/meter_readings',
   'society_gate_requests'              : '/gate_requests',
+  'society_activity_logs'              : '/activity_logs',
+  'society_vehicles'                   : '/vehicles',
+  'society_guard_requests'             : '/guard_requests',
+  'society_salary_payments'            : '/salary_payments',
+  'society_salary_employees'           : '/salary_employees',
+  'society_accounting_entries'         : '/accounting/entries',
 };
 
 // ─── Core Helper: fbDB ──────────────────────────────────────────────────────
@@ -221,13 +228,27 @@ db.ref('.info/connected').on('value', snap => {
   const badge = document.getElementById('fbStatusBadge');
   if (badge) {
     badge.textContent = window._fbOnline ? '🟢 Live' : '🔴 Offline';
-    badge.style.color  = window._fbOnline ? '#1F4D3D' : '#D36B53';
+    badge.style.background = window._fbOnline ? '#00E676' : '#FF5252';
+    badge.style.color      = window._fbOnline ? '#033621' : '#FFFFFF';
+    badge.style.fontWeight = '700';
+    badge.style.border     = window._fbOnline ? '1px solid #B9F6CA' : '1px solid #FF8A80';
+    badge.style.boxShadow  = window._fbOnline ? '0 2px 8px rgba(0, 230, 118, 0.4)' : '0 2px 8px rgba(255, 82, 82, 0.4)';
   }
 });
 window.pushNotification = function(title, type) {
+  // Do NOT store chat logs in notifications
+  if (type === 'chat' || (title && title.toLowerCase().includes('chat'))) {
+    return;
+  }
+  const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+
   if (typeof fbGet === 'function') {
     fbGet('society_notifications').then(list => {
-      const arr = list || [];
+      const arr = (list || []).filter(n => {
+        if (n.type === 'chat' || (n.title && n.title.toLowerCase().includes('chat'))) return false;
+        const t = n.time || n.timestamp || 0;
+        return !t || t >= sevenDaysAgo;
+      });
       const newNotif = {
         id: 'NOTIF-' + Date.now() + '-' + Math.floor(Math.random() * 100),
         title: title,
@@ -235,13 +256,18 @@ window.pushNotification = function(title, type) {
         type: type
       };
       arr.unshift(newNotif);
-      if (arr.length > 20) {
-        arr.length = 20;
+      if (arr.length > 50) {
+        arr.length = 50;
       }
       fbSet('society_notifications', arr);
     });
   } else {
-    const arr = JSON.parse(localStorage.getItem('society_notifications')) || [];
+    const raw = JSON.parse(localStorage.getItem('society_notifications')) || [];
+    const arr = raw.filter(n => {
+      if (n.type === 'chat' || (n.title && n.title.toLowerCase().includes('chat'))) return false;
+      const t = n.time || n.timestamp || 0;
+      return !t || t >= sevenDaysAgo;
+    });
     const newNotif = {
       id: 'NOTIF-' + Date.now(),
       title: title,
@@ -249,9 +275,123 @@ window.pushNotification = function(title, type) {
       type: type
     };
     arr.unshift(newNotif);
-    if (arr.length > 20) arr.length = 20;
+    if (arr.length > 50) arr.length = 50;
     localStorage.setItem('society_notifications', JSON.stringify(arr));
   }
 };
+
+window.logActivity = function(toolAction, status, name) {
+  if (!toolAction) return;
+  let userName = name;
+  if (!userName) {
+    try {
+      const cu = JSON.parse(localStorage.getItem('currentUser'));
+      userName = cu ? (cu.name || cu.role || 'User') : 'Admin';
+    } catch(e) {
+      userName = 'Admin';
+    }
+  }
+  const now = new Date();
+  const dateTimeStr = now.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' ' + now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
+  
+  const logEntry = {
+    id: 'LOG-' + Date.now() + '-' + Math.floor(Math.random()*1000),
+    name: userName,
+    dateTime: dateTimeStr,
+    status: status || 'Completed',
+    toolAction: toolAction || 'Action',
+    timestamp: Date.now()
+  };
+
+  const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+
+  if (typeof fbGet === 'function') {
+    fbGet('society_activity_logs').then(list => {
+      const arr = (list || []).filter(l => {
+        const t = l.timestamp || (l.dateTime ? new Date(l.dateTime).getTime() : 0);
+        return !t || isNaN(t) || t >= sevenDaysAgo;
+      });
+      arr.unshift(logEntry);
+      if (arr.length > 200) arr.length = 200;
+      fbSet('society_activity_logs', arr);
+    });
+  } else {
+    const arr = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
+    arr.unshift(logEntry);
+    if (arr.length > 200) arr.length = 200;
+    localStorage.setItem('society_activity_logs', JSON.stringify(arr));
+  }
+};
+
+// ─── 7-Day Auto Cleanup for Logs & Notifications ─────────────────────────────────────
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+window.autoCleanOldLogsAndNotifications = function() {
+  const now = Date.now();
+
+  // 1. Clean Notifications older than 7 days
+  const cleanNotifs = (list) => {
+    if (!Array.isArray(list)) return list;
+    return list.filter(n => {
+      if (n.type === 'chat' || (n.title && n.title.toLowerCase().includes('chat'))) return false;
+      const itemTime = n.time || (n.timestamp ? Number(n.timestamp) : 0);
+      if (!itemTime) return true;
+      return (now - itemTime) <= SEVEN_DAYS_MS;
+    });
+  };
+
+  // 2. Clean Activity Logs older than 7 days
+  const cleanLogs = (list) => {
+    if (!Array.isArray(list)) return list;
+    return list.filter(l => {
+      const itemTime = l.timestamp || (l.dateTime ? new Date(l.dateTime).getTime() : 0);
+      if (!itemTime || isNaN(itemTime)) return true;
+      return (now - itemTime) <= SEVEN_DAYS_MS;
+    });
+  };
+
+  if (typeof fbGet === 'function') {
+    fbGet('society_notifications').then(list => {
+      if (list && list.length > 0) {
+        const cleaned = cleanNotifs(list);
+        if (cleaned.length !== list.length) {
+          fbSet('society_notifications', cleaned);
+        }
+      }
+    }).catch(e => console.warn(e));
+
+    fbGet('society_activity_logs').then(list => {
+      if (list && list.length > 0) {
+        const cleaned = cleanLogs(list);
+        if (cleaned.length !== list.length) {
+          fbSet('society_activity_logs', cleaned);
+        }
+      }
+    }).catch(e => console.warn(e));
+  }
+
+  try {
+    const localNotifs = JSON.parse(localStorage.getItem('society_notifications'));
+    if (localNotifs) {
+      const cleanedN = cleanNotifs(localNotifs);
+      localStorage.setItem('society_notifications', JSON.stringify(cleanedN));
+    }
+
+    const localLogs = JSON.parse(localStorage.getItem('society_activity_logs'));
+    if (localLogs) {
+      const cleanedL = cleanLogs(localLogs);
+      localStorage.setItem('society_activity_logs', JSON.stringify(cleanedL));
+    }
+  } catch(e) {
+    console.warn(e);
+  }
+};
+
+try {
+  autoCleanOldLogsAndNotifications();
+  setInterval(autoCleanOldLogsAndNotifications, 60 * 60 * 1000);
+} catch(e) {
+  console.warn(e);
+}
 
 console.log('[SR Gold Society] Firebase initialised → project: society048');

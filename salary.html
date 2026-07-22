@@ -549,31 +549,70 @@
     }
   };
 
-  function initSalaryDesk() {
-    employees = JSON.parse(localStorage.getItem('society_employees'));
-    punches = JSON.parse(localStorage.getItem('society_punches')) || [];
+  async function initSalaryDesk() {
+    let registeredUsers = [];
+    try {
+      registeredUsers = JSON.parse(localStorage.getItem('society_users')) || [];
+      if (typeof fbGet === 'function') {
+        const fbUsers = await fbGet('society_users');
+        if (fbUsers && fbUsers.length > 0) {
+          registeredUsers = fbUsers;
+        }
+      }
+    } catch(e) {}
+
+    if (registeredUsers.length === 0 && currentUser && currentUser.name) {
+      registeredUsers = [currentUser];
+    }
+
+    const registeredNamesSet = new Set(registeredUsers.map(u => (u.name || '').trim().toLowerCase()).filter(Boolean));
+
+    let storedEmployees = [];
+    try {
+      if (typeof fbGet === 'function') {
+        storedEmployees = await fbGet('society_employees');
+      }
+    } catch(e) {}
+
+    if (!storedEmployees || storedEmployees.length === 0) {
+      storedEmployees = JSON.parse(localStorage.getItem('society_employees')) || [];
+    }
+
+    // Filter employees: ONLY show registered profile names
+    let cleanEmployees = storedEmployees.filter(e => {
+      const name = (e.name || '').trim().toLowerCase();
+      return registeredNamesSet.has(name);
+    });
+
+    // Populate employee records from registered profiles if clean list is empty
+    if (cleanEmployees.length === 0 && registeredUsers.length > 0) {
+      cleanEmployees = registeredUsers.map(u => ({
+        name: u.name,
+        designation: u.role || 'Resident Staff',
+        joiningDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+        salary: u.salary || 18000,
+        attendance: 30,
+        leaves: 0,
+        overtime: 0,
+        payoutStatus: "Unpaid"
+      }));
+    }
+
+    employees = cleanEmployees;
+    localStorage.setItem('society_employees', JSON.stringify(employees));
+    if (typeof fbSet === 'function') {
+      fbSet('society_employees', employees).catch(e => console.warn(e));
+    }
+
+    // Filter punches: ONLY show punches for registered profile names
+    let storedPunches = JSON.parse(localStorage.getItem('society_punches')) || [];
+    punches = storedPunches.filter(p => {
+      const name = (p.empName || '').trim().toLowerCase();
+      return registeredNamesSet.has(name);
+    });
+    localStorage.setItem('society_punches', JSON.stringify(punches));
+
     dailyTasks = JSON.parse(localStorage.getItem('society_daily_tasks')) || {};
-
-    // Seed default employee list if empty
-    if (!employees) {
-      employees = [
-        { name: "Ramesh Kumar", designation: "Security Guard", joiningDate: "12 Jan 2024", salary: 15000, attendance: 29, leaves: 1, overtime: 10, payoutStatus: "Unpaid" },
-        { name: "Suresh Patil", designation: "Facility Manager", joiningDate: "05 Mar 2023", salary: 28000, attendance: 30, leaves: 0, overtime: 4, payoutStatus: "Unpaid" },
-        { name: "Sunita Devi", designation: "Housekeeping Supervisor", joiningDate: "18 Jun 2024", salary: 12000, attendance: 26, leaves: 4, overtime: 0, payoutStatus: "Unpaid" },
-        { name: "Rajesh Shinde", designation: "Lift Technician", joiningDate: "01 Nov 2024", salary: 18000, attendance: 28, leaves: 2, overtime: 15, payoutStatus: "Unpaid" }
-      ];
-      localStorage.setItem('society_employees', JSON.stringify(employees));
-    }
-
-    // Seed default punches if empty
-    if (punches.length === 0) {
-      punches = [
-        { empName: "Ramesh Kumar", date: "20 Jul 2026", inTime: "08:00 AM", outTime: "05:00 PM", hours: 9, timestamp: Date.now() },
-        { empName: "Suresh Patil", date: "20 Jul 2026", inTime: "09:00 AM", outTime: "05:30 PM", hours: 8.5, timestamp: Date.now() },
-        { empName: "Rajesh Shinde", date: "19 Jul 2026", inTime: "08:30 AM", outTime: "07:30 PM", hours: 11, timestamp: Date.now() }
-      ];
-      localStorage.setItem('society_punches', JSON.stringify(punches));
-    }
 
     renderEmployees();
     populateEmployeeDropdowns();
@@ -602,22 +641,51 @@
     }
   }
 
-  function populateEmployeeDropdowns() {
+  async function populateEmployeeDropdowns() {
     const punchSelect = document.getElementById('punchEmployeeSelect');
     const taskSelect = document.getElementById('taskEmployeeSelect');
+    if (!punchSelect || !taskSelect) return;
     
     punchSelect.innerHTML = '';
     taskSelect.innerHTML = '';
 
-    employees.forEach(emp => {
+    let registeredUsers = [];
+    try {
+      registeredUsers = JSON.parse(localStorage.getItem('society_users')) || [];
+      if (typeof fbGet === 'function') {
+        const fbUsers = await fbGet('society_users');
+        if (fbUsers && fbUsers.length > 0) registeredUsers = fbUsers;
+      }
+    } catch(e) {}
+
+    if (registeredUsers.length === 0 && currentUser && currentUser.name) {
+      registeredUsers = [currentUser];
+    }
+
+    // Build map of registered profile names so names remain visible in Punches & Daily Tasks even if deleted from Salary Pay
+    const nameMap = new Map();
+
+    registeredUsers.forEach(u => {
+      if (u && u.name) {
+        nameMap.set(u.name.trim(), u.role || 'Resident Staff');
+      }
+    });
+
+    employees.forEach(e => {
+      if (e && e.name && !nameMap.has(e.name.trim())) {
+        nameMap.set(e.name.trim(), e.designation || 'Staff');
+      }
+    });
+
+    nameMap.forEach((roleOrDesig, name) => {
       const opt1 = document.createElement('option');
-      opt1.value = emp.name;
-      opt1.textContent = `${emp.name} (${emp.designation})`;
+      opt1.value = name;
+      opt1.textContent = `${name} (${roleOrDesig})`;
       punchSelect.appendChild(opt1);
 
       const opt2 = document.createElement('option');
-      opt2.value = emp.name;
-      opt2.textContent = `${emp.name} (${emp.designation})`;
+      opt2.value = name;
+      opt2.textContent = `${name} (${roleOrDesig})`;
       taskSelect.appendChild(opt2);
     });
   }
@@ -977,6 +1045,10 @@
       txId: 'TXN-' + Math.floor(10000000 + Math.random() * 90000000),
       date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
     };
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Salary Pay (${emp.name} - ₹${netSalary.toLocaleString()})`, 'Completed');
+    }
 
     localStorage.setItem('society_employees', JSON.stringify(employees));
 

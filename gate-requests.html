@@ -391,6 +391,10 @@
     visitors.unshift(newVisitorRecord);
     localStorage.setItem('society_visitors', JSON.stringify(visitors));
 
+    if (typeof logActivity === 'function') {
+      logActivity(`Gate Request (Visitor: ${visitorName})`, 'Approved');
+    }
+
     if (typeof fbSet === 'function') {
       fbSet('society_pending_visitor_approvals', gateRequests)
         .then(() => {
@@ -415,6 +419,10 @@
     if (idx === -1) return;
 
     gateRequests[idx].status = 'Rejected';
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Gate Request (Visitor: ${visitorName})`, 'Declined');
+    }
 
     if (typeof fbSet === 'function') {
       fbSet('society_pending_visitor_approvals', gateRequests)

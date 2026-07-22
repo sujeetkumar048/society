@@ -1120,6 +1120,10 @@
       // Push to Firebase (also updates localStorage cache via fbPush)
       fbPush('society_pending_visitor_approvals', pendingEntry);
 
+      if (typeof logActivity === 'function') {
+        logActivity(`Visitor Entry (${name} - Flat ${flatInput})`, 'Submitted');
+      }
+
       // Refresh pending panel if visible
       if (typeof renderPendingApprovals === 'function') renderPendingApprovals();
 

@@ -344,7 +344,7 @@
   <div class="header">
     <div class="header-top">
       <div class="page-title" style="flex:1;">Complaints</div>
-      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;margin-right:12px;">● Live</span>
+      <span id="fbStatusBadge" style="font-size: 9.5px; background: #00E676; color: #033621; padding: 3px 9px; border-radius: 8px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); border: 1px solid #B9F6CA; margin-right: 12px;">🟢 Live</span>
       <a href="add-complaint.html" class="add-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </a>
@@ -477,19 +477,17 @@
   function initComplaints() {
     if (!currentUser) return;
 
+    const filterSampleComplaints = (list) => {
+      if (!Array.isArray(list)) return [];
+      return list.filter(c => c.id && !['CMP-2026-042', 'CMP-2026-041', 'CMP-2026-040', 'CMP-2026-039', 'CMP-2026-038'].includes(c.id));
+    };
+
     if (typeof fbListen === 'function') {
       if (!isListeningComplaints) {
         isListeningComplaints = true;
         fbListen('society_complaints', (data) => {
-          complaints = data || [];
-          if (complaints.length === 0) {
-            complaints = [
-              { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding to calls from floors 3-5.", priority: "High", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
-              { id: "CMP-2026-041", title: "Water leakage in corridor", desc: "Water leaking from ceiling on 4th floor corridor, Tower B.", priority: "High", location: "Tower B", time: "17 Jul 2026 · 11:30 AM", status: "Pending" },
-              { id: "CMP-2026-040", title: "Garden lights not working", desc: "Multiple garden lights in central lawn area are not functioning.", priority: "Medium", location: "Garden", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" },
-              { id: "CMP-2026-039", title: "Parking slot dispute", desc: "Vehicle parked in reserved slot B-201 without authorization.", priority: "Low", location: "Parking B", time: "13 Jul 2026 · 09:15 AM", status: "Resolved" },
-              { id: "CMP-2026-038", title: "Common area cleaning", desc: "Staircase area in Tower B needs thorough cleaning.", priority: "Medium", location: "Tower B", time: "13 Jul 2026 · 04:00 PM", status: "In Progress" }
-            ];
+          complaints = filterSampleComplaints(data || []);
+          if ((data || []).length !== complaints.length) {
             fbSet('society_complaints', complaints);
           }
           localStorage.setItem('society_complaints', JSON.stringify(complaints));
@@ -498,16 +496,11 @@
         });
       }
     } else {
-      const stored = JSON.parse(localStorage.getItem('society_complaints')) || [];
-      const defaults = [
-        { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding to calls from floors 3-5.", priority: "High", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
-        { id: "CMP-2026-041", title: "Water leakage in corridor", desc: "Water leaking from ceiling on 4th floor corridor, Tower B.", priority: "High", location: "Tower B", time: "17 Jul 2026 · 11:30 AM", status: "Pending" },
-        { id: "CMP-2026-040", title: "Garden lights not working", desc: "Multiple garden lights in central lawn area are not functioning.", priority: "Medium", location: "Garden", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" },
-        { id: "CMP-2026-039", title: "Parking slot dispute", desc: "Vehicle parked in reserved slot B-201 without authorization.", priority: "Low", location: "Parking B", time: "13 Jul 2026 · 09:15 AM", status: "Resolved" },
-        { id: "CMP-2026-038", title: "Common area cleaning", desc: "Staircase area in Tower B needs thorough cleaning.", priority: "Medium", location: "Tower B", time: "13 Jul 2026 · 04:00 PM", status: "In Progress" }
-      ];
-      complaints = [...stored, ...defaults];
-      renderComplaints('all');
+      const raw = JSON.parse(localStorage.getItem('society_complaints')) || [];
+      complaints = filterSampleComplaints(raw);
+      localStorage.setItem('society_complaints', JSON.stringify(complaints));
+      const activeFilter = document.querySelector('.filter-tab.active')?.textContent.toLowerCase().replace(' ', '-') || 'all';
+      renderComplaints(activeFilter === 'all' ? 'all' : activeFilter);
     }
   }
 
@@ -515,9 +508,11 @@
     const listContainer = document.getElementById('complaintsList');
     listContainer.innerHTML = '';
 
+    let visibleCount = 0;
     complaints.forEach(c => {
       const statusKey = c.status.toLowerCase().replace(' ', '-');
       if (filter !== 'all' && statusKey !== filter) return;
+      visibleCount++;
 
       const priorityClass = c.priority.toLowerCase();
       let statusClass = 'status-pending';
@@ -557,6 +552,10 @@
       `;
       listContainer.appendChild(card);
     });
+
+    if (visibleCount === 0) {
+      listContainer.innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--muted); font-size:13.5px; line-height:1.5;">No complaints found. All issues resolved! 🎉</div>`;
+    }
   }
 
   function filterComplaints(filter) {
@@ -595,6 +594,10 @@
     if (complaintIndex !== -1) {
       complaints[complaintIndex].status = newStatus;
       
+      if (typeof logActivity === 'function') {
+        logActivity(`Complaint (#${currentComplaintId})`, newStatus);
+      }
+
       // Update localStorage
       localStorage.setItem('society_complaints', JSON.stringify(complaints));
       
@@ -635,6 +638,10 @@
     // Remove from complaints array
     complaints = complaints.filter(c => c.id !== complaintId);
     
+    if (typeof logActivity === 'function') {
+      logActivity(`Complaint (#${complaintId})`, 'Deleted');
+    }
+
     // Update localStorage
     localStorage.setItem('society_complaints', JSON.stringify(complaints));
     

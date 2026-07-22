@@ -56,7 +56,7 @@
 
   /* ── FULL-SCREEN CHAT WINDOW ── */
   .chat-window{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:200;display:none;flex-direction:column;}
-  .cw-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));color:#fff;padding:16px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .cw-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));color:#fff;padding:16px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:relative;}
   .cw-back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;}
   .cw-back svg{width:15px;height:15px;stroke:#fff;}
   .cw-avatar{width:38px;height:38px;border-radius:50%;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -65,6 +65,14 @@
   .cw-sub{font-size:10.5px;color:rgba(255,255,255,.65);margin-top:1px;}
   .cw-more{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;}
   .cw-more svg{width:16px;height:16px;stroke:#fff;}
+
+  /* ── CHAT ACTIONS DROPDOWN ── */
+  .cw-dropdown{position:absolute;top:60px;right:14px;background:var(--card);border-radius:12px;box-shadow:0 8px 28px rgba(21,53,41,.18);border:1px solid var(--line);z-index:350;min-width:200px;overflow:hidden;display:none;}
+  .cw-dropdown.open{display:block;}
+  .cw-dropdown-item{padding:13px 16px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);transition:background .15s;}
+  .cw-dropdown-item:last-child{border-bottom:none;}
+  .cw-dropdown-item:hover{background:var(--paper);}
+  .cw-dropdown-item.danger{color:var(--terracotta);}
   .cw-stream{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;background:var(--paper);}
   .chat-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.45;word-break:break-word;}
   .chat-bubble.sent{background:var(--forest);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
@@ -129,7 +137,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
       <div class="page-title">💬 Society Chat</div>
-      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;">● Live</span>
+      <span id="fbStatusBadge" style="font-size: 9.5px; background: #00E676; color: #033621; padding: 3px 9px; border-radius: 8px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); border: 1px solid #B9F6CA;">🟢 Live</span>
     </div>
   </div>
 
@@ -187,9 +195,22 @@
       <div class="cw-name" id="cwName">Chat</div>
       <div class="cw-sub" id="cwSub">Online</div>
     </div>
-    <button class="cw-more" id="cwMoreBtn" onclick="openGroupSettings()" style="display:none;">
+    <button class="cw-more" id="cwMoreBtn" onclick="toggleChatDropdown()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
     </button>
+  </div>
+
+  <!-- Chat actions dropdown (admin-only delete/clear options) -->
+  <div class="cw-dropdown" id="cwDropdown">
+    <div class="cw-dropdown-item" id="cwDropdownGroupInfo" onclick="openGroupSettingsFromDropdown()" style="display:none;">
+      <span>👥</span> Group Info
+    </div>
+    <div class="cw-dropdown-item danger" id="cwDropdownClear" onclick="clearChatMessages()">
+      <span>🗑️</span> Clear All Messages
+    </div>
+    <div class="cw-dropdown-item danger" id="cwDropdownDelete" onclick="deleteChatThread()">
+      <span>❌</span> Delete Chat
+    </div>
   </div>
   <div class="cw-stream" id="cwStream"></div>
   <div class="typing-row" id="typingRow">typing…</div>
@@ -273,6 +294,12 @@
 let currentUser = JSON.parse(localStorage.getItem('currentUser'));
 if (!currentUser) { 
   window.location.href = 'profile.html';
+}
+
+// Update last chat read timestamp for current user's flat
+if (currentUser && currentUser.flat) {
+  const flatKey = String(currentUser.flat).replace(/flat\s*/i,'').trim();
+  localStorage.setItem('chat_last_read_' + flatKey, Date.now());
 }
 
 // ── sample flat directory (used when society_users is empty) ──
@@ -574,6 +601,10 @@ function startThreadsListener() {
 // ══════════════════════════════════════════════
 function openChat(tid) {
   activeThreadId = tid;
+  if (currentUser && currentUser.flat) {
+    const flatKey = String(currentUser.flat).replace(/flat\s*/i,'').trim();
+    localStorage.setItem('chat_last_read_' + flatKey, Date.now());
+  }
   const t = threads[tid] || {};
   const displayName = threadDisplayName(t);
   const avatarText  = threadAvatarText(t);
@@ -588,7 +619,21 @@ function openChat(tid) {
   av.style.background = t.type === 'group' ? 'var(--sky)' : 'linear-gradient(135deg,var(--marigold),#b8891a)';
   av.style.color       = t.type === 'group' ? '#fff' : 'var(--forest-dark)';
 
-  document.getElementById('cwMoreBtn').style.display = t.type === 'group' ? 'flex' : 'none';
+  // Always show ⋮ menu; show Group Info only for groups
+  document.getElementById('cwMoreBtn').style.display = 'flex';
+  const isAdminUser = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+  const isGroupAdminUser = t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
+
+  // Group Info item visible only in group chats
+  document.getElementById('cwDropdownGroupInfo').style.display = t.type === 'group' ? 'flex' : 'none';
+  // Clear / Delete visible only to admin or group admin
+  const showAdminActions = isAdminUser || isGroupAdminUser;
+  document.getElementById('cwDropdownClear').style.display = showAdminActions ? 'flex' : 'none';
+  document.getElementById('cwDropdownDelete').style.display = showAdminActions ? 'flex' : 'none';
+  // Hide ⋮ if nothing to show
+  if (!t.type === 'group' && !showAdminActions) {
+    document.getElementById('cwMoreBtn').style.display = 'none';
+  }
 
   cw.style.display = 'flex';
   renderMessages();
@@ -596,7 +641,94 @@ function openChat(tid) {
 
 function closeChatWindow() {
   document.getElementById('chatWindow').style.display = 'none';
+  document.getElementById('cwDropdown').classList.remove('open');
   activeThreadId = null;
+}
+
+function toggleChatDropdown() {
+  document.getElementById('cwDropdown').classList.toggle('open');
+}
+
+function openGroupSettingsFromDropdown() {
+  document.getElementById('cwDropdown').classList.remove('open');
+  openGroupSettings();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('cwDropdown');
+  const moreBtn  = document.getElementById('cwMoreBtn');
+  if (dropdown && moreBtn && !dropdown.contains(e.target) && !moreBtn.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+
+// Admin: Clear all messages in a chat thread
+function clearChatMessages() {
+  document.getElementById('cwDropdown').classList.remove('open');
+  if (!activeThreadId) return;
+  if (!confirm('Are you sure you want to clear ALL messages in this chat? This cannot be undone.')) return;
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).set({}).then(() => {
+        alert('All messages cleared successfully.');
+      }).catch(err => {
+        console.warn('Firebase clear failed, clearing locally:', err.message);
+        clearChatMessagesLocally();
+      });
+    } else {
+      clearChatMessagesLocally();
+    }
+  } catch(e) {
+    clearChatMessagesLocally();
+  }
+}
+
+function clearChatMessagesLocally() {
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  if (localThreads[activeThreadId]) {
+    localThreads[activeThreadId].messages = {};
+    localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+    threads[activeThreadId].messages = {};
+    renderMessages();
+    alert('All messages cleared.');
+  }
+}
+
+// Admin: Delete entire chat thread
+function deleteChatThread() {
+  document.getElementById('cwDropdown').classList.remove('open');
+  if (!activeThreadId) return;
+  const t = threads[activeThreadId];
+  const chatName = t ? (t.name || threadDisplayName(t)) : activeThreadId;
+  if (!confirm(`Delete entire chat "${chatName}"? This removes all messages and history permanently.`)) return;
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      firebase.database().ref(`/chat_threads/${activeThreadId}`).remove().then(() => {
+        closeChatWindow();
+        alert('Chat deleted successfully.');
+      }).catch(err => {
+        console.warn('Firebase delete failed, deleting locally:', err.message);
+        deleteChatThreadLocally();
+      });
+    } else {
+      deleteChatThreadLocally();
+    }
+  } catch(e) {
+    deleteChatThreadLocally();
+  }
+}
+
+function deleteChatThreadLocally() {
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  delete localThreads[activeThreadId];
+  delete threads[activeThreadId];
+  localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+  closeChatWindow();
+  renderChatList();
+  alert('Chat deleted.');
 }
 
 // ══════════════════════════════════════════════

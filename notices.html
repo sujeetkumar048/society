@@ -323,7 +323,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </a>
       <div class="page-title" style="flex:1;">Notice Board</div>
-      <span id="fbStatusBadge" style="font-size:10px;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:8px;font-weight:600;color:#fff;">● Live</span>
+      <span id="fbStatusBadge" style="font-size: 9.5px; background: #00E676; color: #033621; padding: 3px 9px; border-radius: 8px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); border: 1px solid #B9F6CA;">🟢 Live</span>
     </div>
   </div>
 
@@ -557,6 +557,9 @@
       type: type, 
       author: currentUser.role || 'Resident' 
     }, 'notices');
+    if (typeof logActivity === 'function') {
+      logActivity(`Notice Board (${title})`, 'Added');
+    }
     
     if (typeof fbSet === 'function') {
       fbSet('society_notices', notices).then(() => {
@@ -624,6 +627,10 @@
     // Remove from notices array
     notices.splice(idx, 1);
     
+    if (typeof logActivity === 'function') {
+      logActivity(`Notice Board (${noticeToDelete ? noticeToDelete.title : idx})`, 'Deleted');
+    }
+
     if (typeof fbSet === 'function') {
       fbSet('society_notices', notices).then(() => {
         // Log deletion details

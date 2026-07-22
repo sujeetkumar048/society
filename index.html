@@ -222,9 +222,30 @@
     cursor:pointer;
     transition:transform .15s ease, box-shadow .15s ease;
     text-decoration:none;
+    position:relative;
   }
   .action:active{transform:scale(.96);}
   .action:hover{box-shadow:0 6px 16px rgba(21,53,41,.10); border-color:transparent;}
+  
+  @keyframes blink-pulse {
+    0% { transform: scale(0.85); opacity: 0.7; box-shadow: 0 0 0 0 rgba(217, 166, 46, 0.8); }
+    50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 6px rgba(217, 166, 46, 0); }
+    100% { transform: scale(0.85); opacity: 0.7; box-shadow: 0 0 0 0 rgba(217, 166, 46, 0); }
+  }
+  .action-blink-indicator {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FF9800;
+    border: 1.5px solid #ffffff;
+    animation: blink-pulse 1.4s infinite ease-in-out;
+  }
+  .action-blink-indicator.green { background: #00E676; }
+  .action-blink-indicator.red { background: var(--terracotta); }
+
   .action-icon{
     width:38px; height:38px;
     border-radius:11px;
@@ -472,12 +493,12 @@
           <div class="brand-sub">Surakshit Society</div>
         </div>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
         <div class="bell" onclick="openModal('notificationModal')" style="cursor: pointer; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; position: relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; stroke:#fff;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <div class="dot" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--terracotta); border: 1.5px solid var(--forest);"></div>
         </div>
-        <span id="fbStatusBadge" style="font-size: 9.5px; background: rgba(255,255,255,.18); padding: 2px 8px; border-radius: 6px; font-weight: 600; color: #fff; letter-spacing: 0.3px;">● Live</span>
+        <span id="fbStatusBadge" style="font-size: 9.5px; background: #00E676; color: #033621; padding: 3px 9px; border-radius: 8px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(0, 230, 118, 0.4); border: 1px solid #B9F6CA;">🟢 Live</span>
       </div>
     </div>
     <div class="greeting">
@@ -515,7 +536,7 @@
 
   <!-- QUICK ACTIONS -->
   <div class="section">
-    <div class="section-title">Quick Actions <span class="eyebrow">13 tools</span></div>
+    <div class="section-title">Quick Actions <span class="eyebrow">15 tools</span></div>
     <div class="actions-grid">
       <!-- 1. Pay Maintenance -->
       <a href="pay-maintenance.html" class="action" id="qa_tool_pay_maintenance">
@@ -557,10 +578,10 @@
         <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <span>Gate Request</span>
       </a>
-      <!-- 9. Flat Scores -->
+      <!-- 9. Scores -->
       <a href="#" class="action" onclick="openModal('memberScoresModal'); return false;" id="qa_tool_member_scores">
         <div class="action-icon bg-marigold"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
-        <span>Flat Scores</span>
+        <span>Scores</span>
       </a>
       <!-- 10. Documents -->
       <a href="documents.html" class="action" id="qa_tool_documents">
@@ -582,42 +603,25 @@
         <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
         <span>Local Services</span>
       </a>
+      <!-- 14. Vehicles -->
+      <a href="#" class="action" onclick="openModal('vehiclesModal'); return false;" id="qa_tool_vehicles">
+        <div class="action-icon bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>
+        <span>Vehicles</span>
+      </a>
+      <!-- 15. Guard Request -->
+      <a href="#" class="action" onclick="openModal('guardRequestsModal'); return false;" id="qa_tool_guard_request">
+        <div class="action-icon bg-terracotta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 6h16L12 2z"/><ellipse cx="12" cy="4.8" rx="1" ry="1.4"/><path d="M5.5 7.5h13"/><path d="M5.5 9h13"/><path d="M6 10.5c0 2.8 2.7 4.5 6 4.5s6-1.7 6-4.5"/><path d="M8 15.5l2.5 3 1.5-2 1.5 2 2.5-3"/><path d="M11 16.5l1 2 1-2v5.5h-2z"/><rect x="5" y="18" width="3.5" height="2.2" rx="0.4"/><path d="M3 23c0-3.5 3.5-5.8 9-5.8s9 2.3 9 5.8"/></svg></div>
+        <span>Guard Request</span>
+      </a>
     </div>
 
   </div>
 
-  <!-- ACTIVITIES -->
-  <div class="section">
-    <div class="section-title">Today's Activities <span class="eyebrow">4 logged</span></div>
-    <div class="activity-list">
-      <div class="activity-item">
-        <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="activity-text">
-          <div class="name">Lift Serviced</div>
-          <div class="time">09:12 AM · Tower B</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="activity-text">
-          <div class="name">Water Tank Cleaning</div>
-          <div class="time">08:30 AM · Overhead Tank</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="activity-text">
-          <div class="name">Security Shift Changed</div>
-          <div class="time">08:00 AM · Main Gate</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="activity-text">
-          <div class="name">Garden Maintenance</div>
-          <div class="time">07:45 AM · Central Lawn</div>
-        </div>
-      </div>
+  <!-- ACTIVITY LOGS SECTION AT BOTTOM -->
+  <div class="section" style="margin-bottom: 24px;">
+    <div class="section-title">Activity Logs <span class="eyebrow" id="dashboardLogsCount">4 logged</span></div>
+    <div id="dashboardLogsList" style="display: flex; flex-direction: column; gap: 8px;">
+      <!-- Dynamic real-time activity logs rendered here in required format: name - date time - status - tool/action -->
     </div>
   </div>
 
@@ -834,6 +838,130 @@
     </div>
   </div>
 
+  <!-- ACTIVITY LOGS MODAL -->
+  <div class="modal-overlay" id="activityLogsModal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title">📋 Activity & Action Logs</div>
+        <div class="modal-close" onclick="closeModal('activityLogsModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.4; text-align:left;">
+        Real-time logs for edits, approvals, gate access, submissions, additions & resolutions.
+      </div>
+      <div id="activityLogsContainer" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; text-align:left;">
+        <!-- Filled dynamically -->
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('activityLogsModal')" style="margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
+  <!-- VEHICLES DIRECTORY MODAL -->
+  <div class="modal-overlay" id="vehiclesModal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title">🚗 Resident Vehicles Directory</div>
+        <div class="modal-close" onclick="closeModal('vehiclesModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      
+      <!-- Vehicles List -->
+      <div id="vehiclesContainer" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:2px; margin-bottom:12px; text-align:left;">
+        <!-- Filled dynamically in required format: Flat - Cars/Bike/bycycle - count - Vehical number -->
+      </div>
+
+      <!-- Add / Edit Form (collapsible) -->
+      <div style="background:rgba(31,77,61,0.04); border:1px dashed var(--forest); border-radius:12px; padding:12px; margin-top:4px; text-align:left;">
+        <div onclick="toggleVehicleForm()" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:2px 0;">
+          <span>➕ Add / Edit Vehicle Details</span>
+          <span id="vehFormArrow" style="font-size:11px;">▼</span>
+        </div>
+
+        <div id="vehFormFields" style="display:none; flex-direction:column; gap:8px; margin-top:10px;">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="vehFlat" placeholder="Flat No (e.g. A-101)" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+            <select id="vehType" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; background:white;">
+              <option value="Car">🚗 Car</option>
+              <option value="Bike">🏉 Bike</option>
+              <option value="Scooty">🛵 Scooty</option>
+              <option value="Bicycle">🚲 Bicycle</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="vehCount" placeholder="Count (e.g. 1)" min="1" value="1" style="width:90px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+            <input type="text" id="vehNumber" placeholder="Vehicle No. (e.g. KA 05 MB 1234)" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          </div>
+          <input type="text" id="vehColor" placeholder="Vehicle Color (e.g. White, Black, Red, Silver...)" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          <input type="hidden" id="vehEditId" value="">
+          <button onclick="saveVehicleEntry()" style="background:var(--forest); color:white; border:none; padding:10px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer;">Save Vehicle</button>
+        </div>
+      </div>
+
+      <!-- PDF Export Button -->
+      <button onclick="downloadVehiclesPdf()" style="width:100%; padding:11px; border-radius:10px; border:1.5px solid var(--forest); background:#E4EEE8; color:var(--forest-dark); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        📄 Download All Vehicles List (PDF)
+      </button>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('vehiclesModal')" style="margin-top: 14px;">Close</button>
+    </div>
+  </div>
+
+  <!-- SECURITY GUARD REQUESTS MODAL -->
+  <div class="modal-overlay" id="guardRequestsModal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display:flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px; height:22px;"><path d="M12 2L4 6h16L12 2z"/><ellipse cx="12" cy="4.8" rx="1" ry="1.4"/><path d="M5.5 7.5h13"/><path d="M5.5 9h13"/><path d="M6 10.5c0 2.8 2.7 4.5 6 4.5s6-1.7 6-4.5"/><path d="M8 15.5l2.5 3 1.5-2 1.5 2 2.5-3"/><path d="M11 16.5l1 2 1-2v5.5h-2z"/><rect x="5" y="18" width="3.5" height="2.2" rx="0.4"/><path d="M3 23c0-3.5 3.5-5.8 9-5.8s9 2.3 9 5.8"/></svg>
+          Security Guard Requests
+        </div>
+        <div class="modal-close" onclick="closeModal('guardRequestsModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px; text-align:left;">
+        Material & equipment requests for main gate security (Chharu, Wiper, Cleaner, Table, Chair, etc.)
+      </div>
+
+      <!-- Guard Requests List -->
+      <div id="guardRequestsContainer" style="max-height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:2px; margin-bottom:12px; text-align:left;">
+        <!-- Filled dynamically in required format: Guard Name - Item - Request Date - Status -->
+      </div>
+
+      <!-- Add / Submit Request Form (collapsible) -->
+      <div style="background:rgba(31,77,61,0.04); border:1px dashed var(--forest); border-radius:12px; padding:12px; margin-top:4px; text-align:left;">
+        <div onclick="toggleGuardReqForm()" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:2px 0;">
+          <span>➕ Add / Submit Guard Request</span>
+          <span id="guardReqFormArrow" style="font-size:11px;">▼</span>
+        </div>
+
+        <div id="guardReqFormFields" style="display:none; flex-direction:column; gap:8px; margin-top:10px;">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="grdGuardName" value="Krishan" placeholder="Guard Name" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; font-weight:600;">
+            <select id="grdItemSelect" onchange="handleGuardItemSelect(this)" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; background:white;">
+              <option value="Chharu (Broom)">Chharu (Broom)</option>
+              <option value="Wiper">Wiper</option>
+              <option value="Cleaner">Cleaner</option>
+              <option value="Security Table">Security Table</option>
+              <option value="Security Chair">Security Chair</option>
+              <option value="Torch Light">Torch Light</option>
+              <option value="Visitor Register">Visitor Register</option>
+              <option value="Other">Other Material...</option>
+            </select>
+          </div>
+          <input type="text" id="grdCustomItem" placeholder="Or type item name (e.g. Broom / Cleaner)" style="display:none; width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          <input type="text" id="grdNote" placeholder="Additional Notes (Optional)" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          
+          <button onclick="saveGuardRequest()" style="background:var(--forest); color:white; border:none; padding:10px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer;">Submit Guard Request</button>
+        </div>
+      </div>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('guardRequestsModal')" style="margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -857,12 +985,564 @@
       initMemberScores();
     } else if (modalId === 'meterReadingsModal') {
       initMeterReadings();
+    } else if (modalId === 'activityLogsModal') {
+      initActivityLogs();
+    } else if (modalId === 'vehiclesModal') {
+      initVehicles();
+    } else if (modalId === 'guardRequestsModal') {
+      initGuardRequests();
     }
   }
 
   function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
   }
+
+  // Activity Logs Initialization
+  window.initActivityLogs = function() {
+    const modalContainer = document.getElementById('activityLogsContainer');
+    const dashboardContainer = document.getElementById('dashboardLogsList');
+    const dashboardLogsCount = document.getElementById('dashboardLogsCount');
+
+    const defaultLogs = [
+      { id: '1', name: 'Admin', dateTime: '22 Jul 2026 10:30 AM', status: 'Approved', toolAction: 'Gate Request Entry (Visitor: Ramesh)' },
+      { id: '2', name: 'Admin', dateTime: '22 Jul 2026 09:15 AM', status: 'Added', toolAction: 'Local Service Provider (Plumber)' },
+      { id: '3', name: 'Sujeet', dateTime: '21 Jul 2026 08:00 PM', status: 'Submitted', toolAction: 'Meter Reading Entry (Flat A-101)' },
+      { id: '4', name: 'Admin', dateTime: '21 Jul 2026 05:45 PM', status: 'Resolved', toolAction: 'Complaint (#104 Water Leakage)' }
+    ];
+
+    const buildLogHtml = (log) => {
+      let badgeStyle = 'background:rgba(31,77,61,0.1); color:var(--forest-dark);';
+      const st = (log.status || '').toLowerCase();
+      if (st.includes('reject') || st.includes('cancel') || st.includes('delete') || st.includes('decline')) {
+        badgeStyle = 'background:rgba(193,80,61,0.12); color:var(--terracotta);';
+      } else if (st.includes('approve') || st.includes('allow') || st.includes('resolve') || st.includes('submit') || st.includes('add') || st.includes('complete') || st.includes('edit')) {
+        badgeStyle = 'background:rgba(217,166,46,0.18); color:#8C640D;';
+      }
+      // REQUIRED FORMAT: name - date time - status - tool/action
+      return `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-family:'Space Grotesk',sans-serif; font-size:12.5px; color:var(--forest-dark); font-weight:600; line-height:1.4; word-break:break-word; box-shadow:0 2px 6px rgba(0,0,0,0.01);">
+          <span style="font-weight:700; color:var(--forest-dark);">${log.name || 'User'}</span> - 
+          <span style="color:var(--muted); font-weight:500;">${log.dateTime || ''}</span> - 
+          <span style="${badgeStyle} font-weight:700; padding:2px 7px; border-radius:5px; font-size:11px;">${log.status || 'Action'}</span> - 
+          <span>${log.toolAction || ''}</span>
+        </div>
+      `;
+    };
+
+    const DASHBOARD_LOGS_LIMIT = 5;
+
+    const renderDashboardLogsWithToggle = (list) => {
+      if (!dashboardContainer) return;
+      if (list.length === 0) {
+        dashboardContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No activity logs yet.</div>';
+        return;
+      }
+
+      const visible = list.slice(0, DASHBOARD_LOGS_LIMIT);
+      const hidden = list.slice(DASHBOARD_LOGS_LIMIT);
+
+      let html = visible.map(buildLogHtml).join('');
+
+      if (hidden.length > 0) {
+        html += `
+          <div id="dashboardLogsHidden" style="display:none; flex-direction:column; gap:8px;">
+            ${hidden.map(buildLogHtml).join('')}
+          </div>
+          <button id="dashboardLogsToggleBtn" onclick="toggleDashboardLogsExpand()" style="width:100%; padding:9px; margin-top:4px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); color:var(--forest-dark); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer;">
+            ▼ Show ${hidden.length} More Logs
+          </button>
+        `;
+      }
+
+      dashboardContainer.innerHTML = html;
+    };
+
+    window.toggleDashboardLogsExpand = function() {
+      const hiddenDiv = document.getElementById('dashboardLogsHidden');
+      const btn = document.getElementById('dashboardLogsToggleBtn');
+      if (!hiddenDiv || !btn) return;
+      if (hiddenDiv.style.display === 'none') {
+        hiddenDiv.style.display = 'flex';
+        hiddenDiv.style.flexDirection = 'column';
+        hiddenDiv.style.gap = '8px';
+        btn.textContent = '▲ Show Less';
+      } else {
+        hiddenDiv.style.display = 'none';
+        btn.textContent = btn.textContent.replace('▲ Show Less', '▼ Show ' + (btn._hiddenCount || '') + ' More Logs');
+      }
+    };
+
+    const renderLogs = (logs) => {
+      const list = (logs && logs.length > 0) ? logs : defaultLogs;
+
+      // Modal: show all logs
+      if (modalContainer) {
+        modalContainer.innerHTML = list.map(buildLogHtml).join('');
+      }
+
+      // Dashboard: show only first 5, rest hidden
+      renderDashboardLogsWithToggle(list);
+      // Store hidden count for toggle button label
+      const btn = document.getElementById('dashboardLogsToggleBtn');
+      if (btn) btn._hiddenCount = Math.max(0, list.length - DASHBOARD_LOGS_LIMIT);
+
+      if (dashboardLogsCount) dashboardLogsCount.textContent = `${list.length} logged`;
+    };
+
+    if (typeof fbListen === 'function') {
+      fbListen('society_activity_logs', (data) => {
+        renderLogs(data || []);
+      });
+    } else {
+      const stored = localStorage.getItem('society_activity_logs');
+      renderLogs(stored ? JSON.parse(stored) : null);
+    }
+  };
+
+  // Vehicles Directory Logic
+  let societyVehicles = [];
+  let isListeningVehicles = false;
+
+  const defaultVehicles = [
+    { id: '1', flat: 'A-101', type: 'Car', count: 1, number: 'KA 05 MB 1234', addedBy: 'Admin' },
+    { id: '2', flat: 'B-204', type: 'Bike', count: 2, number: 'MH 12 AB 5678', addedBy: 'Sujeet' },
+    { id: '3', flat: 'C-302', type: 'Bicycle', count: 1, number: 'Hero Jet #88', addedBy: 'Admin' },
+    { id: '4', flat: 'A-402', type: 'Car', count: 1, number: 'DL 01 AX 9090', addedBy: 'Ramesh' }
+  ];
+
+  window.initVehicles = function() {
+    if (typeof fbListen === 'function') {
+      if (!isListeningVehicles) {
+        isListeningVehicles = true;
+        fbListen('society_vehicles', (data) => {
+          societyVehicles = (data && data.length > 0) ? data : defaultVehicles;
+          renderVehicles();
+        });
+      }
+    } else {
+      const stored = localStorage.getItem('society_vehicles');
+      societyVehicles = stored ? JSON.parse(stored) : defaultVehicles;
+      renderVehicles();
+    }
+  };
+
+  function renderVehicles() {
+    const container = document.getElementById('vehiclesContainer');
+    if (!container) return;
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    let html = '';
+    if (societyVehicles.length === 0) {
+      html = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No resident vehicles registered yet.</div>';
+    } else {
+      societyVehicles.forEach(v => {
+        const typeIcon = v.type === 'Car' ? '🚗' : v.type === 'Bike' ? '🏍️' : v.type === 'Scooty' ? '🛵' : '🚲';
+        const colorBadge = v.color ? `<span style="display:inline-block; background:rgba(31,77,61,0.08); color:var(--forest-dark); font-size:10px; font-weight:600; padding:1px 7px; border-radius:5px; margin-left:4px;">🎨 ${v.color}</span>` : '';
+        
+        // REQUIRED FORMAT: Flat - Type - Count - Vehicle Number - Color
+        html += `
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:var(--forest-dark);">
+                ${typeIcon} Flat ${v.flat} - ${v.type} - ${v.count} - ${v.number} ${colorBadge}
+              </div>
+              <div style="font-size:10px; color:var(--muted); margin-top:2px;">Added by ${v.addedBy || 'Resident'}</div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button onclick="editVehicle('${v.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">✏️ Edit</button>
+              ${isAdmin ? `<button onclick="deleteVehicle('${v.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+    container.innerHTML = html;
+  }
+
+  window.toggleVehicleForm = function() {
+    const fields = document.getElementById('vehFormFields');
+    const arrow = document.getElementById('vehFormArrow');
+    if (!fields) return;
+    if (fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      if (arrow) arrow.textContent = '▲';
+    } else {
+      fields.style.display = 'none';
+      if (arrow) arrow.textContent = '▼';
+    }
+  };
+
+  window.saveVehicleEntry = function() {
+    const flat   = document.getElementById('vehFlat').value.trim();
+    const type   = document.getElementById('vehType').value;
+    const count  = Number(document.getElementById('vehCount').value) || 1;
+    const number = document.getElementById('vehNumber').value.trim();
+    const color  = document.getElementById('vehColor').value.trim();
+    const editId = document.getElementById('vehEditId').value;
+
+    if (!flat || !number) {
+      alert('Please fill out Flat Number and Vehicle Number.');
+      return;
+    }
+
+    if (editId) {
+      const idx = societyVehicles.findIndex(v => v.id === editId);
+      if (idx !== -1) {
+        societyVehicles[idx].flat   = flat;
+        societyVehicles[idx].type   = type;
+        societyVehicles[idx].count  = count;
+        societyVehicles[idx].number = number;
+        societyVehicles[idx].color  = color;
+        if (typeof logActivity === 'function') {
+          logActivity(`Vehicle Entry (Flat ${flat} - ${type}${color ? ' - ' + color : ''})`, 'Edited');
+        }
+      }
+    } else {
+      const newRec = {
+        id: Date.now().toString(),
+        flat, type, count, number, color,
+        addedBy: currentUser ? currentUser.name : 'Resident',
+        addedAt: new Date().toLocaleString('en-IN')
+      };
+      societyVehicles.unshift(newRec);
+      if (typeof logActivity === 'function') {
+        logActivity(`Vehicle Entry (Flat ${flat} - ${type}${color ? ' - ' + color : ''})`, 'Added');
+      }
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_vehicles', societyVehicles).then(() => {
+        resetVehicleForm();
+        renderVehicles();
+        alert('Vehicle details saved successfully!');
+      });
+    } else {
+      localStorage.setItem('society_vehicles', JSON.stringify(societyVehicles));
+      resetVehicleForm();
+      renderVehicles();
+      alert('Vehicle details saved successfully!');
+    }
+  };
+
+  function resetVehicleForm() {
+    document.getElementById('vehFlat').value   = currentUser ? (currentUser.flat || '') : '';
+    document.getElementById('vehType').value   = 'Car';
+    document.getElementById('vehCount').value  = '1';
+    document.getElementById('vehNumber').value = '';
+    document.getElementById('vehColor').value  = '';
+    document.getElementById('vehEditId').value = '';
+  }
+
+  window.editVehicle = function(id) {
+    const rec = societyVehicles.find(v => v.id === id);
+    if (!rec) return;
+    document.getElementById('vehFlat').value   = rec.flat;
+    document.getElementById('vehType').value   = rec.type;
+    document.getElementById('vehCount').value  = rec.count;
+    document.getElementById('vehNumber').value = rec.number;
+    document.getElementById('vehColor').value  = rec.color || '';
+    document.getElementById('vehEditId').value = rec.id;
+
+    const fields = document.getElementById('vehFormFields');
+    if (fields && fields.style.display === 'none') {
+      window.toggleVehicleForm();
+    }
+  };
+
+  window.deleteVehicle = function(id) {
+    if (!confirm('Are you sure you want to delete this vehicle record?')) return;
+    const item = societyVehicles.find(v => v.id === id);
+    societyVehicles = societyVehicles.filter(v => v.id !== id);
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Vehicle Entry (Flat ${item ? item.flat : id})`, 'Deleted');
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_vehicles', societyVehicles).then(() => {
+        renderVehicles();
+        alert('Vehicle record deleted successfully.');
+      });
+    } else {
+      localStorage.setItem('society_vehicles', JSON.stringify(societyVehicles));
+      renderVehicles();
+      alert('Vehicle record deleted successfully.');
+    }
+  };
+
+  window.downloadVehiclesPdf = function() {
+    if (!societyVehicles || societyVehicles.length === 0) {
+      alert('No vehicle entries available to export.');
+      return;
+    }
+
+    const societyName = (currentUser && currentUser.societyName) ? currentUser.societyName : 'Surakshit Society';
+    const dateStr = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' ' + new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
+    
+    let totalCars = 0, totalBikes = 0, totalBicycles = 0;
+    societyVehicles.forEach(v => {
+      const type = (v.type || '').toLowerCase();
+      const count = Number(v.count || 1);
+      if (type.includes('car')) totalCars += count;
+      else if (type.includes('bike')) totalBikes += count;
+      else if (type.includes('bicycle') || type.includes('bycycle')) totalBicycles += count;
+    });
+
+    let tableRows = '';
+    societyVehicles.forEach((v, idx) => {
+      // REQUIRED FORMAT: Flat - Cars/Bike/bycycle - count - Vehical number
+      const formattedEntry = `Flat ${v.flat} - ${v.type} - ${v.count} - ${v.number}`;
+      tableRows += `
+        <tr>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB; text-align:center;">${idx + 1}</td>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB; font-weight:bold; color:#1F4D3D;">${formattedEntry}</td>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB;">Flat ${v.flat}</td>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB;">${v.type}</td>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB; text-align:center;">${v.count}</td>
+          <td style="padding:10px; border-bottom:1px solid #E5E7EB; font-family:monospace; font-weight:bold;">${v.number}</td>
+        </tr>
+      `;
+    });
+
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Resident Vehicles Directory - ${societyName}</title>
+        <style>
+          body { font-family: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111827; padding: 24px; }
+          .header { text-align: center; border-bottom: 2px solid #1F4D3D; padding-bottom: 14px; margin-bottom: 20px; }
+          .header h1 { margin: 0; font-size: 22px; color: #1F4D3D; }
+          .header p { margin: 4px 0 0; font-size: 13px; color: #6B7280; }
+          .summary { display: flex; justify-content: space-around; background: #F3F4F6; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; font-weight: bold; }
+          table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+          th { background: #1F4D3D; color: white; padding: 10px; text-align: left; }
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${societyName} — Resident Vehicles Directory</h1>
+          <p>Generated on: ${dateStr}</p>
+        </div>
+        <div class="summary">
+          <span>Total Entries: ${societyVehicles.length}</span>
+          <span>🚗 Cars: ${totalCars}</span>
+          <span>🏍️ Bikes: ${totalBikes}</span>
+          <span>🚲 Bicycles: ${totalBicycles}</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align:center;">#</th>
+              <th>Vehicle Details (Format: Flat - Type - Count - Vehicle No)</th>
+              <th>Flat</th>
+              <th>Type</th>
+              <th style="text-align:center;">Count</th>
+              <th>Vehicle Number</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        ' + '<' + 'scr' + 'ipt>' + '
+          window.onload = function() {
+            window.print();
+          };
+        ' + '<' + '/scr' + 'ipt>' + '
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+  };
+
+  // ─── Security Guard Requests Logic ───
+  let guardRequests = [];
+  let isListeningGuardReqs = false;
+
+  const defaultGuardRequests = [
+    { id: 'GR-101', guardName: 'Krishan', item: 'Chharu (Broom)', date: '22 Jul 2026', status: 'Approved' },
+    { id: 'GR-102', guardName: 'Krishan', item: 'Wiper', date: '22 Jul 2026', status: 'Approved' },
+    { id: 'GR-103', guardName: 'Krishan', item: 'Cleaner', date: '21 Jul 2026', status: 'Approved' },
+    { id: 'GR-104', guardName: 'Krishan', item: 'Security Chair', date: '20 Jul 2026', status: 'Not Approved' }
+  ];
+
+  window.initGuardRequests = function() {
+    if (typeof fbListen === 'function') {
+      if (!isListeningGuardReqs) {
+        isListeningGuardReqs = true;
+        fbListen('society_guard_requests', (data) => {
+          const cleanList = (data && data.length > 0) ? data.map(g => ({
+            ...g,
+            status: g.status === 'Approved by Admin' ? 'Approved' : (g.status || 'Not Approved')
+          })) : defaultGuardRequests;
+          guardRequests = cleanList;
+          renderGuardRequests();
+        });
+      }
+    } else {
+      const stored = localStorage.getItem('society_guard_requests');
+      guardRequests = stored ? JSON.parse(stored).map(g => ({
+        ...g,
+        status: g.status === 'Approved by Admin' ? 'Approved' : (g.status || 'Not Approved')
+      })) : defaultGuardRequests;
+      renderGuardRequests();
+    }
+  };
+
+  function renderGuardRequests() {
+    const container = document.getElementById('guardRequestsContainer');
+    if (!container) return;
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    let html = '';
+    if (guardRequests.length === 0) {
+      html = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No guard requests recorded yet.</div>';
+    } else {
+      guardRequests.forEach(gr => {
+        const isApproved = (gr.status || '').toLowerCase() === 'approved';
+        const displayStatus = isApproved ? 'Approved' : 'Not Approved';
+        const statusColor = isApproved ? 'var(--forest)' : 'var(--terracotta)';
+
+        html += `
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="flex:1; padding-right:8px;">
+              <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12.5px; color:var(--forest-dark); line-height:1.4;">
+                👮 ${gr.guardName || 'Krishan'} - ${gr.item} - ${gr.date} - <span style="color:${statusColor}; font-weight:800;">${displayStatus}</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+              ${isApproved ? `
+                <span style="background:rgba(31,77,61,0.12); color:var(--forest); padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700;">✓ Approved</span>
+              ` : (isAdmin ? `
+                <button onclick="approveGuardRequest('${gr.id}')" style="background:var(--forest); color:white; border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Approve</button>
+              ` : '')}
+              ${isAdmin ? `<button onclick="deleteGuardRequest('${gr.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Delete</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+    container.innerHTML = html;
+  }
+
+  window.toggleGuardReqForm = function() {
+    const fields = document.getElementById('guardReqFormFields');
+    const arrow = document.getElementById('guardReqFormArrow');
+    if (!fields) return;
+    if (fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      if (arrow) arrow.textContent = '▲';
+    } else {
+      fields.style.display = 'none';
+      if (arrow) arrow.textContent = '▼';
+    }
+  };
+
+  window.handleGuardItemSelect = function(sel) {
+    const customInput = document.getElementById('grdCustomItem');
+    if (sel.value === 'Other') {
+      customInput.style.display = 'block';
+    } else {
+      customInput.style.display = 'none';
+    }
+  };
+
+  window.saveGuardRequest = function() {
+    const guardName = document.getElementById('grdGuardName').value.trim() || 'Krishan';
+    const itemSel = document.getElementById('grdItemSelect').value;
+    const customItem = document.getElementById('grdCustomItem').value.trim();
+    const item = itemSel === 'Other' ? (customItem || 'General Material') : itemSel;
+    const note = document.getElementById('grdNote').value.trim();
+
+    const nowStr = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    const newReq = {
+      id: 'GR-' + Date.now(),
+      guardName: guardName,
+      item: item,
+      date: nowStr,
+      status: isAdmin ? 'Approved' : 'Not Approved',
+      note: note,
+      addedAt: new Date().toLocaleString('en-IN')
+    };
+
+    guardRequests.unshift(newReq);
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Guard Request (${guardName} - ${item})`, newReq.status);
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_guard_requests', guardRequests).then(() => {
+        resetGuardReqForm();
+        renderGuardRequests();
+        alert(`Guard request submitted! Status: ${newReq.status}`);
+      });
+    } else {
+      localStorage.setItem('society_guard_requests', JSON.stringify(guardRequests));
+      resetGuardReqForm();
+      renderGuardRequests();
+      alert(`Guard request submitted! Status: ${newReq.status}`);
+    }
+  };
+
+  function resetGuardReqForm() {
+    document.getElementById('grdGuardName').value = 'Krishan';
+    document.getElementById('grdItemSelect').value = 'Chharu (Broom)';
+    document.getElementById('grdCustomItem').value = '';
+    document.getElementById('grdCustomItem').style.display = 'none';
+    document.getElementById('grdNote').value = '';
+  }
+
+  window.approveGuardRequest = function(id) {
+    const idx = guardRequests.findIndex(g => g.id === id);
+    if (idx === -1) return;
+    guardRequests[idx].status = 'Approved';
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Guard Request (${guardRequests[idx].guardName} - ${guardRequests[idx].item})`, 'Approved');
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_guard_requests', guardRequests).then(() => {
+        renderGuardRequests();
+        alert('Guard request approved successfully!');
+      });
+    } else {
+      localStorage.setItem('society_guard_requests', JSON.stringify(guardRequests));
+      renderGuardRequests();
+      alert('Guard request approved successfully!');
+    }
+  };
+
+  window.deleteGuardRequest = function(id) {
+    if (!confirm('Are you sure you want to delete this guard request record?')) return;
+    const item = guardRequests.find(g => g.id === id);
+    guardRequests = guardRequests.filter(g => g.id !== id);
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Guard Request (${item ? item.item : id})`, 'Deleted');
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_guard_requests', guardRequests).then(() => {
+        renderGuardRequests();
+        alert('Guard request deleted successfully.');
+      });
+    } else {
+      localStorage.setItem('society_guard_requests', JSON.stringify(guardRequests));
+      renderGuardRequests();
+      alert('Guard request deleted successfully.');
+    }
+  };
 
   // Local Services Logic
   let localServices = [];
@@ -930,12 +1610,14 @@
     if (typeof fbSet === 'function') {
       fbSet('society_services', localServices).then(() => {
         logAction('service_added', { serviceName: name, category: category, rating: rating }, 'local_services');
+        if (typeof logActivity === 'function') { logActivity(`Local Service (${name} - ${category})`, 'Added'); }
         alert('Service Provider added successfully!');
         resetAddServiceForm();
       });
     } else {
       localStorage.setItem('society_services', JSON.stringify(localServices));
       logAction('service_added', { serviceName: name, category: category, rating: rating }, 'local_services');
+      if (typeof logActivity === 'function') { logActivity(`Local Service (${name} - ${category})`, 'Added'); }
       alert('Service Provider added successfully!');
       resetAddServiceForm();
       renderLocalServices();
@@ -1023,6 +1705,9 @@
     
     // Log deletion details
     logDeletion('local_service', id, serviceToDelete);
+    if (typeof logActivity === 'function') {
+      logActivity(`Local Service (${serviceToDelete ? serviceToDelete.name : id})`, 'Deleted');
+    }
     
     // Re-render local services
     renderLocalServices();
@@ -1146,6 +1831,7 @@
       if (idx !== -1) {
         meterReadings[idx] = { ...meterReadings[idx], flat, month, monthLabel, reading, photo: photo || meterReadings[idx].photo };
         logAction('meter_reading_updated', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
+        if (typeof logActivity === 'function') { logActivity(`Meter Reading (Flat ${flat} - ${monthLabel})`, 'Edited'); }
       }
     } else {
       // Check for duplicate flat+month
@@ -1161,6 +1847,7 @@
         addedAt: new Date().toLocaleString('en-IN')
       });
       logAction('meter_reading_added', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
+      if (typeof logActivity === 'function') { logActivity(`Meter Reading (Flat ${flat} - ${monthLabel})`, 'Added'); }
     }
 
     // Sort by month desc then flat
@@ -1286,6 +1973,9 @@
     
     // Log deletion details
     logDeletion('meter_reading', id, readingToDelete);
+    if (typeof logActivity === 'function') {
+      logActivity(`Meter Reading (Flat ${readingToDelete ? readingToDelete.flat : id})`, 'Deleted');
+    }
     
     // Re-render meter readings
     renderMeterReadings();
@@ -1413,9 +2103,11 @@
       }
 
       const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
-      const customOpenCount = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
+      const filterSampleComplaints = (list) => (list || []).filter(c => c.id && !['CMP-2026-042', 'CMP-2026-041', 'CMP-2026-040', 'CMP-2026-039', 'CMP-2026-038'].includes(c.id));
+      const cleanComplaints = filterSampleComplaints(complaints);
+      const customOpenCount = cleanComplaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
       const compValEl = document.getElementById('statComplaintsVal');
-      if (compValEl) compValEl.textContent = 7 + customOpenCount;
+      if (compValEl) compValEl.textContent = customOpenCount;
 
       const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
       const visValEl = document.getElementById('statVisitorsVal');
@@ -1423,6 +2115,8 @@
 
       const notifications = JSON.parse(localStorage.getItem('society_notifications')) || [];
       renderNotificationsUI(notifications);
+
+      updateQuickActionBlinkingIndicators();
     };
 
     loadLocalStorageStats();
@@ -1449,14 +2143,18 @@
             maintValEl.style.color = '';
           }
         }
+        updateQuickActionBlinkingIndicators();
       });
 
       // Listen to Complaints
       fbListen('society_complaints', (data) => {
-        const complaints = data || [];
+        const raw = data || [];
+        const filterSampleComplaints = (list) => (list || []).filter(c => c.id && !['CMP-2026-042', 'CMP-2026-041', 'CMP-2026-040', 'CMP-2026-039', 'CMP-2026-038'].includes(c.id));
+        const complaints = filterSampleComplaints(raw);
         const customOpenCount = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
         const compValEl = document.getElementById('statComplaintsVal');
-        if (compValEl) compValEl.textContent = 7 + customOpenCount;
+        if (compValEl) compValEl.textContent = customOpenCount;
+        updateQuickActionBlinkingIndicators();
       });
 
       // Listen to Visitors
@@ -1470,6 +2168,7 @@
       fbListen('society_notifications', (data) => {
         const notifications = data || [];
         renderNotificationsUI(notifications);
+        updateQuickActionBlinkingIndicators();
       });
 
       // Listen to Gate Requests
@@ -1505,16 +2204,20 @@
         banner.style.display = 'none';
       }
     }
+    updateQuickActionBlinkingIndicators();
   }
 
   // ─── Real-Time Notifications Helper Systems ───
   let lastReadTime = Number(localStorage.getItem('notif_last_read') || 0);
 
-  function renderNotificationsUI(notifications) {
+  function renderNotificationsUI(rawNotifications) {
     const list = document.getElementById('notificationModal');
     if (!list) return;
     const modalBox = list.querySelector('.modal');
     if (!modalBox) return;
+
+    // Filter out any chat notifications
+    const notifications = (rawNotifications || []).filter(n => n.type !== 'chat' && !(n.title && n.title.toLowerCase().includes('chat')));
 
     const headerHtml = `
       <div class="modal-header">
@@ -1546,9 +2249,16 @@
       });
     }
 
-    const footerHtml = `<button class="modal-btn modal-btn-primary" onclick="markAllNotificationsRead()" style="width:100%; padding:14px; border:none; border-radius:12px; background:var(--forest); color:white; font-size:14px; font-weight:600; cursor:pointer; margin-top:16px;">Mark All Read</button>`;
+    const scrollableContent = `<div style="max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 2px; text-align: left;">${itemsHtml}</div>`;
 
-    modalBox.innerHTML = headerHtml + itemsHtml + footerHtml;
+    const footerHtml = `
+      <div style="display: flex; gap: 8px; margin-top: 14px;">
+        <button class="modal-btn modal-btn-primary" onclick="markAllNotificationsRead()" style="flex: 1; padding: 12px; border: none; border-radius: 10px; background: var(--forest); color: white; font-size: 13px; font-weight: 700; cursor: pointer;">Mark All Read</button>
+        <button onclick="clearAllNotifications()" style="flex: 1; padding: 12px; border: 1px solid var(--terracotta); border-radius: 10px; background: rgba(193,80,61,0.08); color: var(--terracotta); font-size: 13px; font-weight: 700; cursor: pointer;">🗑️ Clear All</button>
+      </div>
+    `;
+
+    modalBox.innerHTML = headerHtml + scrollableContent + footerHtml;
 
     // Show/hide red dot in bell icon
     const dot = document.querySelector('.bell .dot');
@@ -1556,6 +2266,17 @@
       dot.style.display = unreadCount > 0 ? 'block' : 'none';
     }
   }
+
+  window.clearAllNotifications = function() {
+    if (!confirm('Are you sure you want to clear all notifications?')) return;
+    localStorage.setItem('society_notifications', JSON.stringify([]));
+    if (typeof fbSet === 'function') {
+      fbSet('society_notifications', []).catch(e => console.warn(e));
+    }
+    renderNotificationsUI([]);
+    const dot = document.querySelector('.bell .dot');
+    if (dot) dot.style.display = 'none';
+  };
 
   function markAllNotificationsRead() {
     lastReadTime = Date.now();
@@ -1587,8 +2308,140 @@
       if (dot) dot.style.display = 'none';
     } else if (id === 'usersModal') {
       loadAllUsers();
+    } else if (id === 'activityLogsModal') {
+      localStorage.setItem('logs_last_read', Date.now());
+      if (typeof updateQuickActionBlinkingIndicators === 'function') {
+        updateQuickActionBlinkingIndicators();
+      }
+    } else if (id === 'vehiclesModal') {
+      localStorage.setItem('vehicles_last_read', Date.now());
+      if (typeof updateQuickActionBlinkingIndicators === 'function') {
+        updateQuickActionBlinkingIndicators();
+      }
+    } else if (id === 'guardRequestsModal') {
+      localStorage.setItem('guard_last_read', Date.now());
+      if (typeof updateQuickActionBlinkingIndicators === 'function') {
+        updateQuickActionBlinkingIndicators();
+      }
+    } else if (id === 'meterReadingsModal') {
+      localStorage.setItem('meter_last_read', Date.now());
+      if (typeof updateQuickActionBlinkingIndicators === 'function') {
+        updateQuickActionBlinkingIndicators();
+      }
     }
   };
+
+  // ─── Dynamic Quick Action Blinking Indicators Logic (ONLY for NEW Updates) ───
+  function setToolIndicator(toolId, show, colorClass) {
+    const el = document.getElementById(toolId);
+    if (!el) return;
+    let dot = el.querySelector('.action-blink-indicator');
+    if (show) {
+      if (!dot) {
+        dot = document.createElement('div');
+        dot.className = 'action-blink-indicator ' + (colorClass || '');
+        el.insertBefore(dot, el.firstChild);
+      } else {
+        dot.className = 'action-blink-indicator ' + (colorClass || '');
+      }
+    } else {
+      if (dot) dot.remove();
+    }
+  }
+
+  function updateQuickActionBlinkingIndicators() {
+    if (!currentUser) return;
+    const normalise = s => String(s).replace(/flat\s*/i, '').trim();
+    const myFlat = normalise(currentUser.flat || '');
+    
+    // Initialize session baseline time
+    if (!sessionStorage.getItem('dashboard_session_start')) {
+      sessionStorage.setItem('dashboard_session_start', Date.now());
+    }
+    const sessionStart = Number(sessionStorage.getItem('dashboard_session_start') || Date.now());
+
+    // ── 1. Gate Requests: blink if NEW pending visitor request arrived this session ──
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+    const lastGateRead = Number(localStorage.getItem('gate_last_read_' + myFlat) || sessionStart);
+    const hasNewGateReq = approvals.some(req => 
+      normalise(req.flatNo) === myFlat && 
+      req.status === 'Pending' && 
+      ((req.timestamp ? new Date(req.timestamp).getTime() : Date.now()) > lastGateRead)
+    );
+    setToolIndicator('qa_tool_gate_requests', hasNewGateReq, 'red');
+
+    // ── 2. Chat: blink if NEW message received after last chat view ──
+    const chatThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+    const lastChatRead = Number(localStorage.getItem('chat_last_read_' + myFlat) || sessionStart);
+    let hasNewChatOrTag = false;
+    Object.values(chatThreads).forEach(t => {
+      if (!t.members || !t.members.some(m => normalise(m.flat) === myFlat)) return;
+      const msgs = t.messages ? Object.values(t.messages) : [];
+      msgs.forEach(m => {
+        if (normalise(m.senderFlat) !== myFlat) {
+          if (m.timestamp && m.timestamp > lastChatRead) {
+            hasNewChatOrTag = true;
+          }
+        }
+      });
+    });
+    setToolIndicator('qa_tool_chat', hasNewChatOrTag, 'green');
+
+    // ── 3. Notice Board: blink if NEW notice published after last view ──
+    const notices = JSON.parse(localStorage.getItem('society_notices')) || [];
+    const lastNoticeRead = Number(localStorage.getItem('notice_last_read') || sessionStart);
+    const hasNewNotice = notices.some(n => {
+      const ts = n.timestamp || (n.date ? new Date(n.date).getTime() : 0);
+      return ts > lastNoticeRead;
+    });
+    setToolIndicator('qa_tool_notice_board', hasNewNotice, '');
+
+    // ── 4. Add Complaint: blink if NEW complaint submitted after last view ──
+    const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+    const lastComplaintRead = Number(localStorage.getItem('complaint_last_read') || sessionStart);
+    const hasNewComplaintUpdate = complaints.some(c => {
+      const ts = c.timestamp || (c.date ? new Date(c.date).getTime() : 0);
+      return ts > lastComplaintRead;
+    });
+    setToolIndicator('qa_tool_add_complaint', hasNewComplaintUpdate, 'red');
+
+    // ── 5. Vehicles: blink if NEW vehicle entry added after last view ──
+    const vehicles = JSON.parse(localStorage.getItem('society_vehicles')) || [];
+    const lastVehiclesRead = Number(localStorage.getItem('vehicles_last_read') || sessionStart);
+    const hasNewVehicle = vehicles.some(v => {
+      const ts = v.addedAt ? new Date(v.addedAt).getTime() : (v.id ? Number(v.id) : 0);
+      return ts > lastVehiclesRead;
+    });
+    setToolIndicator('qa_tool_vehicles', hasNewVehicle, 'green');
+
+    // ── 6. Guard Request: blink if there is any PENDING guard request ──
+    const guardRequests = JSON.parse(localStorage.getItem('society_guard_requests')) || [];
+    const lastGuardRead = Number(localStorage.getItem('guard_last_read') || sessionStart);
+    const hasNewGuardReq = guardRequests.some(r => {
+      const ts = r.requestDate ? new Date(r.requestDate).getTime() : (r.id ? Number(r.id) : 0);
+      return r.status === 'Pending' && ts > lastGuardRead;
+    });
+    setToolIndicator('qa_tool_guard_request', hasNewGuardReq, 'red');
+
+    // ── 7. Meter Readings: blink if NEW reading added after last view ──
+    const meterReadingsRaw = JSON.parse(localStorage.getItem('society_meter_readings')) || [];
+    const lastMeterRead = Number(localStorage.getItem('meter_last_read') || sessionStart);
+    const hasNewMeter = meterReadingsRaw.some(r => {
+      const ts = r.addedAt ? new Date(r.addedAt).getTime() : (r.id ? Number(r.id) : 0);
+      return ts > lastMeterRead;
+    });
+    setToolIndicator('qa_tool_meter_readings', hasNewMeter, 'green');
+
+    // ── Static tools — no blink triggers ──
+    setToolIndicator('qa_tool_pay_maintenance', false);
+    setToolIndicator('qa_tool_salary_pay', false);
+    setToolIndicator('qa_tool_accounting', false);
+    setToolIndicator('qa_tool_all_users', false);
+    setToolIndicator('qa_tool_visitor_entry', false);
+    setToolIndicator('qa_tool_member_scores', false);
+    setToolIndicator('qa_tool_documents', false);
+    setToolIndicator('qa_tool_local_services', false);
+  }
 
   function showStatDetail(type) {
     const title = document.getElementById('statModalTitle');
@@ -2067,6 +2920,7 @@
 
   // Run on dashboard setup
   initDashboardStats();
+  initActivityLogs();
 </script>
 </body>
 </html>
