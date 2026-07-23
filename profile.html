@@ -351,24 +351,36 @@
     transform:translateX(-50%);
     width:100%;
     max-width:480px;
-    background:var(--card);
-    border-top:1px solid var(--line);
+    background:#FFFFFF;
+    border-top:1.5px solid rgba(31,77,61,0.14);
     display:flex;
     justify-content:space-around;
-    padding:10px 6px 14px;
-    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+    align-items:center;
+    padding:8px 6px 12px;
+    z-index:1000;
+    box-shadow:0 -8px 24px rgba(31,77,61,0.1);
   }
   .nav-item{
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:500;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#526056;
+    font-size:10.5px;
+    font-weight:600;
     cursor:pointer;
     text-decoration:none;
+    flex:1;
+    padding:6px 2px;
+    border-radius:14px;
+    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
-  .nav-item.active{color:var(--forest);}
-  .nav-item.active svg{stroke:var(--forest);}
+  .nav-item svg{width:20px; height:20px; stroke:#526056; transition:transform 0.2s, stroke 0.2s;}
+  .nav-item:active{transform:scale(0.92);}
+  .nav-item.active{
+    color:#153529;
+    font-weight:700;
+    background:linear-gradient(135deg, rgba(31,77,61,0.12) 0%, rgba(217,166,46,0.18) 100%);
+    box-shadow:0 3px 10px rgba(31,77,61,0.08);
+  }
+  .nav-item.active svg{stroke:#1F4D3D; transform:translateY(-1px) scale(1.12);}
 
   @media (min-width:481px){
     body{background:#E9ECE5;}
@@ -682,9 +694,13 @@
           <div class="form-group">
             <div class="form-label">Role</div>
             <select class="form-select" id="regRole">
-              <option value="Resident">Resident</option>
-              <option value="Committee Member">Committee Member</option>
-              <option value="Super Admin">Super Admin</option>
+              <option value="🏠 Owner">🏠 Owner</option>
+              <option value="🔑 Tenant">🔑 Tenant</option>
+              <option value="🛡️ Guard">🛡️ Guard</option>
+              <option value="👔 Supervisor">👔 Supervisor</option>
+              <option value="🏛️ Committee Member">🏛️ Committee Member</option>
+              <option value="⚡ Super Admin">⚡ Super Admin</option>
+              <option value="Others">Others</option>
             </select>
           </div>
           <div class="form-group">
@@ -897,6 +913,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
+      <div class="menu-item" onclick="openActivityLogsModalProfile()">
+        <div class="menu-icon sky">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="menu-text">Activity Logs</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
       <div class="menu-item" onclick="openModal('helpModal')">
         <div class="menu-icon terracotta">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -938,9 +963,13 @@
       <div class="form-group">
         <div class="form-label">Role</div>
         <select class="form-select" id="addRole">
-          <option value="Resident">Resident</option>
-          <option value="Committee Member">Committee Member</option>
-          <option value="Super Admin">Super Admin</option>
+          <option value="🏠 Owner">🏠 Owner</option>
+          <option value="🔑 Tenant">🔑 Tenant</option>
+          <option value="🛡️ Guard">🛡️ Guard</option>
+          <option value="👔 Supervisor">👔 Supervisor</option>
+          <option value="🏛️ Committee Member">🏛️ Committee Member</option>
+          <option value="⚡ Super Admin">⚡ Super Admin</option>
+          <option value="Others">Others</option>
         </select>
       </div>
       <div class="form-group" style="display: flex; gap: 10px;">
@@ -1077,6 +1106,33 @@
     </div>
   </div>
 
+  <!-- ACTIVITY LOGS MODAL IN PROFILE -->
+  <div class="modal-overlay" id="activityLogsProfileModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">📋 Activity & System Logs</div>
+        <div class="modal-close" onclick="closeModal('activityLogsProfileModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.4;">
+        Real-time log of user actions, approvals, gate entries, submissions & updates.
+      </div>
+      <div id="profileActivityLogsContainer" style="max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+        <!-- Filled dynamically -->
+      </div>
+      
+      <!-- Clear All Logs (Admin Only) -->
+      <div id="adminClearLogsBtnRow" style="display:none; margin-top:10px;">
+        <button onclick="clearAllActivityLogsAdmin()" style="width:100%; padding:12px; border-radius:12px; border:1px solid var(--terracotta); background:#FFF0EE; color:var(--terracotta); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          🧹 Clear All Activity Logs (Admin Only)
+        </button>
+      </div>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('activityLogsProfileModal')" style="margin-top: 12px;">Close</button>
+    </div>
+  </div>
+
   <!-- HELP & SUPPORT MODAL -->
   <div class="modal-overlay" id="helpModal">
     <div class="modal">
@@ -1137,6 +1193,10 @@
     <a href="notices.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Notices
+    </a>
+    <a href="feed.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Feed
     </a>
     <a href="profile.html" class="nav-item active">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1382,7 +1442,7 @@
       feedback.className = 'val-feedback';
       return false;
     }
-    if (!/^\d{1,4}[a-zA-Z]?$/.test(val)) {
+    if (val.length < 1) {
       feedback.textContent = 'Invalid Flat Number';
       feedback.className = 'val-feedback error';
       return false;
@@ -1399,6 +1459,7 @@
     const text = document.getElementById('toastText');
     const icon = document.getElementById('toastIcon');
     const svg = document.getElementById('toastIconSvg');
+    if (!toast || !text || !icon || !svg) return;
     
     text.textContent = msg;
     icon.className = `toast-icon ${type}`;
@@ -1427,7 +1488,7 @@
       return;
     }
 
-    const matchedUser = users.find(u => (u.email === loginId || u.phone === loginId) && u.password === loginPass);
+    const matchedUser = users.find(u => u && (u.email === loginId || u.phone === loginId) && u.password === loginPass);
 
     if (matchedUser) {
       if (matchedUser.status === 'Pending') {
@@ -1455,69 +1516,127 @@
   }
 
   // Process Register
-  function processRegister() {
-    const societyName = document.getElementById('regSociety').value.trim();
-    const name = document.getElementById('regName').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const tower = document.getElementById('regTower').value;
-    const flat = document.getElementById('regFlat').value.trim();
-    const role = document.getElementById('regRole').value;
-    const adminEmail = document.getElementById('regAdminEmail').value.trim().toLowerCase();
+  window.processRegister = function processRegister() {
+    try {
+      const societyEl = document.getElementById('regSociety');
+      const nameEl = document.getElementById('regName');
+      const phoneEl = document.getElementById('regPhone');
+      const emailEl = document.getElementById('regEmail');
+      const passwordEl = document.getElementById('regPassword');
+      const towerEl = document.getElementById('regTower');
+      const flatEl = document.getElementById('regFlat');
+      const roleEl = document.getElementById('regRole');
+      const adminEmailEl = document.getElementById('regAdminEmail');
 
-    // Field Validations
-    if (!validateRegSociety() || !validateRegName() || !validateRegPhone() || !validateRegEmail() || !password) {
-      showToast('Please fix validation errors before registering', 'error');
-      return;
-    }
-    if (!validateRegFlat()) {
-      showToast('Please specify your Flat No.', 'error');
-      return;
-    }
+      const societyName = societyEl ? societyEl.value.trim() : '';
+      const name = nameEl ? nameEl.value.trim() : '';
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const email = emailEl ? emailEl.value.trim() : '';
+      const password = passwordEl ? passwordEl.value : '';
+      const tower = towerEl ? towerEl.value : 'Tower A';
+      const flat = flatEl ? flatEl.value.trim() : '';
+      const role = roleEl ? roleEl.value : '🏠 Owner';
+      const adminEmail = adminEmailEl ? adminEmailEl.value.trim().toLowerCase() : 'admin@society.com';
 
-    // Check if email or phone already exists
-    if (users.some(u => u.email === email || u.phone === phone)) {
-      showToast('A profile with this email or phone already exists.', 'error');
-      return;
-    }
-
-    // Check if they are the first user for this society name
-    const isFirstUserOfThisSociety = !users.some(u => u.societyName.toLowerCase() === societyName.toLowerCase());
-
-    const newUser = {
-      societyName,
-      name,
-      phone,
-      email,
-      password,
-      tower,
-      flat,
-      role: isFirstUserOfThisSociety ? "Super Admin" : role,
-      adminEmail: isFirstUserOfThisSociety ? email.toLowerCase() : adminEmail,
-      status: isFirstUserOfThisSociety ? "Approved" : "Pending",
-      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-      flatType: "3 BHK",
-      privacy: {
-        showPhone: true,
-        showEmail: true,
-        allowVisitors: true,
-        profileVisible: true
-      },
-      notifications: {
-        maintenance: true,
-        visitor: true,
-        notice: true,
-        complaint: true,
-        chat: true,
-        payment: true
+      // Field Validations
+      if (!societyName || societyName.length < 2) {
+        showToast('Please enter a valid Society Name', 'error');
+        return;
       }
-    };
+      if (!name || name.length < 2) {
+        showToast('Please enter your Full Name', 'error');
+        return;
+      }
+      if (!phone || phone.length < 10) {
+        showToast('Please enter a valid 10-digit Phone Number', 'error');
+        return;
+      }
+      if (!email || !email.includes('@')) {
+        showToast('Please enter a valid Email Address', 'error');
+        return;
+      }
+      if (!password || password.length < 4) {
+        showToast('Please enter a password of at least 4 characters', 'error');
+        return;
+      }
+      if (!flat) {
+        showToast('Please specify your Flat No.', 'error');
+        return;
+      }
 
-    users.push(newUser);
-    
-    if (typeof fbSet === 'function') {
-      fbSet('society_users', users).then(() => {
+      // Check if email or phone already exists
+      if (users && users.some(u => u && ((u.email && u.email.toLowerCase() === email.toLowerCase()) || (u.phone && u.phone === phone)))) {
+        showToast('A profile with this email or phone already exists.', 'error');
+        return;
+      }
+
+      // Check if they are the first user for this society name
+      const isFirstUserOfThisSociety = !users || users.length === 0 || !users.some(u => u && u.societyName && u.societyName.toLowerCase() === societyName.toLowerCase());
+
+      const newUser = {
+        societyName,
+        name,
+        phone,
+        email,
+        password,
+        tower,
+        flat,
+        role: isFirstUserOfThisSociety ? "⚡ Super Admin" : role,
+        adminEmail: isFirstUserOfThisSociety ? email.toLowerCase() : adminEmail,
+        status: isFirstUserOfThisSociety ? "Approved" : "Pending",
+        memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        flatType: "3 BHK",
+        privacy: {
+          showPhone: true,
+          showEmail: true,
+          allowVisitors: true,
+          profileVisible: true
+        },
+        notifications: {
+          maintenance: true,
+          visitor: true,
+          notice: true,
+          complaint: true,
+          chat: true,
+          payment: true
+        }
+      };
+
+      if (!users) users = [];
+      users.push(newUser);
+      
+      if (typeof fbSet === 'function') {
+        fbSet('society_users', users).then(() => {
+          if (isFirstUserOfThisSociety) {
+            showToast('Registration successful! Logging you in...', 'success');
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 1500);
+          } else {
+            if (typeof pushNotification === 'function') {
+              pushNotification(`New signup: ${name} (Flat ${flat}) requested approval for society ${societyName}`, "notice");
+            }
+            showToast('Registration submitted! Pending administrator approval.', 'success');
+            setTimeout(() => {
+              toggleAuthTab('login');
+              const loginIdInput = document.getElementById('loginId');
+              if (loginIdInput) loginIdInput.value = email;
+            }, 1500);
+          }
+        }).catch(err => {
+          console.error(err);
+          localStorage.setItem('society_users', JSON.stringify(users));
+          localStorage.setItem('users', JSON.stringify(users));
+          showToast('Registration submitted successfully!', 'success');
+          setTimeout(() => {
+            toggleAuthTab('login');
+          }, 1500);
+        });
+      } else {
+        localStorage.setItem('society_users', JSON.stringify(users));
+        localStorage.setItem('users', JSON.stringify(users));
         if (isFirstUserOfThisSociety) {
           showToast('Registration successful! Logging you in...', 'success');
           currentUser = newUser;
@@ -1526,34 +1645,19 @@
             window.location.href = 'index.html';
           }, 1500);
         } else {
-          if (typeof pushNotification === 'function') {
-            pushNotification(`New signup: ${name} (Flat ${flat}) requested approval for society ${societyName}`, "notice");
-          }
           showToast('Registration submitted! Pending administrator approval.', 'success');
           setTimeout(() => {
             toggleAuthTab('login');
+            const loginIdInput = document.getElementById('loginId');
+            if (loginIdInput) loginIdInput.value = email;
           }, 1500);
         }
-      });
-    } else {
-      localStorage.setItem('society_users', JSON.stringify(users));
-      localStorage.setItem('users', JSON.stringify(users));
-      if (isFirstUserOfThisSociety) {
-        showToast('Registration successful! Logging you in...', 'success');
-        currentUser = newUser;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1500);
-      } else {
-        showToast('Registration submitted! Pending administrator approval.', 'success');
-        setTimeout(() => {
-          toggleAuthTab('login');
-          document.getElementById('loginId').value = email;
-        }, 1500);
       }
+    } catch (err) {
+      console.error('Registration Error:', err);
+      showToast('Registration error: ' + err.message, 'error');
     }
-  }
+  };
 
   // Process Logout — defined as a global immediately so onclick attribute always works
   window.processLogout = function processLogout() {
@@ -1607,7 +1711,7 @@
       detailValues[3].textContent = currentUser.flatType || "3 BHK";
       
       // Show/hide "Add New User" button based on role
-      if (currentUser.role === 'Super Admin') {
+      if (currentUser.role && currentUser.role.includes('Super Admin')) {
         addUserBtn.style.display = 'flex';
       } else {
         addUserBtn.style.display = 'none';
@@ -1794,6 +1898,80 @@
     alert('Notification settings updated successfully!');
     closeModal('notificationsModal');
   }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  // Activity Logs in Profile
+  window.openActivityLogsModalProfile = function() {
+    try {
+      renderProfileActivityLogs();
+      
+      // Check if logged in user is admin
+      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member' || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
+      const clearRow = document.getElementById('adminClearLogsBtnRow');
+      if (clearRow) {
+        clearRow.style.display = isAdmin ? 'block' : 'none';
+      }
+      
+      openModal('activityLogsProfileModal');
+    } catch(err) {
+      console.error('Error opening activity logs modal:', err);
+      showToast('Error opening Activity Logs: ' + err.message, 'error');
+    }
+  };
+
+  function renderProfileActivityLogs() {
+    const container = document.getElementById('profileActivityLogsContainer');
+    if (!container) return;
+
+    let logs = [];
+    try {
+      logs = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
+    } catch(e) { logs = []; }
+
+    if (!Array.isArray(logs) || logs.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:30px 10px; color:var(--muted);">
+          <div style="font-size:32px; margin-bottom:6px;">📋</div>
+          <div style="font-weight:700; font-size:14px; color:var(--forest-dark);">No Activity Logs</div>
+          <div style="font-size:12px; margin-top:2px;">Activity history is completely clear</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = logs.map(log => `
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-weight:700; color:var(--forest-dark);">${escapeHtml(log.action || 'Activity')}</span>
+          <span style="font-size:10px; color:var(--muted);">${escapeHtml(log.time || log.timestamp || 'Recent')}</span>
+        </div>
+        <div style="color:var(--ink); font-size:11.5px;">${escapeHtml(log.details || log.desc || '')}</div>
+        ${log.user ? `<div style="font-size:10px; color:var(--muted); margin-top:2px;">By: ${escapeHtml(log.user)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  window.clearAllActivityLogsAdmin = function() {
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member' || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
+    if (!isAdmin) {
+      showToast('Only Admins are allowed to clear activity logs', 'error');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to CLEAR ALL activity logs? This action cannot be undone.')) return;
+
+    localStorage.setItem('society_activity_logs', JSON.stringify([]));
+    if (typeof fbSet === 'function') {
+      fbSet('society_activity_logs', []);
+    }
+
+    showToast('All Activity Logs cleared successfully!', 'success');
+    renderProfileActivityLogs();
+  };
 
   // Submit help ticket
   function submitHelp() {
@@ -2167,7 +2345,8 @@
     const countBadge = document.getElementById('pendingApprovalsCount');
     if (!card || !list || !countBadge) return;
 
-    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+    const isUserAdmin = currentUser && currentUser.role && (currentUser.role.includes('Super Admin') || currentUser.role.includes('Committee Member'));
+    if (!isUserAdmin) {
       card.style.display = 'none';
       return;
     }
@@ -2217,7 +2396,6 @@
       list.appendChild(row);
     });
   }
-
 
   window.approveUser = function(email) {
     const idx = users.findIndex(u => u.email === email);

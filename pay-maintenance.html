@@ -192,24 +192,36 @@
     transform:translateX(-50%);
     width:100%;
     max-width:480px;
-    background:var(--card);
-    border-top:1px solid var(--line);
+    background:#FFFFFF;
+    border-top:1.5px solid rgba(31,77,61,0.14);
     display:flex;
     justify-content:space-around;
-    padding:10px 6px 14px;
-    box-shadow:0 -6px 20px rgba(21,53,41,.06);
+    align-items:center;
+    padding:8px 6px 12px;
+    z-index:1000;
+    box-shadow:0 -8px 24px rgba(31,77,61,0.1);
   }
   .nav-item{
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:500;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#526056;
+    font-size:10.5px;
+    font-weight:600;
     cursor:pointer;
     text-decoration:none;
+    flex:1;
+    padding:6px 2px;
+    border-radius:14px;
+    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .nav-item svg{width:19px; height:19px; stroke:var(--muted);}
-  .nav-item.active{color:var(--forest);}
-  .nav-item.active svg{stroke:var(--forest);}
+  .nav-item svg{width:20px; height:20px; stroke:#526056; transition:transform 0.2s, stroke 0.2s;}
+  .nav-item:active{transform:scale(0.92);}
+  .nav-item.active{
+    color:#153529;
+    font-weight:700;
+    background:linear-gradient(135deg, rgba(31,77,61,0.12) 0%, rgba(217,166,46,0.18) 100%);
+    box-shadow:0 3px 10px rgba(31,77,61,0.08);
+  }
+  .nav-item.active svg{stroke:#1F4D3D; transform:translateY(-1px) scale(1.12);}
 
   @media (min-width:481px){
     body{background:#E9ECE5;}
@@ -349,11 +361,8 @@
         
         <div class="form-group" id="payMethodGroup" style="display:none; margin-top: 16px;">
           <div class="form-label">Payment Mode</div>
-          <select class="form-input" id="payMethod">
-            <option value="UPI">UPI (Google Pay/PhonePe)</option>
-            <option value="Card">Credit / Debit Card</option>
-            <option value="Net Banking">Net Banking</option>
-            <option value="Cash">Cash (Office Admin)</option>
+          <select class="form-input" id="payMethod" style="background:white; font-weight:600; color:var(--forest-dark);">
+            <option value="Barcode / QR Code">📷 Barcode / QR Code</option>
           </select>
         </div>
       </div>
@@ -364,10 +373,120 @@
           <!-- Dyn. populated payments -->
         </div>
       </div>
+
+      <!-- MAINTENANCE ACCOUNT DETAILS CARD (AT THE BOTTOM) -->
+      <div class="card" style="border: 1.5px solid var(--forest); box-shadow: 0 6px 20px rgba(31,77,61,0.06);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="card-title" style="margin-bottom:0;">🏦 Maintenance Account Details</div>
+          <button id="btnEditMaintAccount" onclick="toggleEditMaintAccount()" style="display:none; background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:4px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
+            ✏️ Edit Account
+          </button>
+        </div>
+
+        <!-- Display view of Bank Account Details -->
+        <div id="maintAccountDisplayView" style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--forest-dark);">
+          <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line);">
+            <span style="color:var(--muted);">Account Name:</span>
+            <strong id="displayAccName" style="text-align:right; font-weight:700;">SR GOLD SOCIETY MAINTENANCE</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line);">
+            <span style="color:var(--muted);">Account Number:</span>
+            <strong id="displayAccNum" style="text-align:right; font-weight:700;">98765432101234</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line);">
+            <span style="color:var(--muted);">Bank Name:</span>
+            <strong id="displayBankName" style="text-align:right; font-weight:700;">HDFC Bank Ltd</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line);">
+            <span style="color:var(--muted);">IFSC Code:</span>
+            <strong id="displayIfsc" style="text-align:right; font-weight:700;">HDFC0001234</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:5px 0;">
+            <span style="color:var(--muted);">UPI VPA:</span>
+            <strong id="displayUpiVpa" style="text-align:right; font-weight:700;">society048@okaxis</strong>
+          </div>
+        </div>
+
+        <!-- Admin Edit View (Hidden by default) -->
+        <div id="maintAccountEditView" style="display:none; margin-top:12px; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">Account Holder Name</div>
+            <input type="text" class="form-input" id="editAccName" placeholder="e.g. SR GOLD SOCIETY MAINTENANCE">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">Account Number</div>
+            <input type="text" class="form-input" id="editAccNum" placeholder="e.g. 98765432101234">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">Bank Name</div>
+            <input type="text" class="form-input" id="editBankName" placeholder="e.g. HDFC Bank Ltd">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <div class="form-label">IFSC Code</div>
+            <input type="text" class="form-input" id="editIfsc" placeholder="e.g. HDFC0001234">
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <div class="form-label">UPI VPA</div>
+            <input type="text" class="form-input" id="editUpiVpa" placeholder="e.g. society048@okaxis">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="saveMaintAccountDetails()" style="flex:1; padding:10px; font-size:12px;">💾 Save</button>
+            <button class="btn" onclick="toggleEditMaintAccount()" style="flex:1; padding:10px; font-size:12px; background:white; border:1px solid var(--line); color:var(--ink);">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ADMIN DESK CENTER -->
+    <!-- ADMIN DESK CENTER -->
     <div id="adminDesk" style="display:none;">
+      
+      <!-- SET MONTHLY MAINTENANCE FEE CARD -->
+      <div class="card" style="border: 1.5px solid var(--forest); box-shadow: 0 6px 20px rgba(31,77,61,0.06); margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--forest-dark);">Monthly Maintenance Rate</div>
+            <div style="font-size:12.5px; color:var(--forest); font-weight:700; margin-top:2px;" id="activeMaintRateBadge">Current Month Fee: ₹2,000 / mo</div>
+          </div>
+          <button onclick="toggleMaintRateForm()" id="btnToggleMaintRateForm" style="background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
+            ⚙️ Edit Rate
+          </button>
+        </div>
+
+        <!-- Default Hidden Collapsible Form -->
+        <div id="maintRateFormContainer" style="display:none; margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;">
+          <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
+            Admin sets monthly maintenance fee. Changing the fee for a month updates that month onwards; older/historical month fees remain static.
+          </p>
+
+          <div class="form-group" style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+              <div class="form-label">Select Month</div>
+              <select class="form-input" id="setRateMonth" onchange="onRateMonthChange()">
+                <option value="July 2026">July 2026</option>
+                <option value="August 2026">August 2026</option>
+                <option value="September 2026">September 2026</option>
+                <option value="October 2026">October 2026</option>
+                <option value="November 2026">November 2026</option>
+                <option value="December 2026">December 2026</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <div class="form-label">Maintenance Fee (₹)</div>
+              <input type="number" class="form-input" id="setMaintFeeInput" placeholder="e.g. 2000" min="0">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="saveMonthlyMaintenanceFee()" style="height: 44px; font-size:13px; margin-bottom:10px;">
+            💾 Save Monthly Rate
+          </button>
+
+          <div id="maintRatesHistoryList" style="font-size:11.5px; color:var(--muted); background:var(--paper); padding:10px 12px; border-radius:10px; border:1px solid var(--line);">
+            <!-- Configured Rates List -->
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
         <div class="card-title">Invoice Generator</div>
         
@@ -378,7 +497,7 @@
           </div>
           <div style="flex: 1;">
             <div class="form-label">Billing Month</div>
-            <select class="form-input" id="invMonth">
+            <select class="form-input" id="invMonth" onchange="onInvMonthChange()">
               <option value="July 2026">July 2026</option>
               <option value="August 2026">August 2026</option>
               <option value="September 2026">September 2026</option>
@@ -389,22 +508,22 @@
         <div class="form-group" style="display: flex; gap: 10px;">
           <div style="flex: 1;">
             <div class="form-label">Maintenance (₹)</div>
-            <input type="number" class="form-input" id="invMaint" value="1200" oninput="calculateTotalInvoice()">
+            <input type="number" class="form-input" id="invMaint" value="0" oninput="calculateTotalInvoice()">
           </div>
           <div style="flex: 1;">
             <div class="form-label">Water (₹)</div>
-            <input type="number" class="form-input" id="invWater" value="200" oninput="calculateTotalInvoice()">
+            <input type="number" class="form-input" id="invWater" value="0" oninput="calculateTotalInvoice()">
           </div>
         </div>
 
         <div class="form-group" style="display: flex; gap: 10px;">
           <div style="flex: 1;">
             <div class="form-label">Electric (₹)</div>
-            <input type="number" class="form-input" id="invElectric" value="300" oninput="calculateTotalInvoice()">
+            <input type="number" class="form-input" id="invElectric" value="0" oninput="calculateTotalInvoice()">
           </div>
           <div style="flex: 1;">
             <div class="form-label">Parking (₹)</div>
-            <input type="number" class="form-input" id="invParking" value="150" oninput="calculateTotalInvoice()">
+            <input type="number" class="form-input" id="invParking" value="0" oninput="calculateTotalInvoice()">
           </div>
         </div>
 
@@ -421,12 +540,12 @@
 
         <div class="form-group" style="display: flex; gap: 10px;">
           <div style="flex: 1;">
-            <div class="form-label">GST (18% Auto) (₹)</div>
-            <input type="number" class="form-input" id="invGst" value="333" readonly style="background:#e9ece5;">
+            <div class="form-label">GST (Editable) (₹)</div>
+            <input type="number" class="form-input" id="invGst" value="0" oninput="calculateTotalInvoice()" style="background:white;">
           </div>
           <div style="flex: 1;">
             <div class="form-label">Total Amount (₹)</div>
-            <input type="number" class="form-input" id="invTotal" value="2183" readonly style="background:#e9ece5; font-weight:700; color:var(--forest-dark);">
+            <input type="number" class="form-input" id="invTotal" value="0" readonly style="background:#e9ece5; font-weight:700; color:var(--forest-dark);">
           </div>
         </div>
 
@@ -434,13 +553,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Generate Invoice
         </button>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Generated Invoices Log</div>
-        <div id="generatedInvoicesLogList">
-          <!-- List of generated invoices -->
-        </div>
       </div>
     </div>
   </div>
@@ -459,6 +571,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Notices
     </a>
+    <a href="feed.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Feed
+    </a>
     <a href="profile.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
@@ -476,9 +592,25 @@
       </div>
 
       <div style="text-align: center; margin-bottom: 20px;">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Amount to Pay</div>
-        <div style="font-size: 32px; font-weight: 700; color: var(--forest-dark); font-family: 'IBM Plex Mono', monospace; margin: 4px 0;" id="checkoutAmount">₹2,000</div>
+        <div style="font-size: 11px; color: var(--muted); font-weight:600; text-transform: uppercase; letter-spacing: 0.5px;">
+          Total Bill: <span id="checkoutTotalBill" style="color:var(--forest-dark);">₹2,000</span> &bull; Paid: <span id="checkoutAlreadyPaid" style="color:var(--forest);">₹0</span>
+        </div>
+        <div style="font-size: 11px; font-weight:700; color: var(--terracotta); text-transform: uppercase; letter-spacing: 0.5px; margin-top:4px;">Remaining Due Amount</div>
+        <div style="font-size: 32px; font-weight: 700; color: var(--forest-dark); font-family: 'IBM Plex Mono', monospace; margin: 2px 0;" id="checkoutAmount">₹2,000</div>
         <div style="font-size: 12px; color: var(--muted);" id="checkoutMeta">For July 2026 via UPI</div>
+
+        <!-- Payment Amount Selector Input -->
+        <div style="margin-top:10px; background:var(--paper); padding:10px 14px; border-radius:12px; border:1px solid var(--line);">
+          <div style="font-size:11px; font-weight:600; color:var(--forest-dark); margin-bottom:6px;">Enter Amount to Pay Now (₹):</div>
+          <input type="number" id="payAmountCustomInput" class="form-input" style="text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:18px; color:var(--forest-dark);" oninput="onPayCustomInput()" placeholder="e.g. 500">
+          
+          <div style="display:flex; gap:6px; margin-top:8px;" id="quickPayPresets">
+            <button type="button" onclick="setPresetPayAmount('full')" style="flex:1; background:white; border:1px solid var(--forest); color:var(--forest-dark); border-radius:6px; padding:4px; font-size:10px; font-weight:700; cursor:pointer;">Full Pay</button>
+            <button type="button" onclick="setPresetPayAmount('half')" style="flex:1; background:white; border:1px solid var(--terracotta); color:var(--terracotta); border-radius:6px; padding:4px; font-size:10px; font-weight:700; cursor:pointer;">Half Pay (50%)</button>
+          </div>
+
+          <div id="payAmountValidationMsg" style="font-size:10.5px; color:var(--muted); margin-top:6px;">Default: Full Due Amount</div>
+        </div>
       </div>
 
       <!-- UPI Gateway Screen -->
@@ -668,13 +800,24 @@
     window.location.href = 'profile.html';
   }
 
-  // Hide/show Admin toggle container based on role
+  // Hide/show Admin toggle container based on role & setup GST access
   function setupAdminToggle() {
     const toggleContainer = document.getElementById('adminToggleContainer');
-    if (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') {
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const gstInput = document.getElementById('invGst');
+
+    if (isAdmin) {
       toggleContainer.style.display = 'flex';
+      if (gstInput) {
+        gstInput.readOnly = false;
+        gstInput.style.background = 'white';
+      }
     } else {
       toggleContainer.style.display = 'none';
+      if (gstInput) {
+        gstInput.readOnly = true;
+        gstInput.style.background = '#e9ece5';
+      }
     }
   }
 
@@ -700,7 +843,6 @@
       residentDesk.style.display = 'none';
       adminDesk.style.display = 'block';
       calculateTotalInvoice();
-      renderAdminInvoicesLog();
     }
   }
 
@@ -735,7 +877,7 @@
     }
   });
 
-  // Calculate invoice live values
+  // Calculate invoice live values (GST defaults to 0 unless modified by Admin)
   function calculateTotalInvoice() {
     const maint = Number(document.getElementById('invMaint').value) || 0;
     const water = Number(document.getElementById('invWater').value) || 0;
@@ -743,12 +885,11 @@
     const parking = Number(document.getElementById('invParking').value) || 0;
     const penalty = Number(document.getElementById('invPenalty').value) || 0;
     const prevDue = Number(document.getElementById('invPrevDue').value) || 0;
+    const gst = Number(document.getElementById('invGst').value) || 0;
 
     const subtotal = maint + water + electric + parking + penalty + prevDue;
-    const gst = Math.round(subtotal * 0.18);
     const total = subtotal + gst;
 
-    document.getElementById('invGst').value = gst;
     document.getElementById('invTotal').value = total;
   }
 
@@ -797,6 +938,7 @@
       prevDue: prevDue,
       gst: gst,
       total: total,
+      paidAmount: 0,
       date: todayDateStr,
       status: 'Pending'
     };
@@ -829,10 +971,16 @@
       renderAdminInvoicesLog();
     }
     
-    // Reset form
+    // Reset form to 0
     document.getElementById('invFlatNum').value = '';
+    document.getElementById('invMaint').value = '0';
+    document.getElementById('invWater').value = '0';
+    document.getElementById('invElectric').value = '0';
+    document.getElementById('invParking').value = '0';
     document.getElementById('invPenalty').value = '0';
     document.getElementById('invPrevDue').value = '0';
+    document.getElementById('invGst').value = '0';
+    document.getElementById('invTotal').value = '0';
     calculateTotalInvoice();
   }
 
@@ -852,15 +1000,25 @@
       row.className = 'history-item';
       row.style.fontSize = '12px';
       const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+      const totalAmt = Number(inv.total) || 0;
+      const paidAmt = Number(inv.paidAmount) || 0;
+      const dueAmt = Math.max(0, totalAmt - paidAmt);
+      const isPartial = paidAmt > 0 && dueAmt > 0;
+
+      const badgeHtml = isPartial
+        ? `<span style="font-size:10px; background:#FEF3C7; color:#92400E; padding:2px 6px; border-radius:4px; font-weight:600;">Partial (Paid: ₹${paidAmt.toLocaleString()} | Due: ₹${dueAmt.toLocaleString()})</span>`
+        : `<span style="font-size:10px; background:#F5E1DC; color:var(--terracotta); padding:2px 6px; border-radius:4px; font-weight:600;">Unpaid</span>`;
+
       row.innerHTML = `
         <div>
-          <div style="font-weight:600; color:var(--forest-dark);">Flat ${inv.flat} · ${inv.month}</div>
-          <div style="font-size:10px; color:var(--muted);">${inv.id} · ${inv.date}</div>
+          <div style="font-weight:600; color:var(--forest-dark);">Flat ${inv.flat} &bull; ${inv.month}</div>
+          <div style="font-size:10px; color:var(--muted);">${inv.id} &bull; ${inv.date}</div>
         </div>
         <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-          <div style="font-weight:700; color:var(--terracotta);">₹${inv.total.toLocaleString()}</div>
+          <div style="font-weight:700; color:var(--terracotta);">Due: ₹${dueAmt.toLocaleString()}</div>
           <div style="display:flex; gap:6px; align-items:center;">
-            <span style="font-size:10px; background:#F5E1DC; color:var(--terracotta); padding:2px 6px; border-radius:4px; font-weight:600;">Unpaid</span>
+            ${badgeHtml}
             ${isAdmin ? `<button onclick="deleteInvoice('${inv.id}')" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>` : ''}
           </div>
         </div>
@@ -899,32 +1057,244 @@
   let isListeningPending = false;
   let pendingInvoicesList = [];
 
+  // ─── Monthly Maintenance Rate Settings Logic ───
+  let societyMaintRates = {
+    'default': 2000,
+    'June 2026': 2000,
+    'July 2026': 2000
+  };
+
+  function loadMaintRates() {
+    if (typeof fbListen === 'function') {
+      fbListen('society_maint_rates', (data) => {
+        if (data && typeof data === 'object') {
+          societyMaintRates = data;
+        }
+        updateRateUI();
+      });
+    } else {
+      const stored = localStorage.getItem('society_maint_rates');
+      if (stored) {
+        try { societyMaintRates = JSON.parse(stored); } catch(e){}
+      }
+      updateRateUI();
+    }
+  }
+
+  function getRateForMonth(month) {
+    if (societyMaintRates && societyMaintRates[month] !== undefined) {
+      return Number(societyMaintRates[month]);
+    }
+    return Number((societyMaintRates && societyMaintRates['default']) || 2000);
+  }
+
+  window.toggleMaintRateForm = function() {
+    const container = document.getElementById('maintRateFormContainer');
+    const btn = document.getElementById('btnToggleMaintRateForm');
+    if (!container || !btn) return;
+    if (container.style.display === 'none') {
+      container.style.display = 'block';
+      btn.textContent = '▲ Hide Form';
+    } else {
+      container.style.display = 'none';
+      btn.textContent = '⚙️ Edit Rate';
+    }
+  };
+
+  function updateRateUI() {
+    const selMonth = document.getElementById('setRateMonth')?.value || 'July 2026';
+    const activeRate = getRateForMonth(selMonth);
+    const setMaintFeeInput = document.getElementById('setMaintFeeInput');
+    if (setMaintFeeInput) {
+      setMaintFeeInput.value = activeRate;
+    }
+    const badge = document.getElementById('activeMaintRateBadge');
+    if (badge) {
+      badge.textContent = `Current Month Fee: ₹${activeRate.toLocaleString()} / mo`;
+    }
+
+    // Auto populate invoice generator maint input with active monthly rate!
+    const currentInvMonth = document.getElementById('invMonth')?.value || 'July 2026';
+    const currentRate = getRateForMonth(currentInvMonth);
+    const invMaintInput = document.getElementById('invMaint');
+    if (invMaintInput) {
+      invMaintInput.value = currentRate;
+      calculateTotalInvoice();
+    }
+
+    // Render rates list in admin card
+    const histContainer = document.getElementById('maintRatesHistoryList');
+    if (histContainer) {
+      let html = '<div style="font-weight:700; color:var(--forest-dark); margin-bottom:6px;">Configured Monthly Rates:</div>';
+      const keys = Object.keys(societyMaintRates || {}).filter(k => k !== 'default');
+      if (keys.length === 0) {
+        html += `<div>Default Rate: ₹${((societyMaintRates || {}).default || 2000).toLocaleString()} (Applies to all months)</div>`;
+      } else {
+        keys.forEach(k => {
+          html += `<div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed var(--line);"><span>${k}:</span> <strong style="color:var(--forest-dark);">₹${Number(societyMaintRates[k]).toLocaleString()}</strong></div>`;
+        });
+      }
+      histContainer.innerHTML = html;
+    }
+  }
+
+  window.onRateMonthChange = function() {
+    const month = document.getElementById('setRateMonth').value;
+    const rate = getRateForMonth(month);
+    document.getElementById('setMaintFeeInput').value = rate;
+  };
+
+  window.onInvMonthChange = function() {
+    const month = document.getElementById('invMonth').value;
+    const rate = getRateForMonth(month);
+    document.getElementById('invMaint').value = rate;
+    calculateTotalInvoice();
+  };
+
+  window.saveMonthlyMaintenanceFee = function() {
+    const month = document.getElementById('setRateMonth').value;
+    const fee = Number(document.getElementById('setMaintFeeInput').value);
+    if (isNaN(fee) || fee < 0) {
+      alert('Please enter a valid maintenance fee amount.');
+      return;
+    }
+
+    societyMaintRates[month] = fee;
+    societyMaintRates['default'] = fee; // Update default rate for current/future months
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_maint_rates', societyMaintRates).then(() => {
+        alert(`Maintenance Fee for ${month} set to ₹${fee.toLocaleString()}.\nOlder historical months remain static.`);
+        updateRateUI();
+      });
+    } else {
+      localStorage.setItem('society_maint_rates', JSON.stringify(societyMaintRates));
+      alert(`Maintenance Fee for ${month} set to ₹${fee.toLocaleString()}.\nOlder historical months remain static.`);
+      updateRateUI();
+    }
+  };
+
+  // ─── Maintenance Account Details Logic ───
+  let societyAccountDetails = {
+    accName: 'SR GOLD SOCIETY MAINTENANCE',
+    accNum: '98765432101234',
+    bankName: 'HDFC Bank Ltd',
+    ifsc: 'HDFC0001234',
+    upiVpa: 'society048@okaxis'
+  };
+
+  function loadMaintAccountDetails() {
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const editBtn = document.getElementById('btnEditMaintAccount');
+    if (editBtn) {
+      editBtn.style.display = isAdmin ? 'inline-block' : 'none';
+    }
+
+    if (typeof fbListen === 'function') {
+      fbListen('society_account_details', (data) => {
+        if (data && typeof data === 'object') {
+          societyAccountDetails = data;
+        }
+        renderMaintAccountDetailsUI();
+      });
+    } else {
+      const stored = localStorage.getItem('society_account_details');
+      if (stored) {
+        try { societyAccountDetails = JSON.parse(stored); } catch(e){}
+      }
+      renderMaintAccountDetailsUI();
+    }
+  }
+
+  function renderMaintAccountDetailsUI() {
+    const acc = societyAccountDetails || {};
+    const accName = acc.accName || 'SR GOLD SOCIETY MAINTENANCE';
+    const accNum  = acc.accNum  || '98765432101234';
+    const bankName= acc.bankName|| 'HDFC Bank Ltd';
+    const ifsc    = acc.ifsc    || 'HDFC0001234';
+    const upiVpa  = acc.upiVpa  || 'society048@okaxis';
+
+    const displayAccName = document.getElementById('displayAccName');
+    const displayAccNum = document.getElementById('displayAccNum');
+    const displayBankName = document.getElementById('displayBankName');
+    const displayIfsc = document.getElementById('displayIfsc');
+    const displayUpiVpa = document.getElementById('displayUpiVpa');
+
+    if (displayAccName) displayAccName.textContent = accName;
+    if (displayAccNum) displayAccNum.textContent  = accNum;
+    if (displayBankName) displayBankName.textContent= bankName;
+    if (displayIfsc) displayIfsc.textContent    = ifsc;
+    if (displayUpiVpa) displayUpiVpa.textContent  = upiVpa;
+
+    // Populate edit form fields
+    const editAccName = document.getElementById('editAccName');
+    const editAccNum = document.getElementById('editAccNum');
+    const editBankName = document.getElementById('editBankName');
+    const editIfsc = document.getElementById('editIfsc');
+    const editUpiVpa = document.getElementById('editUpiVpa');
+
+    if (editAccName) editAccName.value = accName;
+    if (editAccNum) editAccNum.value  = accNum;
+    if (editBankName) editBankName.value= bankName;
+    if (editIfsc) editIfsc.value    = ifsc;
+    if (editUpiVpa) editUpiVpa.value  = upiVpa;
+  }
+
+  window.toggleEditMaintAccount = function() {
+    const editView = document.getElementById('maintAccountEditView');
+    const displayView = document.getElementById('maintAccountDisplayView');
+    if (!editView || !displayView) return;
+    
+    if (editView.style.display === 'none') {
+      editView.style.display = 'block';
+      displayView.style.display = 'none';
+    } else {
+      editView.style.display = 'none';
+      displayView.style.display = 'block';
+    }
+  };
+
+  window.saveMaintAccountDetails = function() {
+    const accName = document.getElementById('editAccName').value.trim();
+    const accNum  = document.getElementById('editAccNum').value.trim();
+    const bankName= document.getElementById('editBankName').value.trim();
+    const ifsc    = document.getElementById('editIfsc').value.trim();
+    const upiVpa  = document.getElementById('editUpiVpa').value.trim();
+
+    if (!accName || !accNum || !bankName || !ifsc) {
+      alert('Please fill out Account Name, Account Number, Bank Name, and IFSC Code.');
+      return;
+    }
+
+    societyAccountDetails = { accName, accNum, bankName, ifsc, upiVpa };
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_account_details', societyAccountDetails).then(() => {
+        alert('Maintenance Account Details updated successfully!\nOlder transaction receipts remain static.');
+        toggleEditMaintAccount();
+        renderMaintAccountDetailsUI();
+      });
+    } else {
+      localStorage.setItem('society_account_details', JSON.stringify(societyAccountDetails));
+      alert('Maintenance Account Details updated successfully!\nOlder transaction receipts remain static.');
+      toggleEditMaintAccount();
+      renderMaintAccountDetailsUI();
+    }
+  };
+
   function loadPaymentsHistory() {
     if (!currentUser) return;
     
-    payments = JSON.parse(localStorage.getItem('payments_' + currentUser.email));
-    
-    // Seed default payments if empty
-    if (!payments) {
-      payments = [
-        { month: 'June 2026', amount: '₹2,000', method: 'UPI', date: '03 Jun 2026 · 11:30 AM', txId: 'TXN-902348512' },
-        { month: 'May 2026', amount: '₹2,000', method: 'Net Banking', date: '02 May 2026 · 02:45 PM', txId: 'TXN-876123489' },
-        { month: 'April 2026', amount: '₹2,000', method: 'Credit Card', date: '04 Apr 2026 · 10:15 AM', txId: 'TXN-761239845' }
-      ];
-      localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
-    }
+    payments = JSON.parse(localStorage.getItem('payments_' + currentUser.email)) || [];
+
+    loadMaintRates();
+    loadMaintAccountDetails();
 
     if (typeof fbListen === 'function') {
       if (!isListeningPending) {
         isListeningPending = true;
         fbListen('society_pending_invoices', (data) => {
-          pendingInvoicesList = data || [];
-          if (pendingInvoicesList.length === 0) {
-            pendingInvoicesList = [
-              { id: 'INV-76543', flat: '201', month: 'July 2026', maint: 1100, water: 200, electric: 250, parking: 150, penalty: 0, prevDue: 0, gst: 300, total: 2000, date: '20 Jul 2026 · 10:00 AM', status: 'Pending' }
-            ];
-            fbSet('society_pending_invoices', pendingInvoicesList);
-          }
+          pendingInvoicesList = (data || []).filter(i => i.id !== 'INV-76543');
           // Cache locally to keep offline fallback consistent
           localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
           
@@ -933,65 +1303,115 @@
         });
       }
     } else {
-      pendingInvoicesList = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+      pendingInvoicesList = (JSON.parse(localStorage.getItem('society_pending_invoices')) || []).filter(i => i.id !== 'INV-76543');
       renderPendingBillsUI();
     }
 
     renderHistoryUI();
   }
 
+  function normalizeFlat(flatStr) {
+    if (!flatStr) return '';
+    return String(flatStr).replace(/[^0-9]/g, '');
+  }
+
   function renderPendingBillsUI() {
     const container = document.getElementById('pendingBillsList');
     container.innerHTML = '';
 
-    const myPending = pendingInvoicesList.filter(i => String(i.flat) === String(currentUser.flat));
+    const userFlatNorm = normalizeFlat(currentUser ? currentUser.flat : '');
+    
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    // Match invoices strictly for current user flat (or all if admin)
+    let myPending = pendingInvoicesList.filter(i => {
+      if (isAdmin) return true;
+      if (!currentUser || !currentUser.flat) return true;
+      const invFlatNorm = normalizeFlat(i.flat);
+      if (invFlatNorm && userFlatNorm) {
+        return invFlatNorm === userFlatNorm;
+      }
+      return String(i.flat).trim().toLowerCase() === String(currentUser.flat).trim().toLowerCase();
+    });
+
     const payMethodGroup = document.getElementById('payMethodGroup');
 
-    if (myPending.length === 0) {
-      container.innerHTML = `
-        <div class="amount-display" style="background:#E4EEE8; border:1px solid var(--forest); margin:0;">
-          <div class="amount-label" style="color:var(--forest);">Dues Status</div>
-          <div class="amount-value" style="color:var(--forest);">₹0</div>
-          <div style="font-size:12px; color:var(--forest); margin-top:8px; font-weight:500;">No outstanding bills! You are all caught up. 🎉</div>
+    // Calculate total remaining due across all active pending invoices
+    const activePending = myPending.filter(i => (Number(i.total) - (Number(i.paidAmount) || 0)) > 0);
+    const totalRemainingDue = activePending.reduce((sum, i) => sum + Math.max(0, Number(i.total) - (Number(i.paidAmount) || 0)), 0);
+    const totalPaidSoFar = myPending.reduce((sum, i) => sum + (Number(i.paidAmount) || 0), 0);
+
+    // Summary Card Header (Always Visible at Top!)
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'amount-display';
+    
+    if (totalRemainingDue > 0) {
+      const totalGeneratedSum = activePending.reduce((sum, i) => sum + Number(i.total || 0), 0);
+      summaryCard.style = 'background: #FFF5F2; border: 1.5px solid var(--terracotta); margin-bottom: 16px; border-radius: 14px; padding: 16px; text-align: center;';
+      summaryCard.innerHTML = `
+        <div class="amount-label" style="color:var(--terracotta); font-weight:700; letter-spacing:1px;">TOTAL OUTSTANDING DUE</div>
+        <div class="amount-value" style="color:var(--terracotta); font-size:32px; font-weight:800; margin: 4px 0;">₹${totalRemainingDue.toLocaleString()}</div>
+        <div style="font-size:12px; color:var(--forest-dark); font-weight:600;">
+          Generated Bill: ₹${totalGeneratedSum.toLocaleString()} &bull; Paid: ₹${totalPaidSoFar.toLocaleString()} &bull; <span style="color:var(--terracotta); font-weight:700;">Balance Due: ₹${totalRemainingDue.toLocaleString()}</span>
         </div>
       `;
-      payMethodGroup.style.display = 'none';
-      return;
+      if (payMethodGroup) payMethodGroup.style.display = 'block';
+    } else {
+      summaryCard.style = 'background: #E4EEE8; border: 1.5px solid var(--forest); margin-bottom: 16px; border-radius: 14px; padding: 16px; text-align: center;';
+      summaryCard.innerHTML = `
+        <div class="amount-label" style="color:var(--forest); font-weight:700; letter-spacing:1px;">DUES STATUS</div>
+        <div class="amount-value" style="color:var(--forest); font-size:32px; font-weight:800; margin: 4px 0;">₹0</div>
+        <div style="font-size:12px; color:var(--forest); font-weight:600;">No outstanding bills! You are all caught up. 🎉</div>
+      `;
+      if (payMethodGroup) payMethodGroup.style.display = 'none';
     }
+    
+    container.appendChild(summaryCard);
 
-    payMethodGroup.style.display = 'block';
-
-    myPending.forEach(inv => {
+    // Render individual pending invoice cards
+    activePending.forEach(inv => {
       const card = document.createElement('div');
       card.className = 'pending-bill-item';
       card.style = 'border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--paper); margin-bottom:12px;';
       
+      const totalAmt = Number(inv.total) || 0;
+      const paidAmt = Number(inv.paidAmount) || 0;
+      const dueAmt = Math.max(0, totalAmt - paidAmt);
+      const isPartial = paidAmt > 0 && dueAmt > 0;
+      
+      const statusBadge = isPartial 
+        ? `<span style="font-size:10px; background:#FEF3C7; color:#92400E; padding:3px 8px; border-radius:6px; font-weight:700;">PARTIAL PAID (Paid: ₹${paidAmt.toLocaleString()})</span>`
+        : `<span style="font-size:10px; background:#FEE2E2; color:#991B1B; padding:3px 8px; border-radius:6px; font-weight:700;">UNPAID</span>`;
+
       card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
           <div>
             <div style="font-weight:600; font-size:14px; color:var(--forest-dark);">${inv.month} Maintenance</div>
-            <div style="font-size:10px; color:var(--muted);">${inv.id} · ${inv.date}</div>
+            <div style="font-size:10px; color:var(--muted); margin-top:2px;">${inv.id} &bull; Flat ${inv.flat} &bull; ${inv.date}</div>
+            <div style="margin-top:6px;">${statusBadge}</div>
           </div>
           <div style="text-align:right;">
-            <div style="font-family:\'IBM Plex Mono\',monospace; font-weight:700; font-size:18px; color:var(--terracotta);">₹${inv.total.toLocaleString()}</div>
+            <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Remaining Due</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:20px; color:var(--terracotta);">₹${dueAmt.toLocaleString()}</div>
+            ${paidAmt > 0 ? `<div style="font-size:11px; color:var(--forest); font-weight:600; margin-top:2px;">Paid: ₹${paidAmt.toLocaleString()} / Total: ₹${totalAmt.toLocaleString()}</div>` : ''}
           </div>
         </div>
         
         <!-- Accordion details breakdown -->
-        <div id="breakdown-${inv.id}" style="display:none; font-family:\'IBM Plex Mono\',monospace; font-size:11px; color:var(--muted); border-top:1px dashed var(--line); padding:10px 0; margin-bottom:10px;">
+        <div id="breakdown-${inv.id}" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px dashed var(--line); padding:10px 0; margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Maintenance Fee:</span><span>₹${inv.maint}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Water Charges:</span><span>₹${inv.water}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Electricity Fee:</span><span>₹${inv.electric}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Parking Slots:</span><span>₹${inv.parking}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Penalties/Late Fee:</span><span>₹${inv.penalty}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Previous Arrears:</span><span>₹${inv.prevDue}</span></div>
-          <div style="display:flex; justify-content:space-between; padding:3px 0; border-top:1px dotted var(--line); padding-top:4px;"><span>GST (18%):</span><span>₹${inv.gst}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:3px 0; border-top:1px dotted var(--line); padding-top:4px;"><span>GST:</span><span>₹${inv.gst}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; border-top:1px dashed var(--line); font-weight:700; color:var(--forest-dark);"><span>Total Bill Amount:</span><span>₹${totalAmt.toLocaleString()}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:2px 0; color:var(--forest);"><span>Already Paid:</span><span>₹${paidAmt.toLocaleString()}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:2px 0; color:var(--terracotta); font-weight:700;"><span>Balance Due:</span><span>₹${dueAmt.toLocaleString()}</span></div>
         </div>
 
-        <div style="display:flex; gap:10px;">
-          <button class="btn" onclick="toggleInvoiceAccordion('${inv.id}')" style="flex:1; padding:10px; height:auto; background:var(--card); color:var(--forest); border:1px solid var(--forest); font-size:12px;">Breakdown</button>
-          <button class="btn btn-primary" onclick="payPendingBillClick('${inv.id}')" style="flex:1; padding:10px; height:auto; font-size:12px;">Pay Bill</button>
-        </div>
+        <button class="btn btn-primary" onclick="payPendingBillClick('${inv.id}')" style="width:100%; padding:12px; height:auto; font-size:13px; font-weight:700;">Pay Bill (₹${dueAmt.toLocaleString()})</button>
       `;
       container.appendChild(card);
     });
@@ -1014,15 +1434,34 @@
     activePayingInvoiceId = id;
     const method = document.getElementById('payMethod').value;
 
+    const totalAmt = Number(inv.total) || 0;
+    const paidAmt = Number(inv.paidAmount) || 0;
+    const dueAmt = Math.max(0, totalAmt - paidAmt);
+
     checkoutDetails = {
       id: inv.id,
       month: inv.month,
       method: method,
-      amount: '₹' + inv.total.toLocaleString()
+      totalAmount: totalAmt,
+      paidAmount: paidAmt,
+      dueAmount: dueAmt
     };
 
-    document.getElementById('checkoutAmount').textContent = checkoutDetails.amount;
+    document.getElementById('checkoutTotalBill').textContent = '₹' + totalAmt.toLocaleString();
+    document.getElementById('checkoutAlreadyPaid').textContent = '₹' + paidAmt.toLocaleString();
+    document.getElementById('checkoutAmount').textContent = '₹' + dueAmt.toLocaleString();
     document.getElementById('checkoutMeta').textContent = `For ${inv.month} via ${method}`;
+
+    const inputField = document.getElementById('payAmountCustomInput');
+    if (inputField) {
+      inputField.value = dueAmt;
+      inputField.max = dueAmt;
+    }
+    const valMsg = document.getElementById('payAmountValidationMsg');
+    if (valMsg) {
+      valMsg.textContent = `Full Due Amount: ₹${dueAmt.toLocaleString()} (Enter lesser amount for partial pay)`;
+      valMsg.style.color = 'var(--muted)';
+    }
 
     // Hide all gateway sub-panels
     document.getElementById('checkoutUPI').style.display = 'none';
@@ -1034,41 +1473,109 @@
     selectedBankName = "";
 
     // Show selected method screen
-    if (method === 'UPI') {
+    if (method === 'UPI' || method.includes('Barcode') || method.includes('QR')) {
       document.getElementById('checkoutUPI').style.display = 'block';
     } else if (method === 'Credit/Debit Card' || method === 'Card') {
       document.getElementById('checkoutCard').style.display = 'block';
     } else if (method === 'Net Banking') {
       document.getElementById('checkoutNet').style.display = 'block';
     } else {
-      document.getElementById('checkoutCash').style.display = 'block';
+      document.getElementById('checkoutUPI').style.display = 'block';
     }
 
     openModal('checkoutModal');
   }
 
+  window.setPresetPayAmount = function(type) {
+    if (!checkoutDetails) return;
+    const max = checkoutDetails.dueAmount;
+    const input = document.getElementById('payAmountCustomInput');
+    if (!input) return;
+
+    if (type === 'full') {
+      input.value = max;
+    } else if (type === 'half') {
+      input.value = Math.round(max / 2);
+    }
+    onPayCustomInput();
+  };
+
+  window.onPayCustomInput = function() {
+    const input = document.getElementById('payAmountCustomInput');
+    const valMsg = document.getElementById('payAmountValidationMsg');
+    const submitBtn = document.getElementById('btnSubmitPayment');
+    if (!input || !checkoutDetails) return;
+
+    const val = Number(input.value);
+    const max = checkoutDetails.dueAmount;
+
+    if (isNaN(val) || val <= 0) {
+      valMsg.textContent = '❌ Please enter an amount greater than ₹0';
+      valMsg.style.color = 'var(--terracotta)';
+      if (submitBtn) submitBtn.textContent = `Submit Payment`;
+    } else if (val > max) {
+      valMsg.textContent = `❌ Amount cannot exceed maximum due of ₹${max.toLocaleString()}`;
+      valMsg.style.color = 'var(--terracotta)';
+      if (submitBtn) submitBtn.textContent = `Submit Payment`;
+    } else if (val < max) {
+      const remainingAfter = max - val;
+      valMsg.textContent = `⚠️ Partial Pay of ₹${val.toLocaleString()}. Remaining due after: ₹${remainingAfter.toLocaleString()}`;
+      valMsg.style.color = '#92400E';
+      if (submitBtn) submitBtn.textContent = `Submit Partial Payment of ₹${val.toLocaleString()}`;
+    } else {
+      valMsg.textContent = `✅ Full Payment of ₹${max.toLocaleString()}`;
+      valMsg.style.color = 'var(--forest)';
+      if (submitBtn) submitBtn.textContent = `Submit Full Payment of ₹${max.toLocaleString()}`;
+    }
+  };
+
   function renderHistoryUI() {
     const paymentHistory = document.getElementById('paymentHistory');
     paymentHistory.innerHTML = '';
     
-    payments.forEach(p => {
+    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+
+    if (!payments || payments.length === 0) {
+      paymentHistory.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">No payment history recorded yet.</div>';
+      return;
+    }
+    
+    payments.forEach((p, idx) => {
       const histItem = document.createElement('div');
       histItem.className = 'history-item';
-      histItem.onclick = function() { showReceiptFromHistory(p); };
       histItem.style.cursor = 'pointer';
+      
       histItem.innerHTML = `
-        <div>
+        <div onclick="showReceiptFromHistory(payments[${idx}])" style="flex:1;">
           <div class="history-date">${p.month}</div>
           <div class="status-paid">Paid</div>
         </div>
         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
           <div class="history-amount">${p.amount}</div>
-          <div style="font-size:10px; color:var(--muted);">${p.method}</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:10px; color:var(--muted);">${p.method}</span>
+            ${isAdmin ? `<button onclick="event.stopPropagation(); deletePaymentHistory('${p.txId}')" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>` : ''}
+          </div>
         </div>
       `;
       paymentHistory.appendChild(histItem);
     });
   }
+
+  window.deletePaymentHistory = function(txId) {
+    if (!confirm('Are you sure you want to delete this payment history record?')) return;
+    
+    const pItem = payments.find(p => p.txId === txId);
+    payments = payments.filter(p => p.txId !== txId);
+    localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Payment Record (${pItem ? pItem.month + ' - ' + pItem.amount : txId})`, 'Deleted');
+    }
+
+    renderHistoryUI();
+    alert('Payment history entry deleted successfully.');
+  };
 
   function showReceiptFromHistory(p) {
     document.getElementById('rcptNo').textContent = p.txId.replace('TXN', 'RCPT');
@@ -1092,20 +1599,29 @@
   let latestTx = {};
 
   function submitGatewayPayment() {
-    if (checkoutDetails.method === 'UPI') {
+    const payInput = document.getElementById('payAmountCustomInput');
+    const payAmt = payInput ? Number(payInput.value) : checkoutDetails.dueAmount;
+
+    if (isNaN(payAmt) || payAmt <= 0) {
+      alert('Please enter a valid payment amount greater than ₹0.');
+      return;
+    }
+    if (payAmt > checkoutDetails.dueAmount) {
+      alert(`Payment amount cannot exceed remaining due amount of ₹${checkoutDetails.dueAmount.toLocaleString()}.`);
+      return;
+    }
+
+    if (checkoutDetails.method === 'UPI' || checkoutDetails.method.includes('Barcode') || checkoutDetails.method.includes('QR')) {
       const upiVal = document.getElementById('upiIdInput').value.trim();
-      if (!upiVal || !upiVal.includes('@')) {
-        alert('Please enter a valid UPI ID (e.g. name@okhdfc)');
-        return;
-      }
       
       // Trigger UPI deep link to open installed UPI payment apps on the user's browser/phone
-      const cleanAmt = checkoutDetails.amount.replace(/[^\d.]/g, '');
-      const upiUrl = `upi://pay?pa=society048@okaxis&pn=SR%20Gold%20Society&am=${cleanAmt}&cu=INR&tn=Maint%20Flat%20${currentUser.flat}%20${checkoutDetails.month}`;
+      const upiUrl = `upi://pay?pa=society048@okaxis&pn=SR%20Gold%20Society&am=${payAmt}&cu=INR&tn=Maint%20Flat%20${currentUser.flat}%20${checkoutDetails.month}`;
       console.log('[UPI REDIRECT] Opening UPI deep link: ' + upiUrl);
       
-      // Attempt to redirect the browser to the deep link
-      window.location.href = upiUrl;
+      // Attempt to redirect the browser to the deep link if UPI ID provided
+      if (upiVal) {
+        window.location.href = upiUrl;
+      }
     } else if (checkoutDetails.method === 'Credit/Debit Card' || checkoutDetails.method === 'Card') {
       const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
       const expiry = document.getElementById('cardExpiry').value;
@@ -1151,7 +1667,7 @@
       
       latestTx = {
         month: checkoutDetails.month,
-        amount: checkoutDetails.amount,
+        amount: '₹' + payAmt.toLocaleString(),
         method: checkoutDetails.method === 'Net Banking' ? selectedBankName : checkoutDetails.method,
         date: todayDate,
         txId: txId
@@ -1160,8 +1676,25 @@
       payments.unshift(latestTx);
       localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
 
-      // Remove paid invoice from pending invoices database (Firebase RTDB sync)
-      pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== activePayingInvoiceId);
+      // Update invoice paid amount in pendingInvoicesList
+      const invIndex = pendingInvoicesList.findIndex(i => i.id === activePayingInvoiceId);
+      let isFullyPaid = false;
+      let newRemaining = 0;
+
+      if (invIndex !== -1) {
+        const inv = pendingInvoicesList[invIndex];
+        inv.paidAmount = (Number(inv.paidAmount) || 0) + payAmt;
+        newRemaining = Math.max(0, Number(inv.total) - inv.paidAmount);
+        
+        if (newRemaining <= 0) {
+          isFullyPaid = true;
+          inv.status = 'Paid';
+          pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== activePayingInvoiceId);
+        } else {
+          inv.status = 'Partial';
+        }
+      }
+
       if (typeof fbSet === 'function') {
         fbSet('society_pending_invoices', pendingInvoicesList);
       } else {
@@ -1169,15 +1702,14 @@
       }
 
       // Automatically sync paid invoice amount as a new Income Entry in the Accounting / Finance Database!
-      const cleanAmt = Number(checkoutDetails.amount.replace(/[^\d.]/g, ''));
       const newIncomeEntry = {
         id: 'INC-' + Math.floor(100 + Math.random() * 900),
         head: 'Maintenance',
-        amount: cleanAmt,
+        amount: payAmt,
         flat: currentUser.flat,
         mode: checkoutDetails.method,
         date: todayDate,
-        note: `Maintenance fee paid for ${checkoutDetails.month}`
+        note: `Maintenance fee paid (${isFullyPaid ? 'Full' : 'Partial ₹' + payAmt.toLocaleString()}) for ${checkoutDetails.month}`
       };
 
       if (typeof fbGet === 'function') {
@@ -1194,19 +1726,24 @@
 
       // Push payment notification
       if (typeof pushNotification === 'function') {
-        pushNotification(`Maintenance Paid: Flat ${currentUser.flat} paid ${checkoutDetails.amount} for ${checkoutDetails.month}`, "payment");
+        pushNotification(`Maintenance Paid: Flat ${currentUser.flat} paid ₹${payAmt.toLocaleString()} for ${checkoutDetails.month} (${isFullyPaid ? 'Full Paid - No Due' : 'Remaining Due: ₹' + newRemaining.toLocaleString()})`, "payment");
       }
 
       if (typeof logActivity === 'function') {
-        logActivity(`Maintenance Payment (${checkoutDetails.amount} - ${checkoutDetails.month})`, 'Completed');
+        logActivity(`Maintenance Payment (₹${payAmt.toLocaleString()} - ${checkoutDetails.month})`, 'Completed');
       }
 
       // Re-load UI
       renderPendingBillsUI();
       renderHistoryUI();
+      renderAdminInvoicesLog();
 
       // Show success modal
-      document.getElementById('successMsg').textContent = `Payment of ${checkoutDetails.amount} for ${checkoutDetails.month} recorded successfully.`;
+      if (isFullyPaid) {
+        document.getElementById('successMsg').textContent = `Full Payment of ₹${payAmt.toLocaleString()} for ${checkoutDetails.month} recorded successfully. All dues cleared! 🎉`;
+      } else {
+        document.getElementById('successMsg').textContent = `Partial Payment of ₹${payAmt.toLocaleString()} for ${checkoutDetails.month} recorded. Remaining Due Amount: ₹${newRemaining.toLocaleString()}`;
+      }
       openModal('successModal');
       
       // Clear inputs

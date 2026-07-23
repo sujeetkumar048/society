@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Society Feed — Surakshit Society</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2420;
+    --paper:#F1F4EF;
+    --card:#FFFFFF;
+    --forest:#1F4D3D;
+    --forest-dark:#153529;
+    --marigold:#D9A62E;
+    --marigold-soft:#F4E4BC;
+    --terracotta:#C1503D;
+    --sky:#3E7CB1;
+    --line:#DDE3DA;
+    --muted:#6B7A70;
+    --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    padding-bottom:92px;
+  }
+
+  /* ===== HEADER ===== */
+  .header{
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-dark) 100%);
+    color:#fff;
+    padding:22px 20px 24px;
+    border-radius:0 0 28px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:1px dashed rgba(255,255,255,.18);
+    border-radius:50%;
+  }
+  .header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    z-index:1;
+  }
+  .header-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .back-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .back-btn svg{width:18px; height:18px; stroke:#fff;}
+  .page-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:19px;
+  }
+  .btn-new-post{
+    background:var(--marigold);
+    color:var(--forest-dark);
+    border:none;
+    padding:8px 14px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+    font-family:'Space Grotesk',sans-serif;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    box-shadow:0 4px 12px rgba(217,166,46,0.3);
+  }
+
+  /* ===== CONTENT ===== */
+  .content{
+    padding:16px;
+  }
+
+  /* POST CARD */
+  .post-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:16px;
+    border:1px solid var(--line);
+    box-shadow:0 4px 16px rgba(31,77,61,0.04);
+  }
+  .post-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .post-author{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .author-avatar{
+    width:40px; height:40px;
+    border-radius:50%;
+    background:var(--forest);
+    color:#fff;
+    font-size:14px;
+    font-weight:700;
+    font-family:'Space Grotesk',sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .author-avatar img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .author-name{
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--forest-dark);
+  }
+  .author-meta{
+    font-size:11px;
+    color:var(--muted);
+  }
+  .post-caption{
+    font-size:13.5px;
+    color:var(--ink);
+    line-height:1.5;
+    margin-bottom:12px;
+    white-space:pre-wrap;
+  }
+  .post-media{
+    width:100%;
+    height:220px;
+    max-height:220px;
+    border-radius:14px;
+    overflow:hidden;
+    background:#0F172A;
+    margin-bottom:12px;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .post-media img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    image-rendering:-webkit-optimize-contrast;
+  }
+  
+  /* ACTION BAR */
+  .post-actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:8px;
+    border-top:1px dashed var(--line);
+  }
+  .action-btn{
+    background:none;
+    border:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+    padding:6px 10px;
+    border-radius:8px;
+    transition:background 0.2s;
+  }
+  .action-btn:hover{
+    background:var(--paper);
+  }
+  .action-btn.liked{
+    color:var(--terracotta);
+  }
+
+  /* COMMENTS SECTION */
+  .comments-container{
+    margin-top:12px;
+    background:var(--paper);
+    border-radius:12px;
+    padding:12px;
+    display:none;
+  }
+  .comments-container.active{
+    display:block;
+  }
+  .comment-item{
+    font-size:12px;
+    margin-bottom:8px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .comment-item:last-child{
+    border-bottom:none;
+    margin-bottom:0;
+    padding-bottom:0;
+  }
+  .comment-author{
+    font-weight:700;
+    color:var(--forest-dark);
+    margin-right:6px;
+  }
+  .comment-text{
+    color:var(--ink);
+  }
+  .comment-time{
+    font-size:10px;
+    color:var(--muted);
+    margin-left:6px;
+  }
+  .add-comment-row{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .comment-input{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:8px 14px;
+    font-size:12px;
+    outline:none;
+    background:white;
+  }
+  .btn-send-comment{
+    background:var(--forest);
+    color:white;
+    border:none;
+    padding:0 14px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  /* EXPIRATION FILTER TOGGLE */
+  .expiry-toggle-card{
+    background:#FFF8E7;
+    border:1.5px dashed var(--marigold);
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+    margin-bottom:16px;
+    cursor:pointer;
+  }
+  .expiry-toggle-title{
+    font-size:13px;
+    font-weight:700;
+    color:#92400E;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .expiry-toggle-sub{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  /* MODALS */
+  .modal-overlay{
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.5); z-index:3000;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-sheet{
+    background:var(--card); border-radius:24px 24px 0 0;
+    width:100%; max-width:480px; padding:24px 20px 32px;
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-header{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:16px; border-bottom:1px solid var(--line); padding-bottom:12px;
+  }
+  .modal-title{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; color:var(--forest-dark);
+  }
+  .modal-close{ cursor:pointer; font-size:20px; color:var(--muted); }
+
+  .form-group{ margin-bottom:14px; }
+  .form-label{ font-size:12px; font-weight:700; color:var(--forest-dark); margin-bottom:6px; display:block; }
+  .form-textarea{
+    width:100%; min-height:90px; padding:12px; border:1.5px solid var(--line);
+    border-radius:12px; font-family:'Inter',sans-serif; font-size:13px; outline:none; resize:vertical;
+  }
+  .form-textarea:focus{ border-color:var(--forest); }
+  
+  .img-upload-box{
+    border:2px dashed var(--line); border-radius:12px; padding:16px;
+    text-align:center; background:var(--paper); cursor:pointer; position:relative;
+  }
+  .img-preview{
+    width:100%; max-height:200px; object-fit:cover; border-radius:10px; display:none; margin-top:10px;
+  }
+  .size-badge{
+    font-size:11px; font-weight:700; margin-top:6px; display:inline-block; padding:2px 8px; border-radius:8px;
+  }
+  .size-badge.valid{ background:#E4EEE8; color:var(--forest); }
+  .size-badge.invalid{ background:#F5E1DC; color:var(--terracotta); }
+
+  .btn-submit-post{
+    width:100%; background:linear-gradient(135deg, var(--forest), var(--forest-dark));
+    color:white; border:none; padding:14px; border-radius:14px;
+    font-size:14px; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer;
+  }
+
+  /* BOTTOM NAV */
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:480px;
+    background:#FFFFFF;
+    border-top:1.5px solid rgba(31,77,61,0.14);
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:8px 6px 12px;
+    z-index:1000;
+    box-shadow:0 -8px 24px rgba(31,77,61,0.1);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#526056;
+    font-size:10.5px;
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    flex:1;
+    padding:6px 2px;
+    border-radius:14px;
+    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-item svg{width:20px; height:20px; stroke:#526056; transition:transform 0.2s, stroke 0.2s;}
+  .nav-item:active{transform:scale(0.92);}
+  .nav-item.active{
+    color:#153529;
+    font-weight:700;
+    background:linear-gradient(135deg, rgba(31,77,61,0.12) 0%, rgba(217,166,46,0.18) 100%);
+    box-shadow:0 3px 10px rgba(31,77,61,0.08);
+  }
+  .nav-item.active svg{stroke:#1F4D3D; transform:translateY(-1px) scale(1.12);}
+
+  /* Toast */
+  .toast-box{
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    background:var(--forest-dark); color:white; padding:10px 20px;
+    border-radius:20px; font-size:12px; font-weight:600; z-index:4000;
+    display:none; box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  }
+</style>
+  <!-- ═══ Firebase SDK ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-left">
+        <a href="index.html" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        </a>
+        <div class="page-title">📸 Society Feed</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-new-post" onclick="openCreatePostModal()">
+          <span>+ Post</span>
+        </button>
+        <button id="adminClearAllBtn" onclick="clearAllPostsAdmin()" style="display:none; background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:6px 10px; border-radius:18px; font-size:11px; font-weight:700; cursor:pointer;">
+          🧹 Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ACTIVE POSTS (Last 2 Days) -->
+    <div id="activePostsList">
+      <!-- Dynamically populated -->
+    </div>
+
+    <!-- EXPIRED POSTS (> 2 Days) TOGGLE DRAWER -->
+    <div id="expiredPostsContainer" style="display:none; margin-top:20px;">
+      <div class="expiry-toggle-card" onclick="toggleExpiredPostsView()">
+        <div class="expiry-toggle-title" id="expiryToggleTitle">👁️ View Expired Posts (> 2 days)</div>
+        <div class="expiry-toggle-sub">Posts older than 48 hours are archived here</div>
+      </div>
+      <div id="expiredPostsList" style="display:none;">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CREATE POST MODAL -->
+  <div class="modal-overlay" id="createPostModal" onclick="closeOnOverlay(event, 'createPostModal')">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title">Create New Feed Post</div>
+        <div class="modal-close" onclick="closeModal('createPostModal')">✕</div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">What's happening in society?</div>
+        <textarea class="form-textarea" id="postCaption" placeholder="Write something for your neighbors..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Attach Photo (Max 10 KB)</div>
+        <div class="img-upload-box" onclick="document.getElementById('postImgInput').click()">
+          <div id="uploadBoxText">
+            <div style="font-size:24px; margin-bottom:4px;">🖼️</div>
+            <div style="font-size:12px; font-weight:600; color:var(--forest);">Click to select image</div>
+            <div style="font-size:10px; color:var(--muted);">Image will auto-compress to stay under 10 KB</div>
+          </div>
+          <img id="imgPreview" class="img-preview" alt="Preview">
+          <input type="file" id="postImgInput" accept="image/*" style="display:none;" onchange="handleImageSelection(event)">
+        </div>
+        <div id="sizeBadgeContainer" style="text-align:center; margin-top:4px;"></div>
+      </div>
+
+      <button class="btn-submit-post" onclick="submitNewPost()" id="btnSubmitPost">Share Post</button>
+    </div>
+  </div>
+
+  <!-- IMAGE VIEWER MODAL -->
+  <div class="modal-overlay" id="imageViewerModal" style="background:rgba(0,0,0,0.85); z-index:5000;" onclick="closeOnOverlay(event, 'imageViewerModal')">
+    <div style="position:relative; width:100%; max-width:440px; text-align:center; padding:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span id="viewerPosterName" style="color:white; font-weight:700; font-size:14px; font-family:'Space Grotesk',sans-serif;">Photo View</span>
+        <button onclick="closeModal('imageViewerModal')" style="background:rgba(255,255,255,0.2); color:white; border:none; width:32px; height:32px; border-radius:50%; font-size:16px; font-weight:700; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:black; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.15); box-shadow:0 10px 30px rgba(0,0,0,0.5); position:relative;">
+        <img id="viewerImage" src="" alt="Full View" style="width:100%; height:auto; max-height:65vh; object-fit:contain; display:block; margin:0 auto;">
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+        <a id="btnDownloadImg" href="" download="society_feed_image.jpg" style="background:var(--marigold); color:var(--forest-dark); border:none; padding:12px 24px; border-radius:24px; font-size:13px; font-weight:700; font-family:'Space Grotesk',sans-serif; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(217,166,46,0.4);">
+          <span>⬇️ Download Image</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="complaints.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Complaints
+    </a>
+    <a href="notices.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Notices
+    </a>
+    <a href="feed.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Feed
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </div>
+
+  <div class="toast-box" id="toastBox">Message</div>
+
+</div>
+
+<script>
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'profile.html';
+  }
+
+  const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+  let feedPosts = [];
+  let isListeningFeed = false;
+  let selectedBase64Img = '';
+  let showExpiredPosts = false;
+
+  // Initial setup
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isAdmin) {
+      const clearBtn = document.getElementById('adminClearAllBtn');
+      if (clearBtn) clearBtn.style.display = 'block';
+    }
+    initFeed();
+  });
+
+  function initFeed() {
+    if (typeof fbListen === 'function') {
+      if (!isListeningFeed) {
+        isListeningFeed = true;
+        fbListen('society_feed_posts', (data) => {
+          feedPosts = data || [];
+          if (feedPosts.length === 0) {
+            seedInitialPosts();
+          }
+          localStorage.setItem('society_feed_posts', JSON.stringify(feedPosts));
+          renderFeedUI();
+        });
+      }
+    } else {
+      feedPosts = JSON.parse(localStorage.getItem('society_feed_posts')) || [];
+      if (feedPosts.length === 0) {
+        seedInitialPosts();
+      }
+      renderFeedUI();
+    }
+  }
+
+  function seedInitialPosts() {
+    feedPosts = [];
+    savePostsData();
+  }
+
+  function savePostsData() {
+    localStorage.setItem('society_feed_posts', JSON.stringify(feedPosts));
+    if (typeof fbSet === 'function') {
+      fbSet('society_feed_posts', feedPosts);
+    }
+  }
+
+  function renderFeedUI() {
+    const activeList = document.getElementById('activePostsList');
+    const expiredList = document.getElementById('expiredPostsList');
+    const expiredContainer = document.getElementById('expiredPostsContainer');
+
+    if (!activeList) return;
+    activeList.innerHTML = '';
+    if (expiredList) expiredList.innerHTML = '';
+
+    const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    const activePosts = feedPosts.filter(p => (now - p.timestamp) <= TWO_DAYS_MS);
+    const expiredPosts = feedPosts.filter(p => (now - p.timestamp) > TWO_DAYS_MS);
+
+    if (activePosts.length === 0) {
+      activeList.innerHTML = `
+        <div class="post-card" style="text-align:center; padding:30px 20px;">
+          <div style="font-size:36px; margin-bottom:8px;">📸</div>
+          <div style="font-weight:700; font-size:15px; color:var(--forest-dark);">No Recent Posts</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">Be the first to share something with neighbors!</div>
+          <button class="btn-new-post" onclick="openCreatePostModal()" style="margin:14px auto 0;">+ Create Post</button>
+        </div>
+      `;
+    } else {
+      activePosts.forEach(post => {
+        activeList.appendChild(createPostCardElement(post, false));
+      });
+    }
+
+    if (expiredPosts.length > 0 && expiredContainer && expiredList) {
+      expiredContainer.style.display = 'block';
+      const title = document.getElementById('expiryToggleTitle');
+      if (title) title.textContent = showExpiredPosts ? `🙈 Hide Expired Posts (${expiredPosts.length})` : `👁️ View Expired Posts (${expiredPosts.length} older than 2 days)`;
+      
+      expiredPosts.forEach(post => {
+        expiredList.appendChild(createPostCardElement(post, true));
+      });
+    } else if (expiredContainer) {
+      expiredContainer.style.display = 'none';
+    }
+  }
+
+  function createPostCardElement(post, isExpired) {
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    if (isExpired) card.style.opacity = '0.85';
+
+    // Auto increment views if not already viewed in this session
+    const viewedKey = 'viewed_post_' + post.id;
+    if (!sessionStorage.getItem(viewedKey)) {
+      sessionStorage.setItem(viewedKey, 'true');
+      post.views = (post.views || 0) + 1;
+      savePostsData();
+    }
+
+    const isLikedByMe = post.likes && post.likes.includes(currentUser.email);
+    const likesCount = (post.likes || []).length;
+    const commentsCount = (post.comments || []).length;
+    const formattedTime = formatPostTime(post.timestamp);
+
+    let deleteBtnHtml = '';
+    if (isAdmin) {
+      deleteBtnHtml = `<button onclick="deletePostAdmin('${post.id}')" style="background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700; cursor:pointer;">🗑️ Delete</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="post-author">
+          <div class="author-avatar">${post.authorAvatar || 'SS'}</div>
+          <div>
+            <div class="author-name">${escapeHtml(post.authorName)}</div>
+            <div class="author-meta">${escapeHtml(post.authorFlat || '')} &bull; ${formattedTime}</div>
+          </div>
+        </div>
+        ${deleteBtnHtml}
+      </div>
+
+      ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ''}
+
+      ${post.image ? `
+        <div class="post-media" style="cursor:pointer; position:relative;" onclick="openImageViewer('${post.id}')">
+          <img src="${post.image}" alt="Post Media">
+          <div style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.65); color:white; font-size:10px; padding:3px 8px; border-radius:6px; font-weight:600; backdrop-filter:blur(4px);">
+            🔍 Tap to View & Download
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="post-actions">
+        <button class="action-btn ${isLikedByMe ? 'liked' : ''}" onclick="toggleLikePost('${post.id}')">
+          <span>${isLikedByMe ? '❤️' : '🤍'}</span>
+          <span>${likesCount} ${likesCount === 1 ? 'Like' : 'Likes'}</span>
+        </button>
+
+        <div class="action-btn" style="cursor:default;">
+          <span>👁️</span>
+          <span>${post.views || 0} Views</span>
+        </div>
+
+        <button class="action-btn" onclick="toggleCommentsDrawer('${post.id}')">
+          <span>💬</span>
+          <span>${commentsCount} ${commentsCount === 1 ? 'Comment' : 'Comments'}</span>
+        </button>
+      </div>
+
+      <!-- Comments default hidden until toggled by resident -->
+      <div class="comments-container" id="commentsDrawer_${post.id}" style="display:none;">
+        <div id="commentsList_${post.id}">
+          ${(post.comments || []).map(c => `
+            <div class="comment-item">
+              <span class="comment-author">${escapeHtml(c.name)}:</span>
+              <span class="comment-text">${escapeHtml(c.text)}</span>
+              <span class="comment-time">(${c.time})</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="add-comment-row">
+          <input type="text" class="comment-input" id="inputComment_${post.id}" placeholder="Write a comment..." onkeydown="if(event.key==='Enter')addComment('${post.id}')">
+          <button class="btn-send-comment" onclick="addComment('${post.id}')">Send</button>
+        </div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  function toggleLikePost(postId) {
+    const post = feedPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (!post.likes) post.likes = [];
+    const myIndex = post.likes.indexOf(currentUser.email);
+
+    if (myIndex > -1) {
+      post.likes.splice(myIndex, 1);
+    } else {
+      post.likes.push(currentUser.email);
+    }
+
+    savePostsData();
+    renderFeedUI();
+  }
+
+  function toggleCommentsDrawer(postId) {
+    const drawer = document.getElementById('commentsDrawer_' + postId);
+    if (drawer) {
+      if (drawer.style.display === 'none' || !drawer.style.display) {
+        drawer.style.display = 'block';
+      } else {
+        drawer.style.display = 'none';
+      }
+    }
+  }
+
+  function addComment(postId) {
+    const input = document.getElementById('inputComment_' + postId);
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    const post = feedPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (!post.comments) post.comments = [];
+    post.comments.push({
+      name: currentUser.name || 'Resident',
+      text: text,
+      time: 'Just now'
+    });
+
+    input.value = '';
+    savePostsData();
+    renderFeedUI();
+
+    // Keep drawer open for current post after adding comment
+    setTimeout(() => {
+      const drawer = document.getElementById('commentsDrawer_' + postId);
+      if (drawer) drawer.style.display = 'block';
+    }, 50);
+  }
+
+  window.openImageViewer = function openImageViewer(postId) {
+    const post = feedPosts.find(p => p.id === postId);
+    if (!post || !post.image) return;
+
+    const img = document.getElementById('viewerImage');
+    const name = document.getElementById('viewerPosterName');
+    const downloadBtn = document.getElementById('btnDownloadImg');
+
+    if (img) img.src = post.image;
+    if (name) name.textContent = `Photo by ${post.authorName || 'Resident'}`;
+    if (downloadBtn) {
+      downloadBtn.href = post.image;
+      downloadBtn.download = `Society_Feed_${(post.authorName || 'Photo').replace(/\s+/g, '_')}_${post.id}.jpg`;
+    }
+
+    const modal = document.getElementById('imageViewerModal');
+    if (modal) modal.classList.add('active');
+  };
+
+  function toggleExpiredPostsView() {
+    showExpiredPosts = !showExpiredPosts;
+    const list = document.getElementById('expiredPostsList');
+    if (list) list.style.display = showExpiredPosts ? 'block' : 'none';
+    const title = document.getElementById('expiryToggleTitle');
+    const expiredCount = feedPosts.filter(p => (Date.now() - p.timestamp) > (2 * 24 * 60 * 60 * 1000)).length;
+    if (title) title.textContent = showExpiredPosts ? `🙈 Hide Expired Posts (${expiredCount})` : `👁️ View Expired Posts (${expiredCount} older than 2 days)`;
+  }
+
+  /* IMAGE UPLOAD & MAX 10KB COMPRESSION */
+  function handleImageSelection(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const rawImg = new Image();
+      rawImg.onload = function() {
+        compressImageTo10KB(rawImg, (compressedBase64, sizeKb) => {
+          selectedBase64Img = compressedBase64;
+          const preview = document.getElementById('imgPreview');
+          const boxText = document.getElementById('uploadBoxText');
+          const badgeContainer = document.getElementById('sizeBadgeContainer');
+
+          if (preview) {
+            preview.src = compressedBase64;
+            preview.style.display = 'block';
+          }
+          if (boxText) boxText.style.display = 'none';
+
+          if (badgeContainer) {
+            const isValid = sizeKb <= 10.5;
+            badgeContainer.innerHTML = `<span class="size-badge ${isValid ? 'valid' : 'invalid'}">Size: ${sizeKb.toFixed(1)} KB / 10.0 KB ${isValid ? '✅' : '⚠️'}</span>`;
+          }
+        });
+      };
+      rawImg.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function compressImageTo10KB(img, callback) {
+    let maxDim = 480; // Crisp resolution max dimension
+    let width = img.width;
+    let height = img.height;
+
+    if (width > height) {
+      if (width > maxDim) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      }
+    } else {
+      if (height > maxDim) {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // High quality canvas smoothing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, width, height);
+
+    let quality = 0.7;
+    let dataUrl = canvas.toDataURL('image/jpeg', quality);
+    let sizeKb = Math.round((dataUrl.length * 3) / 4) / 1024;
+
+    // Iteratively scale down or lower quality to strictly fit under 10KB while keeping clear view
+    while (sizeKb > 10.0 && (quality > 0.15 || maxDim > 200)) {
+      if (quality > 0.25) {
+        quality -= 0.1;
+      } else {
+        maxDim -= 40;
+        let newW = img.width;
+        let newH = img.height;
+        if (newW > newH) {
+          newH = Math.round((newH * maxDim) / newW);
+          newW = maxDim;
+        } else {
+          newW = Math.round((newW * maxDim) / newH);
+          newH = maxDim;
+        }
+        canvas.width = newW;
+        canvas.height = newH;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, newW, newH);
+        quality = 0.6;
+      }
+      dataUrl = canvas.toDataURL('image/jpeg', quality);
+      sizeKb = Math.round((dataUrl.length * 3) / 4) / 1024;
+    }
+
+    callback(dataUrl, sizeKb);
+  }
+
+  /* MODAL OPERATORS */
+  function openCreatePostModal() {
+    selectedBase64Img = '';
+    document.getElementById('postCaption').value = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('uploadBoxText').style.display = 'block';
+    document.getElementById('sizeBadgeContainer').innerHTML = '';
+    document.getElementById('createPostModal').classList.add('active');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  function closeOnOverlay(e, id) {
+    if (e.target.id === id) closeModal(id);
+  }
+
+  function submitNewPost() {
+    const caption = document.getElementById('postCaption').value.trim();
+    if (!caption && !selectedBase64Img) {
+      showToast('Please enter a caption or attach a photo');
+      return;
+    }
+
+    const now = Date.now();
+    const initials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'SS';
+
+    const newPost = {
+      id: 'POST-' + now,
+      authorName: currentUser.name || 'Resident',
+      authorFlat: `${currentUser.tower || 'Tower A'}, Flat ${currentUser.flat || '101'}`,
+      authorAvatar: initials,
+      authorEmail: currentUser.email,
+      caption: caption,
+      image: selectedBase64Img,
+      likes: [],
+      views: 1,
+      comments: [],
+      timestamp: now,
+      dateStr: 'Just now'
+    };
+
+    feedPosts.unshift(newPost);
+    savePostsData();
+    closeModal('createPostModal');
+    showToast('Post shared with neighbors!');
+    renderFeedUI();
+  }
+
+  /* ADMIN ACTIONS */
+  function deletePostAdmin(postId) {
+    if (!isAdmin) return;
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    feedPosts = feedPosts.filter(p => p.id !== postId);
+    savePostsData();
+    showToast('Post deleted by Admin');
+    renderFeedUI();
+  }
+
+  function clearAllPostsAdmin() {
+    if (!isAdmin) return;
+    if (!confirm('⚠️ Admin Caution: Are you sure you want to CLEAR ALL posts from the Feed?')) return;
+
+    feedPosts = [];
+    savePostsData();
+    showToast('All feed posts cleared');
+    renderFeedUI();
+  }
+
+  /* HELPERS */
+  function formatPostTime(timestamp) {
+    if (!timestamp) return 'Recently';
+    const diffMs = Date.now() - timestamp;
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function showToast(msg) {
+    const box = document.getElementById('toastBox');
+    if (!box) return;
+    box.textContent = msg;
+    box.style.display = 'block';
+    setTimeout(() => { box.style.display = 'none'; }, 2500);
+  }
+</script>
+</body>
+</html>
