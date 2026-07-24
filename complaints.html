@@ -524,8 +524,17 @@
     const listContainer = document.getElementById('complaintsList');
     listContainer.innerHTML = '';
 
+    const isAdmin = currentUser && (
+      (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') || 
+      currentUser.role === 'Super Admin' || 
+      (currentUser.role && currentUser.role.includes('Committee Member'))
+    );
+
     let visibleCount = 0;
     complaints.forEach(c => {
+      // Hide Help tickets from non-admin residents
+      if (c.isHelpTicket && !isAdmin) return;
+
       const statusKey = c.status.toLowerCase().replace(' ', '-');
       if (filter !== 'all' && statusKey !== filter) return;
       visibleCount++;
@@ -536,8 +545,6 @@
       if (c.status === 'Resolved') statusClass = 'status-resolved';
       if (c.status === 'On Hold') statusClass = 'status-on-hold';
       if (c.status === 'Closed') statusClass = 'status-closed';
-
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
 
       const card = document.createElement('div');
       card.className = 'complaint-card';
@@ -643,7 +650,7 @@
     if (!confirm('Are you sure you want to delete this complaint? This action cannot be undone.')) return;
 
     // Check admin permission
-    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+    if (!currentUser || (!(currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'))) {
       alert('You do not have permission to delete complaints.');
       return;
     }

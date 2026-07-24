@@ -235,7 +235,49 @@ db.ref('.info/connected').on('value', snap => {
     badge.style.boxShadow  = window._fbOnline ? '0 2px 8px rgba(0, 230, 118, 0.4)' : '0 2px 8px rgba(255, 82, 82, 0.4)';
   }
 });
+window.playBeepSound = function(type = 'default') {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) return;
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    if (type === 'success') {
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      oscillator.start();
+      oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+      oscillator.stop(audioCtx.currentTime + 0.25);
+    } else if (type === 'error') {
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(250, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    } else {
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+      oscillator.stop(audioCtx.currentTime + 0.15);
+    }
+  } catch(e) {
+    console.error('Audio beep failed:', e);
+  }
+};
+
 window.pushNotification = function(title, type) {
+  // Play beep sound on new notification
+  if (typeof window.playBeepSound === 'function') {
+    window.playBeepSound('notification');
+  }
+
   // Do NOT store chat logs in notifications
   if (type === 'chat' || (title && title.toLowerCase().includes('chat'))) {
     return;
@@ -395,3 +437,122 @@ try {
 }
 
 console.log('[SR Gold Society] Firebase initialised → project: society048');
+
+// ─── Real-Time Emergency SOS System ──────────────────────────────────────────
+let sosAlarmInterval = null;
+function checkAndShowSOS(sos) {
+  if (!sos || !sos.active) {
+    removeSOSOverlay();
+    return;
+  }
+
+  // Prevent showing if dismissed in this browser session
+  if (sessionStorage.getItem('dismissed_sos_' + sos.id)) {
+    removeSOSOverlay();
+    return;
+  }
+
+  // Prevent showing if alert is older than 30 minutes
+  if (Date.now() - sos.timestamp > 30 * 60 * 1000) {
+    removeSOSOverlay();
+    return;
+  }
+
+  // Render full screen red warning overlay
+  let overlay = document.getElementById('globalSosOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'globalSosOverlay';
+    overlay.style = `
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(139, 0, 0, 0.95);
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+      animation: sosFlash 1s infinite alternate;
+    `;
+
+    // Add keyframes styles
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+      @keyframes sosFlash {
+        0% { background: rgba(139, 0, 0, 0.95); }
+        100% { background: rgba(220, 20, 60, 0.98); }
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    overlay.innerHTML = `
+      <div style="max-width: 450px; width: 100%; background: #ffffff; color: #1a1a1a; border-radius: 20px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center;">
+        <div style="font-size: 50px; margin-bottom: 12px; animation: scaleUp 0.5s infinite alternate;">🚨</div>
+        <h2 style="margin: 0; color: #DC143C; font-size: 24px; font-weight: 800;">EMERGENCY SOS ALERT</h2>
+        <div style="font-size: 16px; font-weight: 700; margin: 12px 0 6px; color: #1a1a1a;">
+          Flat: <span style="background: #FFEBEB; padding: 2px 8px; border-radius: 6px; color: #DC143C;">${sos.flat}</span>
+        </div>
+        <div style="font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; word-break: break-word;">
+          "${sos.desc}"
+        </div>
+        
+        <button id="btnDismissSosGlobal" style="width: 100%; padding: 14px; border: none; border-radius: 12px; background: #DC143C; color: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;">
+          Dismiss Alert
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('btnDismissSosGlobal').addEventListener('click', () => {
+      sessionStorage.setItem('dismissed_sos_' + sos.id, 'true');
+      removeSOSOverlay();
+    });
+  }
+
+  // Play periodic loud beep sound for 5 seconds
+  if (!sosAlarmInterval) {
+    if (typeof window.playBeepSound === 'function') {
+      window.playBeepSound('error');
+    }
+    const startTime = Date.now();
+    sosAlarmInterval = setInterval(() => {
+      if (Date.now() - startTime >= 5000) {
+        clearInterval(sosAlarmInterval);
+        sosAlarmInterval = null;
+        return;
+      }
+      if (typeof window.playBeepSound === 'function') {
+        window.playBeepSound('error');
+      }
+    }, 1200);
+  }
+}
+
+function removeSOSOverlay() {
+  const overlay = document.getElementById('globalSosOverlay');
+  if (overlay) overlay.remove();
+  if (sosAlarmInterval) {
+    clearInterval(sosAlarmInterval);
+    sosAlarmInterval = null;
+  }
+}
+
+// Hook up SOS listener
+if (typeof db !== 'undefined' && typeof db.ref === 'function') {
+  db.ref('society_sos_active').on('value', snap => {
+    checkAndShowSOS(snap.val());
+  });
+} else {
+  // Local fallback checker
+  setInterval(() => {
+    try {
+      const sos = JSON.parse(localStorage.getItem('society_sos_active'));
+      checkAndShowSOS(sos);
+    } catch(e) {}
+  }, 2000);
+}

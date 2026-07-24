@@ -692,6 +692,21 @@
             </div>
           </div>
           <div class="form-group">
+            <div class="form-label">Flat Type</div>
+            <select class="form-select" id="regFlatType">
+              <option value="1 BHK">1 BHK</option>
+              <option value="2 BHK">2 BHK</option>
+              <option value="3 BHK">3 BHK</option>
+              <option value="4 BHK">4 BHK</option>
+              <option value="Studio">Studio</option>
+              <option value="Penthouse">Penthouse</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Pets (Dogs / Animals)</div>
+            <input type="text" class="form-input" id="regPets" placeholder="e.g., None, Dog, Cat">
+          </div>
+          <div class="form-group">
             <div class="form-label">Role</div>
             <select class="form-select" id="regRole">
               <option value="🏠 Owner">🏠 Owner</option>
@@ -856,6 +871,10 @@
           <div class="detail-label">Flat Type</div>
           <div class="detail-value">3 BHK</div>
         </div>
+        <div class="detail-item">
+          <div class="detail-label">Pets (Dogs/Animals)</div>
+          <div class="detail-value">None</div>
+        </div>
       </div>
     </div>
 
@@ -927,6 +946,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="menu-text">Help & Support</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" onclick="openSOSModalProfile()" style="background:#FFF0EE; border:1px dashed var(--terracotta);">
+        <div class="menu-icon terracotta">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="menu-text" style="color:var(--terracotta); font-weight:700;">🚨 Emergency SOS</div>
         <div class="menu-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -1010,6 +1038,34 @@
       <div class="form-group">
         <div class="form-label">Email</div>
         <input type="email" class="form-input" id="editEmail" value="">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Tower</div>
+        <select class="form-select" id="editTower" style="width:100%; box-sizing:border-box;">
+          <option value="Tower A">Tower A</option>
+          <option value="Tower B">Tower B</option>
+          <option value="Tower C">Tower C</option>
+          <option value="Tower D">Tower D</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Flat No.</div>
+        <input type="text" class="form-input" id="editFlat" style="width:100%; box-sizing:border-box;" value="">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Flat Type</div>
+        <select class="form-select" id="editFlatType" style="width:100%; box-sizing:border-box;">
+          <option value="1 BHK">1 BHK</option>
+          <option value="2 BHK">2 BHK</option>
+          <option value="3 BHK">3 BHK</option>
+          <option value="4 BHK">4 BHK</option>
+          <option value="Studio">Studio</option>
+          <option value="Penthouse">Penthouse</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Pets (Dogs / Animals)</div>
+        <input type="text" class="form-input" id="editPets" style="width:100%; box-sizing:border-box;" value="">
       </div>
       <button class="modal-btn modal-btn-primary" onclick="saveProfile()">Save Changes</button>
     </div>
@@ -1164,6 +1220,35 @@
     </div>
   </div>
 
+  <!-- EMERGENCY SOS MODAL -->
+  <div class="modal-overlay" id="sosModal">
+    <div class="modal" style="max-width: 450px; border:2px solid var(--terracotta);">
+      <div class="modal-header" style="border-bottom:1px solid #FFF0EE; padding-bottom:10px;">
+        <div class="modal-title" style="color:var(--terracotta); font-size:18px; display:flex; align-items:center; gap:8px;">
+          🚨 Emergency SOS Trigger
+        </div>
+        <div class="modal-close" onclick="closeModal('sosModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin:10px 0 14px; line-height:1.4; background:#FFF0EE; padding:8px 12px; border-radius:10px; border-left:3px solid var(--terracotta);">
+        <strong>WARNING:</strong> Use only in active emergencies (e.g. fire, medical emergency, security threat). This will send a loud alert with alarm beep sound to all active residents.
+      </div>
+      <div class="form-group">
+        <div class="form-label">Flat Number</div>
+        <input type="text" class="form-input" id="sosFlat" style="width:100%; box-sizing:border-box;" placeholder="Enter flat number" value="">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Emergency Description</div>
+        <textarea class="form-input" id="sosDesc" style="min-height:80px; width:100%; box-sizing:border-box; resize:vertical; font-family:inherit;" placeholder="Describe the emergency (e.g., Medical Help needed in Flat 402, Fire in block B)"></textarea>
+      </div>
+
+      <button onclick="submitEmergencySOS()" style="width:100%; padding:14px; border-radius:12px; border:none; background:var(--terracotta); color:white; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(193,80,61,0.4); display:flex; align-items:center; justify-content:center; gap:6px;">
+        🚨 TRIGGER SOS ALARM
+      </button>
+    </div>
+  </div>
+
   <!-- DELETION LOG MODAL -->
   <div class="modal-overlay" id="deletionLogModal">
     <div class="modal" style="max-width: 500px;">
@@ -1219,11 +1304,25 @@
         isListeningUsers = true;
         fbListen('society_users', (data) => {
           users = data || [];
+          if (currentUser) {
+            const dbUser = users.find(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
+            if (dbUser) {
+              currentUser = dbUser;
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+          }
           updateProfileUI();
         });
       }
     } else {
       users = JSON.parse(localStorage.getItem('society_users')) || [];
+      if (currentUser) {
+        const dbUser = users.find(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
+        if (dbUser) {
+          currentUser = dbUser;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+      }
       updateProfileUI();
     }
   }
@@ -1455,6 +1554,9 @@
 
   // Toast Functionality
   function showToast(msg, type = 'success') {
+    if (typeof window.playBeepSound === 'function') {
+      window.playBeepSound(type);
+    }
     const toast = document.getElementById('toastBox');
     const text = document.getElementById('toastText');
     const icon = document.getElementById('toastIcon');
@@ -1488,7 +1590,22 @@
       return;
     }
 
-    const matchedUser = users.find(u => u && (u.email === loginId || u.phone === loginId) && u.password === loginPass);
+    const matchedUser = users.find(u => {
+      if (!u || u.password !== loginPass) return false;
+      
+      const dbEmail = String(u.email || '').toLowerCase().trim();
+      const inputEmail = String(loginId).toLowerCase().trim();
+      if (dbEmail && dbEmail === inputEmail) return true;
+
+      const dbPhone = String(u.phone || '').replace(/[^0-9]/g, '');
+      const inputPhone = String(loginId).replace(/[^0-9]/g, '');
+      if (dbPhone && inputPhone) {
+        const dbPhoneSuffix = dbPhone.substring(dbPhone.length - 10);
+        const inputPhoneSuffix = inputPhone.substring(inputPhone.length - 10);
+        if (dbPhoneSuffix && dbPhoneSuffix === inputPhoneSuffix) return true;
+      }
+      return false;
+    });
 
     if (matchedUser) {
       if (matchedUser.status === 'Pending') {
@@ -1508,7 +1625,7 @@
       localStorage.setItem('currentUser', JSON.stringify(matchedUser));
       showToast('Logged in successfully! Redirecting...', 'success');
       setTimeout(() => {
-        location.reload();
+        window.location.href = 'index.html';
       }, 1000);
     } else {
       showToast('Invalid credentials. If you are new, register first.', 'error');
@@ -1536,6 +1653,8 @@
       const tower = towerEl ? towerEl.value : 'Tower A';
       const flat = flatEl ? flatEl.value.trim() : '';
       const role = roleEl ? roleEl.value : '🏠 Owner';
+      const flatType = document.getElementById('regFlatType') ? document.getElementById('regFlatType').value : '3 BHK';
+      const pets = document.getElementById('regPets') ? document.getElementById('regPets').value.trim() : 'None';
       const adminEmail = adminEmailEl ? adminEmailEl.value.trim().toLowerCase() : 'admin@society.com';
 
       // Field Validations
@@ -1570,8 +1689,14 @@
         return;
       }
 
-      // Check if they are the first user for this society name
-      const isFirstUserOfThisSociety = !users || users.length === 0 || !users.some(u => u && u.societyName && u.societyName.toLowerCase() === societyName.toLowerCase());
+      // Check if there is already an approved admin for this society
+      const hasApprovedAdmin = users && users.some(u => 
+        u && 
+        u.societyName && u.societyName.toLowerCase() === societyName.toLowerCase() && 
+        u.status === 'Approved' && 
+        u.role && (u.role.includes('Super Admin') || u.role.includes('Committee Member'))
+      );
+      const shouldAutoApprove = !hasApprovedAdmin;
 
       const newUser = {
         societyName,
@@ -1581,11 +1706,12 @@
         password,
         tower,
         flat,
-        role: isFirstUserOfThisSociety ? "⚡ Super Admin" : role,
-        adminEmail: isFirstUserOfThisSociety ? email.toLowerCase() : adminEmail,
-        status: isFirstUserOfThisSociety ? "Approved" : "Pending",
+        role: role,
+        adminEmail: shouldAutoApprove ? email.toLowerCase() : adminEmail,
+        status: shouldAutoApprove ? "Approved" : "Pending",
+        pets: pets,
         memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        flatType: "3 BHK",
+        flatType: flatType,
         privacy: {
           showPhone: true,
           showEmail: true,
@@ -1607,12 +1733,12 @@
       
       if (typeof fbSet === 'function') {
         fbSet('society_users', users).then(() => {
-          if (isFirstUserOfThisSociety) {
-            showToast('Registration successful! Logging you in...', 'success');
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          if (shouldAutoApprove) {
+            showToast('Registration successful! Please login to continue.', 'success');
             setTimeout(() => {
-              window.location.href = 'index.html';
+              toggleAuthTab('login');
+              const loginIdInput = document.getElementById('loginId');
+              if (loginIdInput) loginIdInput.value = email;
             }, 1500);
           } else {
             if (typeof pushNotification === 'function') {
@@ -1629,20 +1755,22 @@
           console.error(err);
           localStorage.setItem('society_users', JSON.stringify(users));
           localStorage.setItem('users', JSON.stringify(users));
-          showToast('Registration submitted successfully!', 'success');
+          showToast('Registration successful! Please login to continue.', 'success');
           setTimeout(() => {
             toggleAuthTab('login');
+            const loginIdInput = document.getElementById('loginId');
+            if (loginIdInput) loginIdInput.value = email;
           }, 1500);
         });
       } else {
         localStorage.setItem('society_users', JSON.stringify(users));
         localStorage.setItem('users', JSON.stringify(users));
-        if (isFirstUserOfThisSociety) {
-          showToast('Registration successful! Logging you in...', 'success');
-          currentUser = newUser;
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        if (shouldAutoApprove) {
+          showToast('Registration successful! Please login to continue.', 'success');
           setTimeout(() => {
-            window.location.href = 'index.html';
+            toggleAuthTab('login');
+            const loginIdInput = document.getElementById('loginId');
+            if (loginIdInput) loginIdInput.value = email;
           }, 1500);
         } else {
           showToast('Registration submitted! Pending administrator approval.', 'success');
@@ -1709,9 +1837,10 @@
       detailValues[1].textContent = currentUser.email;
       detailValues[2].textContent = currentUser.memberSince || "Jul 2026";
       detailValues[3].textContent = currentUser.flatType || "3 BHK";
+      detailValues[4].textContent = currentUser.pets || "None";
       
       // Show/hide "Add New User" button based on role
-      if (currentUser.role && currentUser.role.includes('Super Admin')) {
+      if (currentUser.role === 'Super Admin') {
         addUserBtn.style.display = 'flex';
       } else {
         addUserBtn.style.display = 'none';
@@ -1721,6 +1850,15 @@
       document.getElementById('editName').value = currentUser.name;
       document.getElementById('editPhone').value = currentUser.phone;
       document.getElementById('editEmail').value = currentUser.email;
+      document.getElementById('editTower').value = currentUser.tower || 'Tower A';
+      document.getElementById('editFlat').value = currentUser.flat || '';
+      document.getElementById('editFlatType').value = currentUser.flatType || '3 BHK';
+      document.getElementById('editPets').value = currentUser.pets || '';
+
+      // Disable email/phone if NOT admin
+      const isUserAdmin = currentUser.role && (currentUser.role.includes('Super Admin') || currentUser.role.includes('Committee Member'));
+      document.getElementById('editPhone').disabled = !isUserAdmin;
+      document.getElementById('editEmail').disabled = !isUserAdmin;
 
       // Populate Privacy toggles
       setToggleState('toggleShowPhone', currentUser.privacy?.showPhone);
@@ -1777,18 +1915,26 @@
     const name = document.getElementById('editName').value.trim();
     const phone = document.getElementById('editPhone').value.trim();
     const email = document.getElementById('editEmail').value.trim();
+    const tower = document.getElementById('editTower').value;
+    const flat = document.getElementById('editFlat').value.trim();
+    const flatType = document.getElementById('editFlatType').value;
+    const pets = document.getElementById('editPets').value.trim();
 
-    if (!name || !phone || !email) {
+    if (!name || !phone || !email || !flat || !flatType) {
       alert('All fields must be filled');
       return;
     }
 
     // Update in users database
-    const idx = users.findIndex(u => u.email === currentUser.email || u.phone === currentUser.phone);
+    const idx = users.findIndex(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
     if (idx !== -1) {
       users[idx].name = name;
       users[idx].phone = phone;
       users[idx].email = email;
+      users[idx].tower = tower;
+      users[idx].flat = flat;
+      users[idx].flatType = flatType;
+      users[idx].pets = pets;
     }
 
     if (typeof fbSet === 'function') {
@@ -1808,6 +1954,10 @@
       currentUser.name = name;
       currentUser.phone = phone;
       currentUser.email = email;
+      currentUser.tower = tower;
+      currentUser.flat = flat;
+      currentUser.flatType = flatType;
+      currentUser.pets = pets;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       alert('Profile updated successfully!');
       closeModal('editProfileModal');
@@ -1862,17 +2012,30 @@
       profileVisible: getToggleState('toggleProfileVisible')
     };
 
-    const idx = users.findIndex(u => u.email === currentUser.email && u.phone === currentUser.phone);
+    const idx = users.findIndex(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
     if (idx !== -1) {
       users[idx].privacy = privacy;
-      localStorage.setItem('users', JSON.stringify(users));
     }
 
-    currentUser.privacy = privacy;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        finishPrivacySave();
+      }).catch(err => {
+        console.error(err);
+        alert('Error saving privacy settings to database.');
+      });
+    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('society_users', JSON.stringify(users));
+      finishPrivacySave();
+    }
 
-    alert('Privacy settings updated successfully!');
-    closeModal('privacyModal');
+    function finishPrivacySave() {
+      currentUser.privacy = privacy;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      alert('Privacy settings updated successfully!');
+      closeModal('privacyModal');
+    }
   }
 
   // Save Notifications
@@ -1886,17 +2049,30 @@
       payment: getToggleState('togglePayment')
     };
 
-    const idx = users.findIndex(u => u.email === currentUser.email && u.phone === currentUser.phone);
+    const idx = users.findIndex(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
     if (idx !== -1) {
       users[idx].notifications = notifications;
-      localStorage.setItem('users', JSON.stringify(users));
     }
 
-    currentUser.notifications = notifications;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        finishNotificationsSave();
+      }).catch(err => {
+        console.error(err);
+        alert('Error saving notification settings to database.');
+      });
+    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('society_users', JSON.stringify(users));
+      finishNotificationsSave();
+    }
 
-    alert('Notification settings updated successfully!');
-    closeModal('notificationsModal');
+    function finishNotificationsSave() {
+      currentUser.notifications = notifications;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      alert('Notification settings updated successfully!');
+      closeModal('notificationsModal');
+    }
   }
 
   function escapeHtml(str) {
@@ -1910,7 +2086,7 @@
       renderProfileActivityLogs();
       
       // Check if logged in user is admin
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member' || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
+      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
       const clearRow = document.getElementById('adminClearLogsBtnRow');
       if (clearRow) {
         clearRow.style.display = isAdmin ? 'block' : 'none';
@@ -1956,7 +2132,7 @@
   }
 
   window.clearAllActivityLogsAdmin = function() {
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member' || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') || currentUser.role === '⚡ Super Admin' || currentUser.role === '🏛️ Committee Member');
     if (!isAdmin) {
       showToast('Only Admins are allowed to clear activity logs', 'error');
       return;
@@ -1984,24 +2160,121 @@
       return;
     }
 
-    const tickets = JSON.parse(localStorage.getItem('support_tickets')) || [];
-    const ticketId = 'TKT-' + Math.floor(10000 + Math.random() * 90000);
-    const newTicket = {
+    const ticketId = 'CMP-2026-' + Math.floor(10000 + Math.random() * 90000);
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    const newTicketComplaint = {
       id: ticketId,
-      user: currentUser.email,
-      topic,
-      desc,
-      email,
-      timestamp: new Date().toISOString()
+      title: `Help Ticket: ${topic}`,
+      desc: desc,
+      category: 'Help & Support',
+      priority: 'Medium',
+      location: `Flat ${currentUser.flat || 'Unknown'}`,
+      time: formattedTime,
+      status: 'Pending',
+      isHelpTicket: true,
+      user: currentUser.email
     };
 
-    tickets.push(newTicket);
-    localStorage.setItem('support_tickets', JSON.stringify(tickets));
+    // Save to Firebase / LocalStorage complaints
+    if (typeof fbGet === 'function') {
+      fbGet('society_complaints').then(list => {
+        const arr = list || [];
+        arr.unshift(newTicketComplaint);
+        fbSet('society_complaints', arr);
+        localStorage.setItem('society_complaints', JSON.stringify(arr));
+      });
+    } else {
+      const arr = JSON.parse(localStorage.getItem('society_complaints')) || [];
+      arr.unshift(newTicketComplaint);
+      localStorage.setItem('society_complaints', JSON.stringify(arr));
+    }
+
+    // Trigger notification visible to admins only
+    const notifTitle = `New Help Ticket from Flat ${currentUser.flat || 'Unknown'}: ${topic}`;
+    if (typeof fbGet === 'function') {
+      fbGet('society_notifications').then(list => {
+        const arr = list || [];
+        const newNotif = {
+          id: 'NOTIF-' + Date.now() + '-' + Math.floor(Math.random() * 100),
+          title: notifTitle,
+          time: Date.now(),
+          type: 'notice',
+          visibleToAdminsOnly: true
+        };
+        arr.unshift(newNotif);
+        fbSet('society_notifications', arr);
+      });
+    } else {
+      const arr = JSON.parse(localStorage.getItem('society_notifications')) || [];
+      const newNotif = {
+        id: 'NOTIF-' + Date.now(),
+        title: notifTitle,
+        time: Date.now(),
+        type: 'notice',
+        visibleToAdminsOnly: true
+      };
+      arr.unshift(newNotif);
+      localStorage.setItem('society_notifications', JSON.stringify(arr));
+    }
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Help Support Ticket (${topic})`, 'Submitted');
+    }
 
     alert(`Help request submitted successfully!\nTicket Ref: ${ticketId}`);
     document.getElementById('helpDesc').value = '';
     closeModal('helpModal');
   }
+
+  // SOS emergency triggering
+  window.openSOSModalProfile = function() {
+    if (currentUser) {
+      document.getElementById('sosFlat').value = currentUser.flat || '';
+    }
+    document.getElementById('sosDesc').value = '';
+    openModal('sosModal');
+  };
+
+  window.submitEmergencySOS = function() {
+    const flatVal = document.getElementById('sosFlat').value.trim();
+    const descVal = document.getElementById('sosDesc').value.trim();
+
+    if (!flatVal) {
+      alert('Please specify your Flat Number');
+      return;
+    }
+    if (!descVal) {
+      alert('Please describe the emergency');
+      return;
+    }
+
+    if (!confirm('Are you absolutely sure you want to TRIGGER THE EMERGENCY SOS ALARM? This will notify the entire society.')) {
+      return;
+    }
+
+    const sosId = 'SOS-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    const newSOS = {
+      id: sosId,
+      flat: flatVal,
+      desc: descVal,
+      timestamp: Date.now(),
+      sender: currentUser ? currentUser.name : 'Resident',
+      active: true
+    };
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_sos_active', newSOS).then(() => {
+        closeModal('sosModal');
+        showToast('Emergency SOS Alarm triggered successfully!', 'success');
+      });
+    } else {
+      localStorage.setItem('society_sos_active', JSON.stringify(newSOS));
+      closeModal('sosModal');
+      showToast('Emergency SOS Alarm triggered successfully!', 'success');
+    }
+  };
 
   // Super Admin: Add New User
   function addUser() {
@@ -2031,6 +2304,7 @@
       flat,
       password: 'password123', // default
       status: "Approved", // Admins create already approved users
+      pets: "None",
       memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       flatType: "3 BHK",
       privacy: {

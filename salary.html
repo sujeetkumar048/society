@@ -784,7 +784,7 @@
     const tbody = document.getElementById('punchLogsList');
     tbody.innerHTML = '';
 
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
     const theadRow = tbody.parentNode.querySelector('thead tr');
     if (theadRow) {
       theadRow.innerHTML = `
@@ -960,7 +960,7 @@
     listContainer.innerHTML = '';
     document.getElementById('staffCount').textContent = `${employees.length} active`;
 
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
 
     employees.forEach((emp, idx) => {
       const isPaid = emp.payoutStatus === 'Paid';

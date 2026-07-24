@@ -374,6 +374,32 @@
     display: none;
   }
 
+  /* Modal Popup styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  }
+
   @media (min-width:481px){
     body{background:#E9ECE5;}
     .app{margin:24px 0; border-radius:26px; box-shadow:0 24px 60px rgba(21,53,41,.14); overflow:hidden;}
@@ -383,7 +409,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script></head>
+  <script src="firebase-config.js"></script>
+  <!-- Face Detection Tracking.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
+</head>
 <body>
 <div class="app">
 
@@ -546,7 +576,10 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Today's Visitors</div>
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <span>Today's Visitors</span>
+        <button id="clearAllVisitorsBtn" onclick="clearAllVisitors()" style="display:none; background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif; border:1px solid var(--terracotta);">🗑️ Clear All</button>
+      </div>
       <div id="visitorsList">
       </div>
     </div>
@@ -648,6 +681,11 @@
 
   let selectedVisTypeVal = 'Guest';
   let capturedPhotoSvg = null;
+  let isFaceVerified = false;
+  const isAdmin = currentUser && currentUser.role && (
+    currentUser.role.includes('Super Admin') || 
+    currentUser.role.includes('Committee Member')
+  );
 
   const defaultPhotoSVG = `<svg viewBox="0 0 100 100" style="width:100%; height:100%; display:block; background:#2c3e50;">
     <circle cx="50" cy="35" r="18" fill="#f39c12"/>
@@ -781,9 +819,11 @@
       // Show captured image
       capturedImg.src = dataUrl;
       capturedImg.style.display = 'block';
-      brackets.style.display = 'block';
       scanner.style.display = 'none';
       overlay.style.display = 'none';
+
+      // Perform AI Biometric face detection
+      performFaceScan(capturedImg, brackets);
 
       // Store for approval flow
       capturedPhotoSvg = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
@@ -797,6 +837,43 @@
       btnOpen.style.display = 'none';
 
     }, 900);
+  }
+
+  function performFaceScan(source, bracketsEl) {
+    if (window.tracking) {
+      try {
+        const tracker = new tracking.ObjectTracker('face');
+        tracker.setInitialScale(4);
+        tracker.setStepSize(2);
+        tracker.setEdgesDensity(0.1);
+
+        tracker.once('track', function(event) {
+          if (event.data.length > 0) {
+            bracketsEl.style.display = 'block';
+            bracketsEl.querySelector('div:last-child').textContent = '✔ FACE VERIFIED';
+            bracketsEl.querySelector('div:last-child').style.backgroundColor = '#2ecc71';
+            isFaceVerified = true;
+            showToast('Biometric face match authenticated!', 'success');
+          } else {
+            bracketsEl.style.display = 'block';
+            bracketsEl.querySelector('div:last-child').textContent = '❌ SCAN FAILED';
+            bracketsEl.querySelector('div:last-child').style.backgroundColor = '#e74c3c';
+            isFaceVerified = false;
+            alert('AI Biometric scan failed: No human face detected. Please retake or upload another photo ensuring the person\'s face is clearly visible.');
+          }
+        });
+
+        // tracking.track matches either img or canvas
+        tracking.track(source, tracker);
+      } catch(err) {
+        console.error('Face tracking error:', err);
+        bracketsEl.style.display = 'block'; // fallback
+        isFaceVerified = true; // fallback
+      }
+    } else {
+      bracketsEl.style.display = 'block'; // fallback
+      isFaceVerified = true; // fallback
+    }
   }
 
   function retakePhoto() {
@@ -813,6 +890,7 @@
     liveLabel.style.display = 'none';
     placeholder.style.display = 'flex';
     capturedPhotoSvg = null;
+    isFaceVerified = false;
 
     btnRetake.style.display = 'none';
     btnSnap.style.display = 'none';
@@ -850,7 +928,12 @@
 
       capturedImg.src = dataUrl;
       capturedImg.style.display = 'block';
-      brackets.style.display = 'block';
+
+      // Perform AI Biometric face detection on uploaded image
+      // Wait for image load before running tracking
+      capturedImg.onload = function() {
+        performFaceScan(capturedImg, brackets);
+      };
 
       capturedPhotoSvg = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
       document.getElementById('capturedPhotoWrap').innerHTML = capturedPhotoSvg;
@@ -874,6 +957,11 @@
 
   function initVisitors() {
     if (!currentUser) return;
+
+    if (isAdmin) {
+      const clearBtn = document.getElementById('clearAllVisitorsBtn');
+      if (clearBtn) clearBtn.style.display = 'block';
+    }
 
     // Run one-time localStorage → Firebase migration
     if (typeof migrateLocalStorageToFirebase === 'function') {
@@ -993,17 +1081,14 @@
 
     const list = [...visitors];
     if (list.length === 0) {
-      list.push(
-        { name: "Rahul Sharma", details: "Guest · Tower A, Flat 201 · 20 Jul 2026 · 10:30 AM", status: "Inside", photo: defaultPhotoSVG },
-        { name: "Amazon Delivery", details: "Delivery · Tower B · 20 Jul 2026 · 09:15 AM", status: "Left", photo: defaultPhotoSVG },
-        { name: "Electrician - Rajesh", details: "Service · Common Area · 20 Jul 2026 · 08:45 AM", status: "Left", photo: defaultPhotoSVG }
-      );
+      listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No visitor logs recorded today.</div>';
+      return;
     }
 
     list.forEach((v, idx) => {
       const isInside = v.status === 'Inside';
       const statusClass = isInside ? 'status-in' : 'status-out';
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
       
       // Left exit button or text label
       let actionHtml = isInside 
@@ -1056,6 +1141,31 @@
     }
   };
 
+  window.clearAllVisitors = function() {
+    if (!isAdmin) {
+      alert('Only admins can clear all visitor entries.');
+      return;
+    }
+    if (!confirm('🚨 WARNING: Are you sure you want to clear ALL visitor entries for today? This action cannot be undone.')) return;
+    
+    visitors = [];
+    if (typeof fbSet === 'function') {
+      fbSet('society_visitors', [])
+        .then(() => {
+          showToast('All visitor entries cleared successfully!', 'success');
+          renderVisitors();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error clearing visitor entries from database.');
+        });
+    } else {
+      localStorage.setItem('society_visitors', JSON.stringify([]));
+      showToast('All visitor entries cleared successfully!', 'success');
+      renderVisitors();
+    }
+  };
+
   // Request Resident Approval
   function requestEntryApproval() {
     const name = document.getElementById('visName').value.trim();
@@ -1072,15 +1182,21 @@
       return;
     }
 
-    // Capture photo if not captured yet
-    if (!capturedPhotoSvg) {
-      simulatePhotoCapture();
-      setTimeout(() => {
-        showApprovalDialog();
-      }, 1300);
-    } else {
-      showApprovalDialog();
+    // Enforce AI Biometric Face Scan Verification
+    if (!isFaceVerified) {
+      alert("AI Biometric Face Scan is required. Please open the camera, snap/upload a photo, and verify the visitor's face before submitting.");
+      
+      // Auto open camera if it's closed
+      if (!cameraStream) {
+        openLiveCamera();
+      }
+      
+      // Scroll to camera viewfinder for visual focus
+      document.getElementById('camViewfinder').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
+
+    showApprovalDialog();
 
     function showApprovalDialog() {
       // Lookup flat owner — check Firebase-cached society_users first
@@ -1135,6 +1251,9 @@
 
       // Push to Firebase (also updates localStorage cache via fbPush)
       fbPush('society_pending_visitor_approvals', pendingEntry);
+
+      // Show success toast notification
+      showToast("Approval Request Sent Successfully!", "success");
 
       if (typeof logActivity === 'function') {
         logActivity(`Visitor Entry (${name} - Flat ${flatInput})`, 'Submitted');

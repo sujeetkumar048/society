@@ -724,7 +724,7 @@
     incomes.forEach((i, idx) => {
       const item = document.createElement('div');
       item.className = 'log-item';
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
       item.innerHTML = `
         <div>
           <div class="log-title">${i.head} ${i.flat ? `(Flat ${i.flat})` : ''}</div>
@@ -746,7 +746,7 @@
     expenses.forEach((e, idx) => {
       const item = document.createElement('div');
       item.className = 'log-item';
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
       item.innerHTML = `
         <div>
           <div class="log-title">${e.head} (To: ${e.vendor})</div>

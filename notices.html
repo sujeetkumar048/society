@@ -467,7 +467,7 @@
     const listContainer = document.getElementById('noticesList');
     listContainer.innerHTML = '';
 
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
 
     notices.forEach((n, idx) => {
       const tagClass = n.type === 'urgent' ? 'tag-urgent' : n.type === 'event' ? 'tag-event' : 'tag-general';
@@ -595,7 +595,7 @@
     if (!confirm('Are you sure you want to delete this notice? This action cannot be undone.')) return;
 
     // Check admin permission
-    if (!currentUser || (currentUser.role !== 'Super Admin' && currentUser.role !== 'Committee Member')) {
+    if (!currentUser || (!(currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'))) {
       alert('You do not have permission to delete notices.');
       return;
     }

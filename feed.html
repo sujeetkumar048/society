@@ -157,8 +157,8 @@
   }
   .post-media{
     width:100%;
-    height:220px;
-    max-height:220px;
+    height:160px;
+    max-height:160px;
     border-radius:14px;
     overflow:hidden;
     background:#0F172A;
@@ -442,11 +442,6 @@
       </div>
 
       <div class="form-group">
-        <div class="form-label">What's happening in society?</div>
-        <textarea class="form-textarea" id="postCaption" placeholder="Write something for your neighbors..."></textarea>
-      </div>
-
-      <div class="form-group">
         <div class="form-label">Attach Photo (Max 10 KB)</div>
         <div class="img-upload-box" onclick="document.getElementById('postImgInput').click()">
           <div id="uploadBoxText">
@@ -458,6 +453,11 @@
           <input type="file" id="postImgInput" accept="image/*" style="display:none;" onchange="handleImageSelection(event)">
         </div>
         <div id="sizeBadgeContainer" style="text-align:center; margin-top:4px;"></div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">What's happening in society?</div>
+        <textarea class="form-textarea" id="postCaption" placeholder="Write something for your neighbors..."></textarea>
       </div>
 
       <button class="btn-submit-post" onclick="submitNewPost()" id="btnSubmitPost">Share Post</button>
@@ -518,7 +518,10 @@
     window.location.href = 'profile.html';
   }
 
-  const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+  const isAdmin = currentUser && currentUser.role && (
+    currentUser.role.includes('Super Admin') || 
+    currentUser.role.includes('Committee Member')
+  );
   let feedPosts = [];
   let isListeningFeed = false;
   let selectedBase64Img = '';
@@ -959,6 +962,9 @@
   }
 
   function showToast(msg) {
+    if (typeof window.playBeepSound === 'function') {
+      window.playBeepSound('success');
+    }
     const box = document.getElementById('toastBox');
     if (!box) return;
     box.textContent = msg;

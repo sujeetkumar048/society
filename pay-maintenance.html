@@ -803,7 +803,7 @@
   // Hide/show Admin toggle container based on role & setup GST access
   function setupAdminToggle() {
     const toggleContainer = document.getElementById('adminToggleContainer');
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
     const gstInput = document.getElementById('invGst');
 
     if (isAdmin) {
@@ -999,7 +999,7 @@
       const row = document.createElement('div');
       row.className = 'history-item';
       row.style.fontSize = '12px';
-      const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
 
       const totalAmt = Number(inv.total) || 0;
       const paidAmt = Number(inv.paidAmount) || 0;
@@ -1184,7 +1184,7 @@
   };
 
   function loadMaintAccountDetails() {
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
     const editBtn = document.getElementById('btnEditMaintAccount');
     if (editBtn) {
       editBtn.style.display = isAdmin ? 'inline-block' : 'none';
@@ -1321,7 +1321,7 @@
 
     const userFlatNorm = normalizeFlat(currentUser ? currentUser.flat : '');
     
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
 
     // Match invoices strictly for current user flat (or all if admin)
     let myPending = pendingInvoicesList.filter(i => {
@@ -1533,7 +1533,7 @@
     const paymentHistory = document.getElementById('paymentHistory');
     paymentHistory.innerHTML = '';
     
-    const isAdmin = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
 
     if (!payments || payments.length === 0) {
       paymentHistory.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">No payment history recorded yet.</div>';

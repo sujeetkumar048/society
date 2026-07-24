@@ -649,7 +649,7 @@ function openChat(tid) {
 
   // Always show ⋮ menu; show Group Info only for groups
   document.getElementById('cwMoreBtn').style.display = 'flex';
-  const isAdminUser = currentUser && (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member');
+  const isAdminUser = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
   const isGroupAdminUser = t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
 
   // Group Info item visible only in group chats
