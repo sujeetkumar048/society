@@ -334,15 +334,15 @@
 
   <!-- TAB SWITCHER -->
   <div class="tab-container" style="margin: 20px 16px 0;">
-    <div class="tab-btn active" id="tabSalaryBtn" onclick="switchSalaryTab('salary')">Salaries</div>
+    <div class="tab-btn active" id="tabTasksBtn" onclick="switchSalaryTab('tasks')">Daily Tasks</div>
     <div class="tab-btn" id="tabAttendanceBtn" onclick="switchSalaryTab('attendance')">Punches</div>
-    <div class="tab-btn" id="tabTasksBtn" onclick="switchSalaryTab('tasks')">Daily Tasks</div>
+    <div class="tab-btn" id="tabSalaryBtn" onclick="switchSalaryTab('salary')">Salaries</div>
   </div>
 
   <div class="content">
     
     <!-- SALARY DISBURSAL TAB -->
-    <div id="salaryTab">
+    <div id="salaryTab" style="display:none;">
       <div class="card">
         <div class="card-title">Staff Employee List <span class="eyebrow" id="staffCount">4 active</span></div>
         <div id="employeeListWrap">
@@ -375,7 +375,10 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Recent Shift Activity Logs</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="card-title" style="margin-bottom:0;">Recent Shift Activity Logs</div>
+          <button id="btnClearShiftLogs" onclick="clearAllShiftLogs()" style="background:var(--terracotta); color:white; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif; display:none;">🗑️ Clear Logs</button>
+        </div>
         <div style="overflow-x:auto;">
           <table class="report-table" style="font-size:11.5px; width:100%; border-collapse:collapse;">
             <thead>
@@ -396,7 +399,7 @@
     </div>
 
     <!-- DAILY TASKS TAB -->
-    <div id="tasksTab" style="display:none;">
+    <div id="tasksTab">
       <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
         <div class="card-title">Daily Duty Tasks <span class="eyebrow" id="dutyDateLabel">Today</span></div>
         
@@ -533,6 +536,15 @@
   };
 
   window.deletePunch = function(idx) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('attendance_logs_delete_clear') : true);
+    if (!hasPerm) {
+      alert('Only administrators with attendance permission are allowed to delete punches.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this attendance punch record?')) return;
     punches.splice(idx, 1);
     
@@ -740,6 +752,52 @@
     alert(`Attendance Success!\n\n${empName} Punched In at ${inTimeStr}.`);
   }
 
+  function parseDateTime(dateStr, timeStr) {
+    if (!dateStr || !timeStr) return null;
+    timeStr = timeStr.replace(/·/g, '').trim();
+    const timeMatch = timeStr.match(/(\d+):(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+    if (!timeMatch) return null;
+    
+    let hours = parseInt(timeMatch[1]);
+    const minutes = parseInt(timeMatch[2]);
+    const ampm = timeMatch[4];
+    
+    if (ampm) {
+      if (ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
+      if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+    }
+    
+    const months = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+    
+    const dateParts = dateStr.trim().split(/\s+/);
+    if (dateParts.length < 3) return null;
+    
+    const day = parseInt(dateParts[0]);
+    const monthKey = dateParts[1].substring(0, 3).toLowerCase();
+    const month = months[monthKey];
+    const year = parseInt(dateParts[2]);
+    
+    if (isNaN(day) || month === undefined || isNaN(year)) return null;
+    
+    return new Date(year, month, day, hours, minutes, 0);
+  }
+
+  function calculateHoursFromTimes(inTimeStr, outTimeStr, dateStr) {
+    const start = parseDateTime(dateStr, inTimeStr);
+    const end = parseDateTime(dateStr, outTimeStr);
+    if (!start || !end) return 0;
+    
+    let diffMs = end.getTime() - start.getTime();
+    if (diffMs < 0) {
+      diffMs += 24 * 60 * 60 * 1000;
+    }
+    
+    return Number((diffMs / (1000 * 60 * 60)).toFixed(2));
+  }
+
   function performPunchOut() {
     const empName = document.getElementById('punchEmployeeSelect').value;
     if (!empName) return;
@@ -753,10 +811,12 @@
     const now = new Date();
     const outTimeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    const elapsedMs = now.getTime() - punches[activeIdx].timestamp;
-    let hoursWorked = Number((elapsedMs / (1000 * 60 * 60)).toFixed(2));
-    if (elapsedMs < 30000) {
-      hoursWorked = 8.5; // default shift for fast testing
+    let hoursWorked = calculateHoursFromTimes(punches[activeIdx].inTime, outTimeStr, punches[activeIdx].date);
+    
+    // Testing override: if less than 1 minute (fast testing) fallback to 8.5 hrs
+    const start = parseDateTime(punches[activeIdx].date, punches[activeIdx].inTime);
+    if (start && (now.getTime() - start.getTime()) < 30000) {
+      hoursWorked = 8.5;
     }
 
     punches[activeIdx].outTime = outTimeStr;
@@ -784,7 +844,18 @@
     const tbody = document.getElementById('punchLogsList');
     tbody.innerHTML = '';
 
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+
+    const hasPerm = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('attendance_logs_delete_clear') : true);
+
+    const clearBtn = document.getElementById('btnClearShiftLogs');
+    if (clearBtn) {
+      clearBtn.style.display = hasPerm ? 'block' : 'none';
+    }
+
     const theadRow = tbody.parentNode.querySelector('thead tr');
     if (theadRow) {
       theadRow.innerHTML = `
@@ -793,7 +864,7 @@
         <th style="padding:8px 4px; text-align:left;">In</th>
         <th style="padding:8px 4px; text-align:left;">Out</th>
         <th style="padding:8px 4px; text-align:right;">Hours</th>
-        ${isAdmin ? `<th style="padding:8px 4px; text-align:right;">Action</th>` : ''}
+        ${hasPerm ? `<th style="padding:8px 4px; text-align:right;">Action</th>` : ''}
       `;
     }
 
@@ -806,11 +877,40 @@
         <td style="padding:10px 4px;">${p.inTime}</td>
         <td style="padding:10px 4px;">${p.outTime || '<span style="color:var(--forest); font-weight:600; font-size:10px;">Working</span>'}</td>
         <td style="padding:10px 4px; text-align:right; font-family:'IBM Plex Mono',monospace; font-weight:600;">${p.hours > 0 ? `${p.hours} hrs` : '-'}</td>
-        ${isAdmin ? `<td style="padding:10px 4px; text-align:right;"><button onclick="deletePunch(${idx})" style="background:none; border:none; color:var(--terracotta); font-weight:700; font-size:11px; cursor:pointer; padding:0; line-height:1.2;">Delete</button></td>` : ''}
+        ${hasPerm ? `<td style="padding:10px 4px; text-align:right;"><button onclick="deletePunch(${idx})" style="background:none; border:none; color:var(--terracotta); font-weight:700; font-size:11px; cursor:pointer; padding:0; line-height:1.2;">Delete</button></td>` : ''}
       `;
       tbody.appendChild(tr);
     });
   }
+
+  window.clearAllShiftLogs = function() {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('attendance_logs_delete_clear') : true);
+    if (!hasPerm) {
+      alert('Only administrators with attendance deletion permission are allowed to clear shift activity logs.');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to clear ALL shift activity logs? This action cannot be undone.')) return;
+
+    punches = [];
+    localStorage.setItem('society_punches', JSON.stringify(punches));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_punches', punches).catch(e => console.warn(e));
+    }
+
+    if (typeof logActivity === 'function') {
+      logActivity('All Shift Activity Logs', 'Cleared');
+    }
+
+    updatePunchStatusView();
+    renderPunchesLog();
+    alert('All shift activity logs cleared successfully.');
+  };
 
   // Daily Tasks checklist logic
   const taskNames = [
@@ -897,21 +997,17 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Image size should be under 2MB!");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      uploadedTaskPhotoBase64 = evt.target.result;
+    window.compressImageToBase64(file, 5, (compressedBase64) => {
+      uploadedTaskPhotoBase64 = compressedBase64;
       
       const preview = document.getElementById('taskPhotoPreview');
-      preview.src = uploadedTaskPhotoBase64;
-      preview.style.display = 'block';
-      document.getElementById('taskPhotoPlaceholder').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+      if (preview) {
+        preview.src = compressedBase64;
+        preview.style.display = 'block';
+      }
+      const placeholder = document.getElementById('taskPhotoPlaceholder');
+      if (placeholder) placeholder.style.display = 'none';
+    });
   }
 
   // Submit Daily Task Report

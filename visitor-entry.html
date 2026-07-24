@@ -583,6 +583,17 @@
       <div id="visitorsList">
       </div>
     </div>
+
+    <!-- GATE ALERTS LIST FOR GUARD -->
+    <div class="card" id="gateAlertsHistoryCard">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <span>🔔 Gate Alerts (Approval Requests)</span>
+        <button id="clearAllGateAlertsBtn" onclick="clearAllGateAlerts()" style="display:none; background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif; border:1px solid var(--terracotta);">🗑️ Clear Alerts</button>
+      </div>
+      <div id="gateAlertsHistoryList">
+        <!-- Dyn. populated history of sent approval requests -->
+      </div>
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -901,15 +912,7 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Photo too large. Please select an image under 5MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const dataUrl = evt.target.result;
-
+    window.compressImageToBase64(file, 5, (compressedBase64) => {
       const capturedImg = document.getElementById('capturedPhotoImg');
       const brackets = document.getElementById('camBrackets');
       const placeholder = document.getElementById('cameraPlaceholder');
@@ -918,7 +921,6 @@
       const btnSnap = document.getElementById('btnSnapPhoto');
       const btnRetake = document.getElementById('btnRetakePhoto');
 
-      // Stop any live stream
       if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
         cameraStream = null;
@@ -926,23 +928,20 @@
       video.style.display = 'none';
       placeholder.style.display = 'none';
 
-      capturedImg.src = dataUrl;
+      capturedImg.src = compressedBase64;
       capturedImg.style.display = 'block';
 
-      // Perform AI Biometric face detection on uploaded image
-      // Wait for image load before running tracking
       capturedImg.onload = function() {
         performFaceScan(capturedImg, brackets);
       };
 
-      capturedPhotoSvg = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
+      capturedPhotoSvg = `<img src="${compressedBase64}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
       document.getElementById('capturedPhotoWrap').innerHTML = capturedPhotoSvg;
 
       btnSnap.style.display = 'none';
       btnRetake.style.display = 'flex';
       btnOpen.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+    });
   }
 
   // Legacy simulatePhotoCapture kept for backward compat but now just triggers openLiveCamera
@@ -961,6 +960,8 @@
     if (isAdmin) {
       const clearBtn = document.getElementById('clearAllVisitorsBtn');
       if (clearBtn) clearBtn.style.display = 'block';
+      const clearAlertsBtn = document.getElementById('clearAllGateAlertsBtn');
+      if (clearAlertsBtn) clearAlertsBtn.style.display = 'block';
     }
 
     // Run one-time localStorage → Firebase migration
@@ -979,6 +980,7 @@
     if (_pendingUnsub) _pendingUnsub();
     _pendingUnsub = fbListen('society_pending_visitor_approvals', function() {
       renderPendingApprovals();
+      renderGateAlertsHistory();
     });
   }
 
@@ -1036,6 +1038,97 @@
     });
   }
 
+  function renderGateAlertsHistory() {
+    const listEl = document.getElementById('gateAlertsHistoryList');
+    if (!listEl) return;
+
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+    listEl.innerHTML = '';
+
+    if (approvals.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; padding:15px; color:var(--muted); font-size:12px;">No gate alerts sent today.</div>';
+      return;
+    }
+
+    // Render alerts in reverse chronological order
+    const sorted = [...approvals].reverse();
+
+    sorted.forEach(p => {
+      let statusBadge = '';
+      if (p.status === 'Approved') {
+        statusBadge = '<span style="background:#E4EEE8; color:var(--forest); padding:3px 8px; border-radius:8px; font-size:10px; font-weight:700;">Approved ✅</span>';
+      } else if (p.status === 'Rejected') {
+        statusBadge = '<span style="background:#F5E1DC; color:var(--terracotta); padding:3px 8px; border-radius:8px; font-size:10px; font-weight:700;">Rejected ❌</span>';
+      } else {
+        statusBadge = '<span style="background:var(--marigold-soft); color:var(--marigold); padding:3px 8px; border-radius:8px; font-size:10px; font-weight:700;">Pending ⏳</span>';
+      }
+
+      const item = document.createElement('div');
+      item.style.cssText = 'border:1px solid var(--line); border-radius:10px; padding:10px; background:var(--paper); margin-bottom:8px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s;';
+      item.onclick = () => openGateAlertDetails(p.id);
+      
+      // Hover effect via JS
+      item.onmouseenter = () => item.style.background = '#eef2eb';
+      item.onmouseleave = () => item.style.background = 'var(--paper)';
+
+      item.innerHTML = `
+        <div style="flex:1; padding-right:8px;">
+          <div style="font-weight:700; font-size:12.5px; color:var(--forest-dark);">${p.visitorName}</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Flat ${p.flatNo} · ${p.timestamp}</div>
+        </div>
+        <div>${statusBadge}</div>
+      `;
+      listEl.appendChild(item);
+    });
+  }
+
+  window.openGateAlertDetails = function(reqId) {
+    const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+    const p = approvals.find(a => a.id === reqId);
+    if (!p) return;
+
+    // Populates fields in modal
+    document.querySelector('#residentApprovalModal .modal-title').innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Gate Alert → Flat ${p.flatNo}
+    `;
+
+    const subDiv = document.querySelector('#residentApprovalModal div[style*="letter-spacing:0.5px"]');
+    if (subDiv) {
+      subDiv.innerHTML = `
+        Notification status for <strong style="color:var(--forest-dark);">${p.ownerName}</strong>
+        <br><span style="font-size:10px; color:var(--muted);">📱 ${p.visitorPhone || 'N/A'} · ${p.timestamp}</span>
+      `;
+    }
+
+    document.getElementById('approvalVisitorName').textContent = p.visitorName;
+    document.getElementById('approvalVisitorDetails').textContent =
+      `${p.idType || 'Visitor'} · Flat ${p.flatNo} · ${p.count || 1} person(s) · Vehicle: ${p.vehicle || 'No Vehicle'}`;
+    document.getElementById('approvalVisitorPurpose').textContent = p.purpose || 'None';
+    
+    const photoContainer = document.getElementById('approvalVisitorPhoto');
+    const defaultPhotoSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:28px; height:28px; opacity:0.75;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    if (photoContainer) {
+      photoContainer.innerHTML = p.photo || defaultPhotoSVG;
+    }
+
+    // Show resident approval modal overlay
+    document.getElementById('residentApprovalModal').classList.add('active');
+
+    // Start status listener to monitor realtime response
+    startGateRequestStatusListener(reqId);
+
+    // If already approved/rejected, set status UI instantly
+    const statusBox = document.getElementById('guardApprovalStatusBox');
+    if (statusBox) {
+      if (p.status === 'Approved') {
+        statusBox.innerHTML = `<span style="color:var(--forest); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;">✅ APPROVED BY OWNER!</span>`;
+      } else if (p.status === 'Rejected') {
+        statusBox.innerHTML = `<span style="color:var(--terracotta); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;">❌ REJECTED BY OWNER!</span>`;
+      }
+    }
+  };
+
   function residentApproveFromPanel(visId) {
     const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
     const idx = approvals.findIndex(p => p.id === visId);
@@ -1088,14 +1181,13 @@
     list.forEach((v, idx) => {
       const isInside = v.status === 'Inside';
       const statusClass = isInside ? 'status-in' : 'status-out';
-      const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
-      
       // Left exit button or text label
       let actionHtml = isInside 
         ? `<button class="btn" onclick="recordExit(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin:0; background:var(--terracotta); color:white; border-radius:8px;">Record Exit</button>`
         : `<div class="visitor-status ${statusClass}">${v.status}</div>`;
 
       if (isAdmin) {
+        actionHtml += `<button onclick="editVisitor(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin-left:6px; background:var(--forest); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Edit</button>`;
         actionHtml += `<button onclick="deleteVisitor(${idx})" style="padding: 6px 12px; font-size:10px; height:auto; width:auto; min-width:auto; margin-left:6px; background:#c0392b; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>`;
       }
 
@@ -1121,6 +1213,10 @@
   }
 
   window.deleteVisitor = function(idx) {
+    if (!isAdmin) {
+      alert('You do not have permission to delete visitor entries.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this visitor entry?')) return;
     visitors.splice(idx, 1);
     
@@ -1137,6 +1233,45 @@
     } else {
       localStorage.setItem('society_visitors', JSON.stringify(visitors));
       alert('Visitor entry deleted successfully!');
+      renderVisitors();
+    }
+  };
+
+  window.editVisitor = function(idx) {
+    if (!isAdmin) return;
+    const v = visitors[idx];
+    const newName = prompt("Edit Visitor Name:", v.name);
+    if (newName === null) return;
+    const newPhone = prompt("Edit Phone Number:", v.visitorPhone || v.phone || '');
+    if (newPhone === null) return;
+    const newFlat = prompt("Edit Flat Number:", v.flatNo || v.details.match(/Flat\s*([0-9a-zA-Z]+)/i)?.[1] || '');
+    if (newFlat === null) return;
+
+    v.name = newName.trim();
+    v.phone = newPhone.trim();
+    if (v.visitorPhone) v.visitorPhone = newPhone.trim();
+    v.flatNo = newFlat.trim();
+
+    // Reconstruct details line
+    const type = v.details.split(' · ')[0] || 'Guest';
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const formattedTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    v.details = `${type} · Tower A, Flat ${newFlat} · ${formattedDate} · ${formattedTime}`;
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_visitors', visitors)
+        .then(() => {
+          showToast('Visitor details updated!', 'success');
+          renderVisitors();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error updating visitor details.');
+        });
+    } else {
+      localStorage.setItem('society_visitors', JSON.stringify(visitors));
+      showToast('Visitor details updated!', 'success');
       renderVisitors();
     }
   };
@@ -1163,6 +1298,30 @@
       localStorage.setItem('society_visitors', JSON.stringify([]));
       showToast('All visitor entries cleared successfully!', 'success');
       renderVisitors();
+    }
+  };
+
+  window.clearAllGateAlerts = function() {
+    if (!isAdmin) {
+      alert('Only admins can clear gate alerts.');
+      return;
+    }
+    if (!confirm('🚨 WARNING: Are you sure you want to clear ALL gate alert requests? This action cannot be undone.')) return;
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_visitor_approvals', [])
+        .then(() => {
+          showToast('All gate alert requests cleared successfully!', 'success');
+          renderGateAlertsHistory();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error clearing gate alerts from database.');
+        });
+    } else {
+      localStorage.setItem('society_pending_visitor_approvals', JSON.stringify([]));
+      showToast('All gate alert requests cleared successfully!', 'success');
+      renderGateAlertsHistory();
     }
   };
 
@@ -1442,6 +1601,56 @@
       }
     });
   });
+
+  function showToast(message, type = 'success') {
+    if (!document.getElementById('toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-styles';
+      style.textContent = `
+        @keyframes toastSlideIn {
+          from { transform: translateY(-20px) scale(0.9); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes toastSlideOut {
+          from { transform: translateY(0) scale(1); opacity: 1; }
+          to { transform: translateY(-20px) scale(0.9); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.style = 'position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const isError = type === 'error';
+    toast.style = `
+      background: ${isError ? 'var(--terracotta)' : 'var(--forest)'};
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      pointer-events: auto;
+      animation: toastSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    `;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 3000);
+  }
 
   // Initial load
   initVisitors();

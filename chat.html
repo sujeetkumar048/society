@@ -649,7 +649,10 @@ function openChat(tid) {
 
   // Always show ⋮ menu; show Group Info only for groups
   document.getElementById('cwMoreBtn').style.display = 'flex';
-  const isAdminUser = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+  const isAdminUser = currentUser && currentUser.role && (
+    currentUser.role.includes('Super Admin') || 
+    currentUser.role.includes('Committee Member')
+  ) && (typeof getAdminPermission === 'function' ? getAdminPermission('chat_admin') : true);
   const isGroupAdminUser = t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
 
   // Group Info item visible only in group chats
@@ -659,7 +662,7 @@ function openChat(tid) {
   document.getElementById('cwDropdownClear').style.display = showAdminActions ? 'flex' : 'none';
   document.getElementById('cwDropdownDelete').style.display = showAdminActions ? 'flex' : 'none';
   // Hide ⋮ if nothing to show
-  if (!t.type === 'group' && !showAdminActions) {
+  if (t.type !== 'group' && !showAdminActions) {
     document.getElementById('cwMoreBtn').style.display = 'none';
   }
 
@@ -695,6 +698,19 @@ document.addEventListener('click', (e) => {
 function clearChatMessages() {
   document.getElementById('cwDropdown').classList.remove('open');
   if (!activeThreadId) return;
+
+  const t = threads[activeThreadId];
+  const isAdminUser = currentUser && currentUser.role && (
+    currentUser.role.includes('Super Admin') || 
+    currentUser.role.includes('Committee Member')
+  ) && (typeof getAdminPermission === 'function' ? getAdminPermission('chat_admin') : true);
+  const isGroupAdminUser = t && t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
+
+  if (!isAdminUser && !isGroupAdminUser) {
+    alert('Permission denied. Only administrators are allowed to clear chats.');
+    return;
+  }
+
   if (!confirm('Are you sure you want to clear ALL messages in this chat? This cannot be undone.')) return;
 
   try {
@@ -729,6 +745,18 @@ function deleteChatThread() {
   document.getElementById('cwDropdown').classList.remove('open');
   if (!activeThreadId) return;
   const t = threads[activeThreadId];
+
+  const isAdminUser = currentUser && currentUser.role && (
+    currentUser.role.includes('Super Admin') || 
+    currentUser.role.includes('Committee Member')
+  ) && (typeof getAdminPermission === 'function' ? getAdminPermission('chat_admin') : true);
+  const isGroupAdminUser = t && t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
+
+  if (!isAdminUser && !isGroupAdminUser) {
+    alert('Permission denied. Only administrators are allowed to delete chats.');
+    return;
+  }
+
   const chatName = t ? (t.name || threadDisplayName(t)) : activeThreadId;
   if (!confirm(`Delete entire chat "${chatName}"? This removes all messages and history permanently.`)) return;
 

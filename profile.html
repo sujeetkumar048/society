@@ -871,7 +871,7 @@
           <div class="detail-label">Flat Type</div>
           <div class="detail-value">3 BHK</div>
         </div>
-        <div class="detail-item">
+        <div class="detail-item" style="display:none;">
           <div class="detail-label">Pets (Dogs/Animals)</div>
           <div class="detail-value">None</div>
         </div>
@@ -928,6 +928,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
         <div class="menu-text">Notifications</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" id="adminAccessMenuItem" onclick="openModal('adminAccessModal')" style="display:none;">
+        <div class="menu-icon terracotta">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="menu-text">Admin Access Control</div>
         <div class="menu-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -1159,6 +1168,50 @@
         <div class="toggle-input active" id="togglePayment" onclick="this.classList.toggle('active')"></div>
       </div>
       <button class="modal-btn modal-btn-primary" onclick="saveNotifications()">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- ADMIN ACCESS CONTROL MODAL -->
+  <div class="modal-overlay" id="adminAccessModal">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">⚙️ Admin Access Control</div>
+        <div class="modal-close" onclick="closeModal('adminAccessModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.4;">
+        Enable or disable administrative actions and permissions across the society dashboard. Changes will sync immediately.
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Chat Admin Actions (Clear/Delete Messages)</div>
+        <div class="toggle-input active" id="togglePermChatAdmin" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Delete Resident Vehicles</div>
+        <div class="toggle-input active" id="togglePermVehicleDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Edit Monthly Maintenance Rate</div>
+        <div class="toggle-input active" id="togglePermMaintRateEdit" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Delete/Waive Maintenance Invoices</div>
+        <div class="toggle-input active" id="togglePermInvoiceDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Clear Payment History Logs</div>
+        <div class="toggle-input active" id="togglePermPaymentHistoryClear" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Edit/Delete Meter Readings</div>
+        <div class="toggle-input active" id="togglePermMeterReadingsEditDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Delete/Clear Shift Attendance Logs</div>
+        <div class="toggle-input active" id="togglePermAttendanceLogsDeleteClear" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="saveAdminPermissions()" style="margin-top: 16px;">Save Permissions</button>
     </div>
   </div>
 
@@ -1860,6 +1913,36 @@
       document.getElementById('editPhone').disabled = !isUserAdmin;
       document.getElementById('editEmail').disabled = !isUserAdmin;
 
+      // Toggle Admin Access Menu Item & Populate Toggles
+      const adminMenu = document.getElementById('adminAccessMenuItem');
+      if (adminMenu) {
+        adminMenu.style.display = isUserAdmin ? 'flex' : 'none';
+      }
+
+      if (isUserAdmin) {
+        let adminPerms = {
+          chat_admin: true,
+          vehicle_delete: true,
+          maint_rate_edit: true,
+          invoice_delete: true,
+          payment_history_clear: true,
+          meter_readings_edit_delete: true,
+          attendance_logs_delete_clear: true
+        };
+        try {
+          const stored = localStorage.getItem('society_admin_permissions');
+          if (stored) adminPerms = JSON.parse(stored);
+        } catch (e) {}
+
+        setToggleState('togglePermChatAdmin', adminPerms.chat_admin !== false);
+        setToggleState('togglePermVehicleDelete', adminPerms.vehicle_delete !== false);
+        setToggleState('togglePermMaintRateEdit', adminPerms.maint_rate_edit !== false);
+        setToggleState('togglePermInvoiceDelete', adminPerms.invoice_delete !== false);
+        setToggleState('togglePermPaymentHistoryClear', adminPerms.payment_history_clear !== false);
+        setToggleState('togglePermMeterReadingsEditDelete', adminPerms.meter_readings_edit_delete !== false);
+        setToggleState('togglePermAttendanceLogsDeleteClear', adminPerms.attendance_logs_delete_clear !== false);
+      }
+
       // Populate Privacy toggles
       setToggleState('toggleShowPhone', currentUser.privacy?.showPhone);
       setToggleState('toggleShowEmail', currentUser.privacy?.showEmail);
@@ -2074,6 +2157,34 @@
       closeModal('notificationsModal');
     }
   }
+
+  // Save Admin Permissions Config
+  window.saveAdminPermissions = function() {
+    const config = {
+      chat_admin: getToggleState('togglePermChatAdmin'),
+      vehicle_delete: getToggleState('togglePermVehicleDelete'),
+      maint_rate_edit: getToggleState('togglePermMaintRateEdit'),
+      invoice_delete: getToggleState('togglePermInvoiceDelete'),
+      payment_history_clear: getToggleState('togglePermPaymentHistoryClear'),
+      meter_readings_edit_delete: getToggleState('togglePermMeterReadingsEditDelete'),
+      attendance_logs_delete_clear: getToggleState('togglePermAttendanceLogsDeleteClear')
+    };
+
+    localStorage.setItem('society_admin_permissions', JSON.stringify(config));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_admin_permissions', config).then(() => {
+        alert('Admin Access Control settings saved & synced successfully!');
+        closeModal('adminAccessModal');
+      }).catch(err => {
+        console.error(err);
+        alert('Error saving Admin settings to database.');
+      });
+    } else {
+      alert('Admin Access Control settings saved successfully!');
+      closeModal('adminAccessModal');
+    }
+  };
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -2351,28 +2462,19 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      showToast('Image is too large. Please select a photo under 2MB.', 'error');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const dataUrl = event.target.result;
-      
-      currentUser.photo = dataUrl;
+    window.compressImageToBase64(file, 5, (compressedBase64) => {
+      currentUser.photo = compressedBase64;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
       const uIndex = users.findIndex(u => u.email === currentUser.email);
       if (uIndex > -1) {
-        users[uIndex].photo = dataUrl;
+        users[uIndex].photo = compressedBase64;
         localStorage.setItem('users', JSON.stringify(users));
       }
 
-      showToast('Profile photo updated successfully!');
+      showToast('Profile photo updated & compressed successfully!');
       updateProfileUI();
-    };
-    reader.readAsDataURL(file);
+    });
   }
 
 

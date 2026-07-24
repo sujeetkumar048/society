@@ -524,10 +524,9 @@
     const listContainer = document.getElementById('complaintsList');
     listContainer.innerHTML = '';
 
-    const isAdmin = currentUser && (
-      (currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member') || 
-      currentUser.role === 'Super Admin' || 
-      (currentUser.role && currentUser.role.includes('Committee Member'))
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
     );
 
     let visibleCount = 0;
@@ -554,7 +553,11 @@
           <div class="complaint-id">#${c.id}</div>
           <div style="display:flex; gap:8px; align-items:center;">
             <div class="complaint-status ${statusClass}">${c.status}</div>
-            ${isAdmin ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteComplaint('${c.id}')">
+            ${isAdmin ? `
+            <button class="delete-btn" style="border-color:var(--forest); color:var(--forest); background:rgba(31,77,61,0.06);" onclick="event.stopPropagation(); editComplaint('${c.id}')">
+              ✏️ Edit
+            </button>
+            <button class="delete-btn" onclick="event.stopPropagation(); deleteComplaint('${c.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               Delete
             </button>` : ''}
@@ -650,7 +653,11 @@
     if (!confirm('Are you sure you want to delete this complaint? This action cannot be undone.')) return;
 
     // Check admin permission
-    if (!currentUser || (!(currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'))) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
       alert('You do not have permission to delete complaints.');
       return;
     }
@@ -684,6 +691,43 @@
     
     // Show success feedback
     alert('Complaint deleted successfully.');
+  }
+
+  window.editComplaint = async function(complaintId) {
+    if (!currentUser || (!(currentUser.role.includes('Super Admin') || currentUser.role.includes('Committee Member')))) {
+      alert('You do not have permission to edit complaints.');
+      return;
+    }
+
+    const c = complaints.find(item => item.id === complaintId);
+    if (!c) return;
+
+    const newTitle = prompt("Edit Complaint Title:", c.title);
+    if (newTitle === null) return;
+    const newDesc = prompt("Edit Complaint Description:", c.desc);
+    if (newDesc === null) return;
+    const newPriority = prompt("Edit Priority (High, Medium, Low):", c.priority);
+    if (newPriority === null) return;
+
+    c.title = newTitle.trim();
+    c.desc = newDesc.trim();
+    c.priority = newPriority.trim();
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Complaint (#${complaintId})`, 'Edited');
+    }
+
+    localStorage.setItem('society_complaints', JSON.stringify(complaints));
+    
+    try {
+      await fbSet('society_complaints', complaints);
+    } catch (e) {
+      console.warn('Firebase update failed, localStorage updated:', e.message);
+    }
+
+    const activeFilter = document.querySelector('.filter-tab.active')?.textContent.toLowerCase().replace(' ', '-') || 'all';
+    renderComplaints(activeFilter === 'all' ? 'all' : activeFilter);
+    alert('Complaint updated successfully!');
   }
 
   function logDeletion(type, id, details) {

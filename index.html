@@ -134,21 +134,21 @@
     background:var(--card);
     border-radius:var(--radius);
     box-shadow:0 10px 30px rgba(21,53,41,.10);
-    padding:16px;
+    padding:12px;
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:14px;
+    gap:10px;
   }
   .stat{
     display:flex;
     flex-direction:column;
-    gap:4px;
-    padding:10px 12px;
-    border-radius:12px;
+    gap:2px;
+    padding:8px 10px;
+    border-radius:10px;
     background:var(--paper);
   }
   .stat .label{
-    font-size:11px;
+    font-size:10px;
     color:var(--muted);
     display:flex;
     align-items:center;
@@ -158,8 +158,8 @@
   }
   .stat .value{
     font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
-    font-size:20px;
+    font-weight:700;
+    font-size:17px;
     color:var(--forest-dark);
   }
   .stat.warn .value{color:var(--terracotta);}
@@ -522,6 +522,14 @@
   <!-- STATS -->
   <div class="stats-wrap">
     <div class="stats-card">
+      <div class="stat green" onclick="window.location.href='accounting.html'" style="cursor:pointer;">
+        <div class="label">Total Balance</div>
+        <div class="value" id="statFundsVal">₹0</div>
+      </div>
+      <div class="stat warn" onclick="window.location.href='accounting.html'" style="cursor:pointer;">
+        <div class="label">Total Expenses</div>
+        <div class="value" id="statExpensesVal">₹0</div>
+      </div>
       <div class="stat warn" id="statMaintenance" onclick="showStatDetail('maintenance')">
         <div class="label">Maintenance Due</div>
         <div class="value" id="statMaintenanceVal">₹2,000</div>
@@ -833,7 +841,17 @@
             <input type="text" id="mtrFlat" placeholder="Flat No (e.g. A-101)" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
             <input type="month" id="mtrMonth" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
           </div>
-          <input type="number" id="mtrReading" placeholder="Reading (Units e.g. 1240)" min="0" style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          <div style="display:flex; gap:8px;">
+            <select id="mtrType" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; background:white; font-weight:600; color:var(--forest-dark);">
+              <option value="Electricity">⚡ Electricity Meter</option>
+              <option value="Water">💧 Water Meter</option>
+              <option value="Gas">🔥 Gas Meter</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="mtrInitial" placeholder="Initial Reading (Units)" min="0" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+            <input type="number" id="mtrFinal" placeholder="Final Reading (Units)" min="0" style="flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-family:'Space Grotesk',sans-serif;">
+          </div>
           
           <!-- Photo Upload -->
           <div style="display:flex; align-items:center; gap:8px;">
@@ -1140,7 +1158,10 @@
   function renderVehicles() {
     const container = document.getElementById('vehiclesContainer');
     if (!container) return;
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
 
     let html = '';
     if (societyVehicles.length === 0) {
@@ -1161,7 +1182,7 @@
             </div>
             <div style="display:flex; gap:6px; align-items:center;">
               <button onclick="editVehicle('${v.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">✏️ Edit</button>
-              ${isAdmin ? `<button onclick="deleteVehicle('${v.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
+              ${(isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('vehicle_delete') : true)) ? `<button onclick="deleteVehicle('${v.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
             </div>
           </div>
         `;
@@ -1261,6 +1282,15 @@
   };
 
   window.deleteVehicle = function(id) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('vehicle_delete') : true);
+    if (!hasPerm) {
+      alert('You do not have permission to delete vehicles.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this vehicle record?')) return;
     const item = societyVehicles.find(v => v.id === id);
     societyVehicles = societyVehicles.filter(v => v.id !== id);
@@ -1404,7 +1434,10 @@
   function renderGuardRequests() {
     const container = document.getElementById('guardRequestsContainer');
     if (!container) return;
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
 
     let html = '';
     if (guardRequests.length === 0) {
@@ -1428,7 +1461,10 @@
               ` : (isAdmin ? `
                 <button onclick="approveGuardRequest('${gr.id}')" style="background:var(--forest); color:white; border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Approve</button>
               ` : '')}
-              ${isAdmin ? `<button onclick="deleteGuardRequest('${gr.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Delete</button>` : ''}
+              ${isAdmin ? `
+                <button onclick="editGuardRequest('${gr.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Edit</button>
+                <button onclick="deleteGuardRequest('${gr.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 9px; border-radius:7px; font-size:11px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">Delete</button>
+              ` : ''}
             </div>
           </div>
         `;
@@ -1529,6 +1565,14 @@
   };
 
   window.deleteGuardRequest = function(id) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
+      alert('You do not have permission to delete guard requests.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this guard request record?')) return;
     const item = guardRequests.find(g => g.id === id);
     guardRequests = guardRequests.filter(g => g.id !== id);
@@ -1546,6 +1590,43 @@
       localStorage.setItem('society_guard_requests', JSON.stringify(guardRequests));
       renderGuardRequests();
       alert('Guard request deleted successfully.');
+    }
+  };
+
+  window.editGuardRequest = function(id) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
+      alert('You do not have permission to edit guard requests.');
+      return;
+    }
+
+    const gr = guardRequests.find(g => g.id === id);
+    if (!gr) return;
+
+    const newItem = prompt("Edit Request Item / Message:", gr.item);
+    if (newItem === null) return;
+    const newGuard = prompt("Edit Guard Name:", gr.guardName || 'Krishan');
+    if (newGuard === null) return;
+
+    gr.item = newItem.trim();
+    gr.guardName = newGuard.trim();
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Guard Request (${gr.item})`, 'Edited');
+    }
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_guard_requests', guardRequests).then(() => {
+        renderGuardRequests();
+        alert('Guard request updated successfully!');
+      });
+    } else {
+      localStorage.setItem('society_guard_requests', JSON.stringify(guardRequests));
+      renderGuardRequests();
+      alert('Guard request updated successfully!');
     }
   };
 
@@ -1633,7 +1714,10 @@
     const container = document.getElementById('localServicesContainer');
     if (!container) return;
 
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
     
     // Sort services by category then by name
     const sortedServices = [...localServices].sort((a, b) => {
@@ -1651,7 +1735,10 @@
       html += `
         <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; line-height:1.4; word-break:break-word; box-shadow: 0 2px 8px rgba(0,0,0,0.01); display:flex; justify-content:space-between; align-items:center; gap:8px;">
           <div style="flex:1;">${rowText}</div>
-          ${isAdmin ? `<button onclick="deleteLocalService('${srv.id}')" style="background:var(--terracotta); color:white; border:none; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; flex-shrink:0;">🗑️ Delete</button>` : ''}
+          ${isAdmin ? `
+            <button onclick="editLocalService('${srv.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; flex-shrink:0;">✏️ Edit</button>
+            <button onclick="deleteLocalService('${srv.id}')" style="background:var(--terracotta); color:white; border:none; padding:6px 10px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; flex-shrink:0;">🗑️ Delete</button>
+          ` : ''}
         </div>
       `;
     });
@@ -1679,8 +1766,12 @@
   window.deleteLocalService = function(id) {
     if (!confirm('Are you sure you want to delete this service provider? This action cannot be undone.')) return;
 
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
     // Check admin permission
-    if (!currentUser || (!(currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'))) {
+    if (!isAdmin) {
       alert('You do not have permission to delete service providers.');
       return;
     }
@@ -1712,6 +1803,54 @@
     
     // Show success feedback
     alert('Service provider deleted successfully.');
+  };
+
+  window.editLocalService = function(id) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
+      alert('You do not have permission to edit service providers.');
+      return;
+    }
+
+    const srv = localServices.find(s => s.id === id);
+    if (!srv) return;
+
+    const newName = prompt("Edit Provider Name:", srv.name);
+    if (newName === null) return;
+    const newPhone = prompt("Edit Contact Number:", srv.phone);
+    if (newPhone === null) return;
+    const newCategory = prompt("Edit Category (Plumber, Electrician, Carpenter, Cleaner, Security, Other):", srv.category);
+    if (newCategory === null) return;
+    const newRating = prompt("Edit Rating (e.g. 4.5):", srv.rating);
+    if (newRating === null) return;
+
+    srv.name = newName.trim();
+    srv.phone = newPhone.trim().startsWith('+91') ? newPhone.trim() : `+91 ${newPhone.trim()}`;
+    srv.category = newCategory.trim();
+    srv.rating = newRating.trim();
+
+    if (typeof logActivity === 'function') {
+      logActivity(`Local Service (${srv.name} - ${srv.category})`, 'Edited');
+    }
+
+    localStorage.setItem('society_services', JSON.stringify(localServices));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_services', localServices)
+        .then(() => {
+          renderLocalServices();
+          alert('Service provider updated successfully!');
+        })
+        .catch(e => {
+          console.warn('Firebase update failed, localStorage updated:', e.message);
+        });
+    } else {
+      renderLocalServices();
+      alert('Service provider updated successfully!');
+    }
   };
 
   function logDeletion(type, id, details) {
@@ -1796,60 +1935,71 @@
 
   window.previewMeterPhoto = function(input) {
     if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
+      window.compressImageToBase64(input.files[0], 5, (compressedBase64) => {
         const preview = document.getElementById('mtrPhotoPreview');
         const img = document.getElementById('mtrPhotoImg');
-        img.src = e.target.result;
-        preview.style.display = 'block';
-        input.dataset.base64 = e.target.result;
-      };
-      reader.readAsDataURL(input.files[0]);
+        if (img) img.src = compressedBase64;
+        if (preview) preview.style.display = 'block';
+        input.dataset.base64 = compressedBase64;
+      });
     }
   };
 
   window.saveMeterReading = function() {
     const flat    = document.getElementById('mtrFlat').value.trim().toUpperCase();
     const month   = document.getElementById('mtrMonth').value;
-    const reading = document.getElementById('mtrReading').value.trim();
+    const type    = document.getElementById('mtrType').value;
+    const initial = document.getElementById('mtrInitial').value.trim();
+    const final   = document.getElementById('mtrFinal').value.trim();
     const editId  = document.getElementById('mtrEditId').value;
     const photoEl = document.getElementById('mtrPhoto');
     const photo   = photoEl.dataset.base64 || '';
 
-    if (!flat || !month || !reading) {
-      alert('Please fill Flat No, Month and Reading.');
+    if (!flat || !month || !initial || !final) {
+      alert('Please fill Flat No, Month, Initial Units and Final Units.');
       return;
     }
 
+    const initVal = Number(initial);
+    const finalVal = Number(final);
+
+    if (finalVal < initVal) {
+      alert('Final Units cannot be less than Initial Units.');
+      return;
+    }
+
+    const reading = finalVal - initVal; // Consumed units
     const monthLabel = new Date(month + '-01').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
     if (editId) {
       // Edit existing
       const idx = meterReadings.findIndex(r => r.id === editId);
       if (idx !== -1) {
-        meterReadings[idx] = { ...meterReadings[idx], flat, month, monthLabel, reading, photo: photo || meterReadings[idx].photo };
-        logAction('meter_reading_updated', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
-        if (typeof logActivity === 'function') { logActivity(`Meter Reading (Flat ${flat} - ${monthLabel})`, 'Edited'); }
+        meterReadings[idx] = { 
+          ...meterReadings[idx], 
+          flat, month, monthLabel, type, initial: initVal, final: finalVal, reading, 
+          photo: photo || meterReadings[idx].photo 
+        };
+        if (typeof logActivity === 'function') { logActivity(`Meter Reading (${type} Flat ${flat} - ${monthLabel})`, 'Edited'); }
       }
     } else {
-      // Check for duplicate flat+month
-      const duplicate = meterReadings.find(r => r.flat === flat && r.month === month);
+      // Check for duplicate flat + month + type
+      const duplicate = meterReadings.find(r => r.flat === flat && r.month === month && r.type === type);
       if (duplicate) {
-        alert(`Reading for Flat ${flat} in ${monthLabel} already exists. Use the Edit button.`);
+        alert(`${type} Reading for Flat ${flat} in ${monthLabel} already exists. Use the Edit button.`);
         return;
       }
       meterReadings.push({
         id: Date.now().toString(),
-        flat, month, monthLabel, reading, photo,
+        flat, month, monthLabel, type, initial: initVal, final: finalVal, reading, photo,
         addedBy: currentUser ? currentUser.name : 'Admin',
         addedAt: new Date().toLocaleString('en-IN')
       });
-      logAction('meter_reading_added', { flat: flat, month: monthLabel, reading: reading }, 'meter_readings');
-      if (typeof logActivity === 'function') { logActivity(`Meter Reading (Flat ${flat} - ${monthLabel})`, 'Added'); }
+      if (typeof logActivity === 'function') { logActivity(`Meter Reading (${type} Flat ${flat} - ${monthLabel})`, 'Added'); }
     }
 
-    // Sort by month desc then flat
-    meterReadings.sort((a, b) => b.month.localeCompare(a.month) || a.flat.localeCompare(b.flat));
+    // Sort by month desc then flat then type
+    meterReadings.sort((a, b) => b.month.localeCompare(a.month) || a.flat.localeCompare(b.flat) || (a.type || '').localeCompare(b.type || ''));
 
     if (typeof fbSet === 'function') {
       fbSet('society_meter_readings', meterReadings).then(() => {
@@ -1867,7 +2017,9 @@
     document.getElementById('mtrFlat').value = currentUser ? `${currentUser.tower || ''}-${currentUser.flat || ''}`.replace(/^-|-$/g,'') : '';
     const now = new Date();
     document.getElementById('mtrMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    document.getElementById('mtrReading').value = '';
+    document.getElementById('mtrType').value = 'Electricity';
+    document.getElementById('mtrInitial').value = '';
+    document.getElementById('mtrFinal').value = '';
     document.getElementById('mtrEditId').value = '';
     document.getElementById('mtrPhotoPreview').style.display = 'none';
     document.getElementById('mtrPhotoImg').src = '';
@@ -1880,20 +2032,20 @@
     if (!rec) return;
     document.getElementById('mtrFlat').value = rec.flat;
     document.getElementById('mtrMonth').value = rec.month;
-    document.getElementById('mtrReading').value = rec.reading;
+    document.getElementById('mtrType').value = rec.type || 'Electricity';
+    document.getElementById('mtrInitial').value = rec.initial !== undefined ? rec.initial : '';
+    document.getElementById('mtrFinal').value = rec.final !== undefined ? rec.final : rec.reading;
     document.getElementById('mtrEditId').value = rec.id;
     if (rec.photo) {
       document.getElementById('mtrPhotoImg').src = rec.photo;
       document.getElementById('mtrPhotoPreview').style.display = 'block';
     }
-    // Auto-open the form when editing
     const fields = document.getElementById('meterFormFields');
     const arrow  = document.getElementById('meterFormArrow');
     if (fields && fields.style.display === 'none') {
       fields.style.display = 'flex';
       if (arrow) arrow.textContent = '▲';
     }
-    // Scroll form into view
     document.getElementById('mtrFlat').scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
@@ -1913,7 +2065,10 @@
     const container = document.getElementById('meterReadingsContainer');
     if (!container) return;
 
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
 
     if (meterReadings.length === 0) {
       container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No meter readings recorded yet.</div>`;
@@ -1926,16 +2081,26 @@
         ? `<img src="${r.photo}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; border:1px solid var(--line);">`
         : '';
 
+      const type = r.type || 'Electricity';
+      const icon = type === 'Electricity' ? '⚡' : type === 'Water' ? '💧' : '🔥';
+      
+      const initialStr = r.initial !== undefined ? r.initial : '0';
+      const finalStr = r.final !== undefined ? r.final : r.reading;
+
       html += `
         <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:var(--forest-dark); display:flex; align-items:center; justify-content:space-between; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
           <div style="flex:1; line-height:1.5;">
-            Flat - <span style="font-weight:800;">${r.flat}</span> · ${r.monthLabel} · <span style="color:var(--forest); font-weight:800;">${Number(r.reading).toLocaleString('en-IN')} Units</span>
-            <div style="font-size:11px; color:var(--muted); font-weight:500; margin-top:2px;">Added by ${r.addedBy || 'Admin'} · ${r.addedAt || ''}</div>
+            <div>${icon} <span style="font-weight:800; text-transform:uppercase; font-size:11px; color:var(--muted);">${type} Meter</span> · Flat <span style="font-weight:800;">${r.flat}</span> · ${r.monthLabel}</div>
+            <div style="margin-top:4px; font-size:13px; color:var(--forest-dark);">
+              <span style="color:var(--forest); font-weight:800;">${Number(r.reading).toLocaleString('en-IN')} Consumed Units</span>
+              <span style="font-size:11.5px; color:var(--muted); font-weight:500; margin-left:6px;">(Initial: ${initialStr} | Final: ${finalStr})</span>
+            </div>
+            <div style="font-size:10px; color:var(--muted); font-weight:500; margin-top:3px;">Added by ${r.addedBy || 'Admin'} · ${r.addedAt || ''}</div>
           </div>
           <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
             ${photoThumb}
-            <button onclick="editMeterReading('${r.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">✏️ Edit</button>
-            ${isAdmin ? `<button onclick="deleteMeterReading('${r.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
+            ${(isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('meter_readings_edit_delete') : true)) ? `<button onclick="editMeterReading('${r.id}')" style="background:rgba(31,77,61,0.08); color:var(--forest-dark); border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">✏️ Edit</button>` : ''}
+            ${(isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('meter_readings_edit_delete') : true)) ? `<button onclick="deleteMeterReading('${r.id}')" style="background:var(--terracotta); color:white; border:none; padding:5px 10px; border-radius:8px; font-size:11.5px; font-family:'Space Grotesk',sans-serif; font-weight:700; cursor:pointer;">🗑️ Delete</button>` : ''}
           </div>
         </div>
       `;
@@ -1948,7 +2113,12 @@
     if (!confirm('Are you sure you want to delete this meter reading? This action cannot be undone.')) return;
 
     // Check admin permission
-    if (!currentUser || (!(currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'))) {
+    const hasPerm = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    ) && (typeof getAdminPermission === 'function' ? getAdminPermission('meter_readings_edit_delete') : true);
+    
+    if (!hasPerm) {
       alert('You do not have permission to delete meter readings.');
       return;
     }
@@ -2000,27 +2170,63 @@
     // Load complaints
     const complaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
 
-    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    // Load society outstanding invoices
+    const pendingInvoices = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
 
-    userList.forEach(u => {
-      // Base score
-      let score = 80;
+    // Helper: normalize flat numbers
+    const normalizeFlat = f => String(f || '').replace(/flat\s*/i, '').trim();
+
+    // Compile scores for all residents
+    const scoredResidents = userList.map(u => {
+      let score = 60; // Base score
       let reasons = [];
 
-      // Check maintenance payment status from localStorage/payments list
+      // Check user payments history
       const userPayments = JSON.parse(localStorage.getItem('payments_' + u.email)) || [];
-      const hasPaidJuly = userPayments.some(p => p.month === 'July 2026');
       
+      // We check for July 2026 bills as current reference
+      const paymentJuly = userPayments.find(p => p.month === 'July 2026');
+      const hasPaidJuly = !!paymentJuly;
+
+      // Unpaid pending invoices for July 2026
+      const pendingJuly = pendingInvoices.find(inv => normalizeFlat(inv.flat) === normalizeFlat(u.flat) && inv.month === 'July 2026');
+
+      // 1. Maintenance, Electricity, Water payments scoring:
       if (hasPaidJuly) {
-        score += 10;
-        reasons.push('Timely Payment');
+        // Find if paid on or before 15th of July
+        const payDatePart = paymentJuly.date ? paymentJuly.date.split(' ')[0] : '1';
+        const dayOfPayment = parseInt(payDatePart) || 1;
+
+        if (dayOfPayment <= 15) {
+          score += 15; // Maintenance paid timely
+          score += 15; // Electricity paid timely
+          score += 10; // Water paid timely
+          reasons.push('Timely Payments (Maint/Elec/Water) ✅');
+        } else {
+          score += 5; // Maintenance paid late
+          score += 5; // Electricity paid late
+          score += 3; // Water paid late
+          reasons.push('Late Payments (Maint/Elec/Water) ⚠️');
+        }
+      } else if (pendingJuly) {
+        // If pending, check if overdue (today is after 15th of the billing month)
+        const todayDay = new Date().getDate();
+        const isOverdue = todayDay > 15;
+
+        if (isOverdue) {
+          score -= 10; // Maintenance overdue penalty
+          score -= 10; // Electricity overdue penalty
+          score -= 5;  // Water overdue penalty
+          reasons.push('Overdue Bills (Maint/Elec/Water) ❌');
+        } else {
+          reasons.push('Unpaid Bills (Not Overdue) ⏳');
+        }
       } else {
-        score -= 15;
-        reasons.push('Unpaid Maintenance');
+        reasons.push('No July Bills Generated');
       }
 
-      // Check complaints associated with this user's flat
-      const userComplaints = complaints.filter(c => c.flat === u.flat || c.email === u.email);
+      // 2. Complaints scoring
+      const userComplaints = complaints.filter(c => normalizeFlat(c.flat) === normalizeFlat(u.flat) || c.email === u.email);
       const openComplaints = userComplaints.filter(c => c.status === 'Pending' || c.status === 'In Progress').length;
       const resolvedComplaints = userComplaints.filter(c => c.status === 'Resolved').length;
 
@@ -2036,24 +2242,54 @@
       // Cap score between 0 and 100
       score = Math.max(0, Math.min(100, score));
 
+      return {
+        user: u,
+        score: score,
+        reasons: reasons
+      };
+    });
+
+    // ─── SORT BY SCORE DESCENDING (RANKING LEVEL) ───
+    scoredResidents.sort((a, b) => b.score - a.score);
+
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+
+    scoredResidents.forEach((res, index) => {
+      const u = res.user;
+      const rank = index + 1;
+
+      // Assign rank medal/badges
+      let rankBadge = '';
+      if (rank === 1) rankBadge = '🥇 <span style="color:#D4AF37; font-weight:800;">Gold</span>';
+      else if (rank === 2) rankBadge = '🥈 <span style="color:#C0C0C0; font-weight:800;">Silver</span>';
+      else if (rank === 3) rankBadge = '🥉 <span style="color:#CD7F32; font-weight:800;">Bronze</span>';
+      else rankBadge = `#${rank}`;
+
       // Color coding score
       let scoreColor = 'var(--forest)';
-      if (score < 60) scoreColor = 'var(--terracotta)';
-      else if (score < 85) scoreColor = 'var(--marigold)';
+      if (res.score < 60) scoreColor = 'var(--terracotta)';
+      else if (res.score < 85) scoreColor = 'var(--marigold)';
 
-      // Flat - score shown - details format
-      const detailText = reasons.join(', ') || 'Good Standing';
+      const detailText = res.reasons.join(', ') || 'Good Standing';
 
       html += `
-        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; line-height:1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.01);">
-          Flat - <span style="font-weight:700; color:var(--forest-dark);">${u.tower}-${u.flat}</span> - Score: <span style="color:${scoreColor}; font-weight:800; font-size:13.5px;">${score}</span> - (${detailText})
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; box-shadow: 0 4px 12px rgba(0,0,0,0.015); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="flex:1;">
+            <div style="font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:0.5px; margin-bottom:4px;">Rank ${rankBadge}</div>
+            <div style="font-weight:700; font-size:13.5px; color:var(--forest-dark);">Flat ${u.tower}-${u.flat}</div>
+            <div style="font-size:11px; color:var(--muted); font-weight:500; margin-top:2px;">${detailText}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:9.5px; color:var(--muted); text-transform:uppercase;">Score</div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:24px; color:${scoreColor};">${res.score}</div>
+          </div>
         </div>
       `;
     });
 
     html += '</div>';
 
-    if (userList.length === 0) {
+    if (scoredResidents.length === 0) {
       html = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No active residents registered to score yet.</div>`;
     }
 
@@ -2082,11 +2318,135 @@
       document.getElementById('sealImage').style.display = 'none';
     }
 
+    const calculateTotalDueForUser = (pendingInvoices) => {
+      if (!currentUser || !currentUser.flat) return 0;
+      const userFlat = currentUser.flat;
+      const normalizeFlat = f => String(f || '').replace(/[^0-9]/g, '').trim();
+      const userFlatNorm = normalizeFlat(userFlat);
+
+      let societyMaintRates = { 'default': 2000 };
+      const storedRates = localStorage.getItem('society_maint_rates');
+      if (storedRates) {
+        try { societyMaintRates = JSON.parse(storedRates); } catch(e){}
+      }
+
+      const getRateForMonth = (m) => {
+        if (societyMaintRates && societyMaintRates[m] !== undefined) return Number(societyMaintRates[m]);
+        return Number((societyMaintRates && societyMaintRates['default']) || 2000);
+      };
+
+      const activeMonths = Object.keys(societyMaintRates || {}).filter(k => k !== 'default');
+      if (activeMonths.length === 0) activeMonths.push('July 2026');
+
+      let totalDue = 0;
+
+      activeMonths.forEach(m => {
+        const waivedList = JSON.parse(localStorage.getItem('society_waived_dues')) || [];
+        const isWaived = waivedList.some(w => normalizeFlat(w.flat) === userFlatNorm && w.month === m);
+        if (isWaived) return;
+
+        const targetRate = getRateForMonth(m);
+        
+        const userPayments = JSON.parse(localStorage.getItem('payments_' + currentUser.email)) || [];
+        const fromPayments = userPayments
+          .filter(p => p.month === m)
+          .reduce((sum, p) => sum + (parseFloat(String(p.amount).replace(/[^0-9.]/g, '')) || 0), 0);
+
+        const incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+        const fromIncomes = incomes
+          .filter(inc => normalizeFlat(inc.flat) === userFlatNorm && (inc.month === m || (inc.note && inc.note.includes(m))))
+          .reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+
+        const totalPaid = Math.max(fromPayments, fromIncomes);
+
+        const existing = pendingInvoices.find(i => normalizeFlat(i.flat) === userFlatNorm && i.month === m);
+
+        if (existing) {
+          const invPaid = Math.max(existing.paidAmount || 0, totalPaid);
+          const invTotal = Math.max(Number(existing.total) || 0, targetRate);
+          totalDue += Math.max(0, invTotal - invPaid);
+        } else {
+          if (totalPaid < targetRate) {
+            totalDue += (targetRate - totalPaid);
+          }
+        }
+      });
+
+      return totalDue;
+    };
+
+    const updatePendingApprovalsCount = () => {
+      const isAdmin = currentUser && currentUser.role && (
+        currentUser.role.includes('Super Admin') || 
+        currentUser.role.includes('Committee Member')
+      );
+
+      let count = 0;
+      if (isAdmin) {
+        const localUsers = JSON.parse(localStorage.getItem('society_users')) || [];
+        count = localUsers.filter(u => u.status === 'Pending').length;
+      } else {
+        const normalise = s => String(s || '').replace(/flat\s*/i, '').trim();
+        const myFlat = normalise(currentUser ? currentUser.flat : '');
+        const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
+        count = approvals.filter(req => normalise(req.flatNo) === myFlat && req.status === 'Pending').length;
+      }
+
+      const approvalsValEl = document.getElementById('statApprovalsVal');
+      if (approvalsValEl) {
+        approvalsValEl.textContent = count;
+      }
+    };
+
+    const updateCollectionProgress = () => {
+      const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
+      const incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+
+      const maintPayments = incomes.filter(inc => inc.head === 'Maintenance');
+      const totalCollected = maintPayments.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+
+      const totalOutstanding = pending.reduce((sum, inv) => sum + Math.max(0, Number(inv.total) - Number(inv.paidAmount || 0)), 0);
+
+      const totalBilled = totalCollected + totalOutstanding;
+      let percent = 100;
+      if (totalBilled > 0) {
+        percent = Math.round((totalCollected / totalBilled) * 100);
+      }
+
+      const collectionVal = document.getElementById('statCollectionVal');
+      const collectionBar = document.getElementById('statCollectionBar');
+
+      if (collectionVal) {
+        collectionVal.textContent = percent + '%';
+      }
+      if (collectionBar) {
+        collectionBar.style.width = percent + '%';
+      }
+    };
+
+    const updateFundsAndExpenses = () => {
+      const incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+      const expenses = JSON.parse(localStorage.getItem('society_expenses')) || [];
+
+      const totalIncomes = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+      const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+      const totalFunds = totalIncomes - totalExpenses;
+
+      const fundsVal = document.getElementById('statFundsVal');
+      const expensesVal = document.getElementById('statExpensesVal');
+
+      if (fundsVal) {
+        fundsVal.textContent = '₹' + totalFunds.toLocaleString();
+      }
+      if (expensesVal) {
+        expensesVal.textContent = '₹' + totalExpenses.toLocaleString();
+      }
+    };
+
     // 1. Always load from Local Storage immediately on load
     const loadLocalStorageStats = () => {
       const pending = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-      const myPending = pending.filter(i => String(i.flat) === String(currentUser.flat));
-      const totalDue = myPending.reduce((sum, i) => sum + Math.max(0, Number(i.total) - Number(i.paidAmount || 0)), 0);
+      const totalDue = calculateTotalDueForUser(pending);
       
       const maintValEl = document.getElementById('statMaintenanceVal');
       const maintCardEl = document.getElementById('statMaintenance');
@@ -2116,6 +2476,10 @@
       const notifications = JSON.parse(localStorage.getItem('society_notifications')) || [];
       renderNotificationsUI(notifications);
 
+      updatePendingApprovalsCount();
+      updateCollectionProgress();
+      updateFundsAndExpenses();
+
       updateQuickActionBlinkingIndicators();
     };
 
@@ -2128,8 +2492,7 @@
       // Listen to Pending Invoices
       fbListen('society_pending_invoices', (data) => {
         const pending = data || [];
-        const myPending = pending.filter(i => String(i.flat) === String(currentUser.flat));
-        const totalDue = myPending.reduce((sum, i) => sum + Math.max(0, Number(i.total) - Number(i.paidAmount || 0)), 0);
+        const totalDue = calculateTotalDueForUser(pending);
         
         const maintValEl = document.getElementById('statMaintenanceVal');
         const maintCardEl = document.getElementById('statMaintenance');
@@ -2183,12 +2546,35 @@
       fbListen('society_pending_visitor_approvals', (data) => {
         handleGateRequestsCheck(data || []);
       });
+
+      // Listen to Incomes
+      fbListen('society_incomes', (data) => {
+        localStorage.setItem('society_incomes', JSON.stringify(data || []));
+        updateFundsAndExpenses();
+        updateCollectionProgress();
+      });
+
+      // Listen to Expenses
+      fbListen('society_expenses', (data) => {
+        localStorage.setItem('society_expenses', JSON.stringify(data || []));
+        updateFundsAndExpenses();
+        updateCollectionProgress();
+      });
+
+      // Listen to Users
+      fbListen('society_users', (data) => {
+        localStorage.setItem('society_users', JSON.stringify(data || []));
+        updatePendingApprovalsCount();
+      });
     } else {
       // Local fallback checking
       setInterval(() => {
         const data = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
         handleGateRequestsCheck(data);
-      }, 2000);
+        updatePendingApprovalsCount();
+        updateCollectionProgress();
+        updateFundsAndExpenses();
+      }, 3000);
     }
   }
 

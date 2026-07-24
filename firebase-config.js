@@ -62,6 +62,7 @@ const DB_PATHS = {
   'society_salary_payments'            : '/salary_payments',
   'society_salary_employees'           : '/salary_employees',
   'society_accounting_entries'         : '/accounting/entries',
+  'society_admin_permissions'          : '/admin_permissions_config',
 };
 
 // ─── Core Helper: fbDB ──────────────────────────────────────────────────────
@@ -253,12 +254,14 @@ window.playBeepSound = function(type = 'default') {
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
       oscillator.stop(audioCtx.currentTime + 0.25);
     } else if (type === 'error') {
-      oscillator.type = 'triangle';
-      oscillator.frequency.setValueAtTime(250, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(450, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime); // high volume
       oscillator.start();
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-      oscillator.stop(audioCtx.currentTime + 0.3);
+      oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 1.5);
+      oscillator.frequency.linearRampToValueAtTime(450, audioCtx.currentTime + 3.0);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+      oscillator.stop(audioCtx.currentTime + 3.0);
     } else {
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
@@ -514,14 +517,14 @@ function checkAndShowSOS(sos) {
     });
   }
 
-  // Play periodic loud beep sound for 5 seconds
+  // Play periodic loud alarm sound (3 seconds duration, repeating every 5 seconds)
   if (!sosAlarmInterval) {
     if (typeof window.playBeepSound === 'function') {
       window.playBeepSound('error');
     }
     const startTime = Date.now();
     sosAlarmInterval = setInterval(() => {
-      if (Date.now() - startTime >= 5000) {
+      if (Date.now() - startTime >= 30000) { // Auto-stop repeating after 30 seconds
         clearInterval(sosAlarmInterval);
         sosAlarmInterval = null;
         return;
@@ -529,7 +532,7 @@ function checkAndShowSOS(sos) {
       if (typeof window.playBeepSound === 'function') {
         window.playBeepSound('error');
       }
-    }, 1200);
+    }, 5000);
   }
 }
 
@@ -556,3 +559,126 @@ if (typeof db !== 'undefined' && typeof db.ref === 'function') {
     } catch(e) {}
   }, 2000);
 }
+
+// ─── Shared Admin Permissions Getter ─────────────────────────────────────────
+window.getAdminPermission = function(permKey) {
+  try {
+    const config = JSON.parse(localStorage.getItem('society_admin_permissions')) || {
+      chat_admin: true,
+      vehicle_delete: true,
+      maint_rate_edit: true,
+      invoice_delete: true,
+      payment_history_clear: true,
+      meter_readings_edit_delete: true,
+      attendance_logs_delete_clear: true
+    };
+    return config[permKey] !== false;
+  } catch(e) {
+    return true;
+  }
+};
+
+// ─── Auto Image Compression Helper (Target 5KB) ──────────────────────────────
+window.compressImageToBase64 = function(fileOrBase64, targetSizeKb, callback) {
+  const processImage = (imgSrc) => {
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      
+      let maxDim = 250;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      let canvas = document.createElement('canvas');
+      let ctx = canvas.getContext('2d');
+      let quality = 0.6;
+      let resultBase64 = "";
+      let attempts = 0;
+
+      const attemptCompression = () => {
+        canvas.width = width;
+        canvas.height = height;
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        resultBase64 = canvas.toDataURL('image/jpeg', quality);
+        const sizeInKb = (resultBase64.length * 0.75) / 1024;
+
+        if (sizeInKb <= targetSizeKb || attempts >= 5 || width < 50 || height < 50) {
+          callback(resultBase64);
+        } else {
+          attempts++;
+          width = Math.round(width * 0.85);
+          height = Math.round(height * 0.85);
+          quality = Math.max(0.1, quality - 0.1);
+          attemptCompression();
+        }
+      };
+
+      attemptCompression();
+    };
+    img.onerror = () => {
+      callback(imgSrc);
+    };
+    img.src = imgSrc;
+  };
+
+  if (fileOrBase64 instanceof File) {
+    const reader = new FileReader();
+    reader.onload = (e) => processImage(e.target.result);
+    reader.onerror = () => callback("");
+    reader.readAsDataURL(fileOrBase64);
+  } else if (typeof fileOrBase64 === 'string') {
+    processImage(fileOrBase64);
+  } else {
+    callback("");
+  }
+};
+
+// ─── Auto Document Validator / Compresser (Target 10KB) ──────────────────────
+window.validateAndProcessDocument = function(file, targetSizeKb, callback) {
+  if (!file) {
+    callback(null, 'No file selected');
+    return;
+  }
+
+  const isImage = file.type.startsWith('image/');
+  const sizeInKb = file.size / 1024;
+
+  if (isImage) {
+    // Compress the image document to target size (10KB)
+    window.compressImageToBase64(file, targetSizeKb, (compressedBase64) => {
+      callback({
+        name: file.name,
+        type: file.type,
+        sizeStr: ((compressedBase64.length * 0.75) / 1024).toFixed(1) + ' KB',
+        data: compressedBase64
+      }, null);
+    });
+  } else {
+    // Check if non-image document size is within limit
+    if (sizeInKb <= targetSizeKb) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        callback({
+          name: file.name,
+          type: file.type,
+          sizeStr: sizeInKb.toFixed(1) + ' KB',
+          data: e.target.result
+        }, null);
+      };
+      reader.onerror = () => callback(null, 'Failed to read file');
+      reader.readAsDataURL(file);
+    } else {
+      callback(null, `Document size (${sizeInKb.toFixed(1)} KB) exceeds the ${targetSizeKb} KB limit. Please upload a smaller file.`);
+    }
+  }
+};

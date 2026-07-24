@@ -351,6 +351,52 @@
       <div class="auth-tab" onclick="switchDesk('admin')" id="tabAdmin" style="flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--forest-dark); position: relative; z-index: 2; transition: color 0.2s;">Invoice Center</div>
     </div>
 
+    <!-- SET MONTHLY MAINTENANCE FEE CARD (VISIBLE TO ALL, EDIT ONLY FOR ADMIN) -->
+    <div class="card" style="border: 1.5px solid var(--forest); box-shadow: 0 6px 20px rgba(31,77,61,0.06); margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--forest-dark);">Monthly Maintenance Rate</div>
+          <div style="font-size:12.5px; color:var(--forest); font-weight:700; margin-top:2px;" id="activeMaintRateBadge">Current Month Fee: ₹2,000 / mo</div>
+        </div>
+        <button onclick="toggleMaintRateForm()" id="btnToggleMaintRateForm" style="display:none; background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
+          ⚙️ Edit Rate
+        </button>
+      </div>
+
+      <!-- Default Hidden Collapsible Form -->
+      <div id="maintRateFormContainer" style="display:none; margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;">
+        <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
+          Admin sets monthly maintenance fee. Changing the fee for a month updates that month onwards; older/historical month fees remain static.
+        </p>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div class="form-label">Select Month</div>
+            <select class="form-input" id="setRateMonth" onchange="onRateMonthChange()">
+              <option value="July 2026">July 2026</option>
+              <option value="August 2026">August 2026</option>
+              <option value="September 2026">September 2026</option>
+              <option value="October 2026">October 2026</option>
+              <option value="November 2026">November 2026</option>
+              <option value="December 2026">December 2026</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <div class="form-label">Maintenance Fee (₹)</div>
+            <input type="number" class="form-input" id="setMaintFeeInput" placeholder="e.g. 2000" min="0">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveMonthlyMaintenanceFee()" style="height: 44px; font-size:13px; margin-bottom:10px;">
+          💾 Save Monthly Rate
+        </button>
+
+        <div id="maintRatesHistoryList" style="font-size:11.5px; color:var(--muted); background:var(--paper); padding:10px 12px; border-radius:10px; border:1px solid var(--line);">
+          <!-- Configured Rates List -->
+        </div>
+      </div>
+    </div>
+
     <!-- RESIDENT DESK VIEW -->
     <div id="residentDesk">
       <div class="card">
@@ -368,10 +414,18 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Payment History</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="card-title" style="margin-bottom:0;">Payment History</div>
+          <button id="btnClearPaymentHistory" onclick="clearAllPaymentLogs()" style="display:none; background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
+            🗑️ Clear Logs
+          </button>
+        </div>
         <div id="paymentHistory">
           <!-- Dyn. populated payments -->
         </div>
+        <button id="btnToggleHistoryLength" onclick="toggleHistoryLength()" style="display:none; width:100%; margin-top:12px; background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
+          Show More
+        </button>
       </div>
 
       <!-- MAINTENANCE ACCOUNT DETAILS CARD (AT THE BOTTOM) -->
@@ -438,55 +492,8 @@
     </div>
 
     <!-- ADMIN DESK CENTER -->
-    <!-- ADMIN DESK CENTER -->
     <div id="adminDesk" style="display:none;">
       
-      <!-- SET MONTHLY MAINTENANCE FEE CARD -->
-      <div class="card" style="border: 1.5px solid var(--forest); box-shadow: 0 6px 20px rgba(31,77,61,0.06); margin-bottom:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div>
-            <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--forest-dark);">Monthly Maintenance Rate</div>
-            <div style="font-size:12.5px; color:var(--forest); font-weight:700; margin-top:2px;" id="activeMaintRateBadge">Current Month Fee: ₹2,000 / mo</div>
-          </div>
-          <button onclick="toggleMaintRateForm()" id="btnToggleMaintRateForm" style="background:var(--paper); border:1px solid var(--line); color:var(--forest-dark); padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer; font-family:'Space Grotesk',sans-serif;">
-            ⚙️ Edit Rate
-          </button>
-        </div>
-
-        <!-- Default Hidden Collapsible Form -->
-        <div id="maintRateFormContainer" style="display:none; margin-top:14px; border-top:1px dashed var(--line); padding-top:14px;">
-          <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
-            Admin sets monthly maintenance fee. Changing the fee for a month updates that month onwards; older/historical month fees remain static.
-          </p>
-
-          <div class="form-group" style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-              <div class="form-label">Select Month</div>
-              <select class="form-input" id="setRateMonth" onchange="onRateMonthChange()">
-                <option value="July 2026">July 2026</option>
-                <option value="August 2026">August 2026</option>
-                <option value="September 2026">September 2026</option>
-                <option value="October 2026">October 2026</option>
-                <option value="November 2026">November 2026</option>
-                <option value="December 2026">December 2026</option>
-              </select>
-            </div>
-            <div style="flex: 1;">
-              <div class="form-label">Maintenance Fee (₹)</div>
-              <input type="number" class="form-input" id="setMaintFeeInput" placeholder="e.g. 2000" min="0">
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="saveMonthlyMaintenanceFee()" style="height: 44px; font-size:13px; margin-bottom:10px;">
-            💾 Save Monthly Rate
-          </button>
-
-          <div id="maintRatesHistoryList" style="font-size:11.5px; color:var(--muted); background:var(--paper); padding:10px 12px; border-radius:10px; border:1px solid var(--line);">
-            <!-- Configured Rates List -->
-          </div>
-        </div>
-      </div>
-
       <div class="card" style="border: 2px solid var(--forest); box-shadow: 0 10px 30px rgba(31,77,61,0.06);">
         <div class="card-title">Invoice Generator</div>
         
@@ -803,8 +810,23 @@
   // Hide/show Admin toggle container based on role & setup GST access
   function setupAdminToggle() {
     const toggleContainer = document.getElementById('adminToggleContainer');
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
     const gstInput = document.getElementById('invGst');
+    const editRateBtn = document.getElementById('btnToggleMaintRateForm');
+    const clearHistoryBtn = document.getElementById('btnClearPaymentHistory');
+
+    const canEditRate = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('maint_rate_edit') : true);
+    const canClearHist = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('payment_history_clear') : true);
+
+    if (editRateBtn) {
+      editRateBtn.style.display = canEditRate ? 'block' : 'none';
+    }
+    if (clearHistoryBtn) {
+      clearHistoryBtn.style.display = canClearHist ? 'block' : 'none';
+    }
 
     if (isAdmin) {
       toggleContainer.style.display = 'flex';
@@ -990,12 +1012,14 @@
     if (!listContainer) return;
     listContainer.innerHTML = '';
 
-    if (pendingInvoicesList.length === 0) {
+    const audited = getAuditedPendingList();
+
+    if (audited.length === 0) {
       listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:12px;">No pending invoices in system.</div>`;
       return;
     }
 
-    pendingInvoicesList.forEach(inv => {
+    audited.forEach(inv => {
       const row = document.createElement('div');
       row.className = 'history-item';
       row.style.fontSize = '12px';
@@ -1019,7 +1043,7 @@
           <div style="font-weight:700; color:var(--terracotta);">Due: ₹${dueAmt.toLocaleString()}</div>
           <div style="display:flex; gap:6px; align-items:center;">
             ${badgeHtml}
-            ${isAdmin ? `<button onclick="deleteInvoice('${inv.id}')" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>` : ''}
+            ${(isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('invoice_delete') : true)) ? `<button onclick="deleteInvoice('${inv.id}')" style="background:var(--terracotta); color:white; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; font-weight:600; font-family:sans-serif; line-height:1.2;">Delete</button>` : ''}
           </div>
         </div>
       `;
@@ -1028,6 +1052,36 @@
   }
 
   window.deleteInvoice = function(invId) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission === 'function' ? getAdminPermission('invoice_delete') : true);
+    if (!hasPerm) {
+      alert('Only administrators with deletion permission are allowed to delete invoices.');
+      return;
+    }
+
+    if (String(invId).startsWith('SYS-')) {
+      if (!confirm('Are you sure you want to waive/delete this pending monthly due balance? This month will no longer show as outstanding for this flat.')) return;
+      const parts = invId.split('-');
+      const month = parts[1] + ' ' + parts[2];
+      const flat = parts[3];
+
+      const waivedList = JSON.parse(localStorage.getItem('society_waived_dues')) || [];
+      waivedList.push({ flat: flat, month: month });
+      localStorage.setItem('society_waived_dues', JSON.stringify(waivedList));
+
+      if (typeof fbSet === 'function') {
+        fbSet('society_waived_dues', waivedList).catch(e => console.warn(e));
+      }
+
+      alert('Pending monthly due waived successfully!');
+      renderPendingBillsUI();
+      renderAdminInvoicesLog();
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this invoice?')) return;
     pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== invId);
     
@@ -1052,6 +1106,7 @@
 
   // Load Payments History & Outstanding Bills
   let payments = [];
+  let showAllHistory = false;
   let selectedBankName = "";
   let activePayingInvoiceId = null;
   let isListeningPending = false;
@@ -1315,16 +1370,89 @@
     return String(flatStr).replace(/[^0-9]/g, '');
   }
 
+  function getAuditedPendingList() {
+    let auditedList = JSON.parse(JSON.stringify(pendingInvoicesList));
+
+    const activeMonths = Object.keys(societyMaintRates || {}).filter(k => k !== 'default');
+    if (activeMonths.length === 0) activeMonths.push('July 2026');
+
+    // Get active approved residents
+    const localUsers = JSON.parse(localStorage.getItem('society_users')) || [];
+    const activeResidents = localUsers.filter(u => u.status === 'Approved' && u.flat);
+
+    activeResidents.forEach(r => {
+      activeMonths.forEach(m => {
+        // Skip if waived by admin
+        const waivedList = JSON.parse(localStorage.getItem('society_waived_dues')) || [];
+        const isWaived = waivedList.some(w => normalizeFlat(w.flat) === normalizeFlat(r.flat) && w.month === m);
+        if (isWaived) return;
+
+        const targetRate = getRateForMonth(m);
+        
+        // Calculate total paid so far for this flat and month from payments & incomes
+        const userPayments = JSON.parse(localStorage.getItem('payments_' + r.email)) || [];
+        const fromPayments = userPayments
+          .filter(p => p.month === m)
+          .reduce((sum, p) => sum + (parseFloat(String(p.amount).replace(/[^0-9.]/g, '')) || 0), 0);
+
+        const incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
+        const fromIncomes = incomes
+          .filter(inc => normalizeFlat(inc.flat) === normalizeFlat(r.flat) && (inc.month === m || (inc.note && inc.note.includes(m))))
+          .reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+
+        const totalPaid = Math.max(fromPayments, fromIncomes);
+
+        // Find if there is already a pending invoice for this flat & month
+        const existingIdx = auditedList.findIndex(i => normalizeFlat(i.flat) === normalizeFlat(r.flat) && i.month === m);
+
+        if (existingIdx !== -1) {
+          const inv = auditedList[existingIdx];
+          inv.paidAmount = Math.max(inv.paidAmount || 0, totalPaid);
+          if (Number(inv.total) < targetRate) {
+            inv.total = targetRate;
+          }
+        } else {
+          if (totalPaid < targetRate) {
+            const synthInvoice = {
+              id: 'SYS-' + m.replace(/\s/g, '-') + '-' + normalizeFlat(r.flat),
+              flat: r.flat,
+              month: m,
+              maint: targetRate,
+              water: 0,
+              electric: 0,
+              parking: 0,
+              penalty: 0,
+              prevDue: 0,
+              gst: 0,
+              total: targetRate,
+              paidAmount: totalPaid,
+              date: '01 ' + m.split(' ')[0] + ' 2026',
+              status: totalPaid > 0 ? 'Partial' : 'Pending'
+            };
+            auditedList.push(synthInvoice);
+          }
+        }
+      });
+    });
+
+    return auditedList;
+  }
+
   function renderPendingBillsUI() {
     const container = document.getElementById('pendingBillsList');
     container.innerHTML = '';
 
     const userFlatNorm = normalizeFlat(currentUser ? currentUser.flat : '');
     
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+
+    const auditedList = getAuditedPendingList();
 
     // Match invoices strictly for current user flat (or all if admin)
-    let myPending = pendingInvoicesList.filter(i => {
+    let myPending = auditedList.filter(i => {
       if (isAdmin) return true;
       if (!currentUser || !currentUser.flat) return true;
       const invFlatNorm = normalizeFlat(i.flat);
@@ -1372,7 +1500,8 @@
     activePending.forEach(inv => {
       const card = document.createElement('div');
       card.className = 'pending-bill-item';
-      card.style = 'border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--paper); margin-bottom:12px;';
+      card.style = 'border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--paper); margin-bottom:12px; cursor:pointer;';
+      card.onclick = function() { toggleInvoiceAccordion(inv.id); };
       
       const totalAmt = Number(inv.total) || 0;
       const paidAmt = Number(inv.paidAmount) || 0;
@@ -1384,10 +1513,10 @@
         : `<span style="font-size:10px; background:#FEE2E2; color:#991B1B; padding:3px 8px; border-radius:6px; font-weight:700;">UNPAID</span>`;
 
       card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0;">
           <div>
             <div style="font-weight:600; font-size:14px; color:var(--forest-dark);">${inv.month} Maintenance</div>
-            <div style="font-size:10px; color:var(--muted); margin-top:2px;">${inv.id} &bull; Flat ${inv.flat} &bull; ${inv.date}</div>
+            <div style="font-size:10px; color:var(--muted); margin-top:2px;">Bill Date: ${inv.date}</div>
             <div style="margin-top:6px;">${statusBadge}</div>
           </div>
           <div style="text-align:right;">
@@ -1398,7 +1527,7 @@
         </div>
         
         <!-- Accordion details breakdown -->
-        <div id="breakdown-${inv.id}" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px dashed var(--line); padding:10px 0; margin-bottom:10px;">
+        <div id="breakdown-${inv.id}" style="display:none; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); border-top:1px dashed var(--line); padding:10px 0; margin-top:12px;">
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Maintenance Fee:</span><span>₹${inv.maint}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Water Charges:</span><span>₹${inv.water}</span></div>
           <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>Electricity Fee:</span><span>₹${inv.electric}</span></div>
@@ -1410,8 +1539,6 @@
           <div style="display:flex; justify-content:space-between; padding:2px 0; color:var(--forest);"><span>Already Paid:</span><span>₹${paidAmt.toLocaleString()}</span></div>
           <div style="display:flex; justify-content:space-between; padding:2px 0; color:var(--terracotta); font-weight:700;"><span>Balance Due:</span><span>₹${dueAmt.toLocaleString()}</span></div>
         </div>
-
-        <button class="btn btn-primary" onclick="payPendingBillClick('${inv.id}')" style="width:100%; padding:12px; height:auto; font-size:13px; font-weight:700;">Pay Bill (₹${dueAmt.toLocaleString()})</button>
       `;
       container.appendChild(card);
     });
@@ -1428,7 +1555,8 @@
 
   // Resident Pay Click
   function payPendingBillClick(id) {
-    const inv = pendingInvoicesList.find(i => i.id === id);
+    const audited = getAuditedPendingList();
+    const inv = audited.find(i => i.id === id);
     if (!inv) return;
 
     activePayingInvoiceId = id;
@@ -1531,22 +1659,41 @@
 
   function renderHistoryUI() {
     const paymentHistory = document.getElementById('paymentHistory');
+    const toggleBtn = document.getElementById('btnToggleHistoryLength');
+    if (!paymentHistory) return;
+
     paymentHistory.innerHTML = '';
     
-    const isAdmin = currentUser && ((currentUser.role === 'Super Admin' || currentUser.role === 'Committee Member'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
 
     if (!payments || payments.length === 0) {
       paymentHistory.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">No payment history recorded yet.</div>';
+      if (toggleBtn) toggleBtn.style.display = 'none';
       return;
     }
     
-    payments.forEach((p, idx) => {
+    // Toggle button display and limit slicing
+    const hasMoreThan5 = payments.length > 5;
+    if (toggleBtn) {
+      toggleBtn.style.display = hasMoreThan5 ? 'block' : 'none';
+      toggleBtn.textContent = showAllHistory ? 'Show Less' : `Show More (+${payments.length - 5})`;
+    }
+
+    const visiblePayments = (hasMoreThan5 && !showAllHistory) ? payments.slice(0, 5) : payments;
+
+    visiblePayments.forEach((p, idx) => {
       const histItem = document.createElement('div');
       histItem.className = 'history-item';
       histItem.style.cursor = 'pointer';
       
+      // Match correct index for showReceiptFromHistory
+      const originalIdx = payments.findIndex(orig => orig.txId === p.txId);
+
       histItem.innerHTML = `
-        <div onclick="showReceiptFromHistory(payments[${idx}])" style="flex:1;">
+        <div onclick="showReceiptFromHistory(payments[${originalIdx !== -1 ? originalIdx : 0}])" style="flex:1;">
           <div class="history-date">${p.month}</div>
           <div class="status-paid">Paid</div>
         </div>
@@ -1562,6 +1709,35 @@
     });
   }
 
+  window.toggleHistoryLength = function() {
+    showAllHistory = !showAllHistory;
+    renderHistoryUI();
+  };
+
+  window.clearAllPaymentLogs = function() {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
+      alert('Only administrators are allowed to clear payment history.');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to clear ALL payment history logs? This action cannot be undone.')) return;
+
+    payments = [];
+    localStorage.setItem('payments_' + currentUser.email, JSON.stringify(payments));
+
+    if (typeof logActivity === 'function') {
+      logActivity('All Payment History Logs', 'Cleared');
+    }
+
+    renderHistoryUI();
+    renderPendingBillsUI();
+    alert('All payment history logs cleared successfully.');
+  };
+
   window.deletePaymentHistory = function(txId) {
     if (!confirm('Are you sure you want to delete this payment history record?')) return;
     
@@ -1574,6 +1750,7 @@
     }
 
     renderHistoryUI();
+    renderPendingBillsUI();
     alert('Payment history entry deleted successfully.');
   };
 
@@ -1680,16 +1857,43 @@
       const invIndex = pendingInvoicesList.findIndex(i => i.id === activePayingInvoiceId);
       let isFullyPaid = false;
       let newRemaining = 0;
+      let inv;
 
       if (invIndex !== -1) {
-        const inv = pendingInvoicesList[invIndex];
+        inv = pendingInvoicesList[invIndex];
+      } else {
+        // It's a synthesized invoice that they just paid (fully or partially)
+        const audited = getAuditedPendingList();
+        const synth = audited.find(i => i.id === activePayingInvoiceId);
+        if (synth) {
+          inv = {
+            id: 'INV-' + Date.now().toString().slice(-6),
+            flat: synth.flat,
+            month: synth.month,
+            maint: synth.maint,
+            water: 0,
+            electric: 0,
+            parking: 0,
+            penalty: 0,
+            prevDue: 0,
+            gst: 0,
+            total: synth.total,
+            paidAmount: synth.paidAmount,
+            date: synth.date,
+            status: 'Pending'
+          };
+          pendingInvoicesList.unshift(inv);
+        }
+      }
+
+      if (inv) {
         inv.paidAmount = (Number(inv.paidAmount) || 0) + payAmt;
         newRemaining = Math.max(0, Number(inv.total) - inv.paidAmount);
         
         if (newRemaining <= 0) {
           isFullyPaid = true;
           inv.status = 'Paid';
-          pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== activePayingInvoiceId);
+          pendingInvoicesList = pendingInvoicesList.filter(i => i.id !== inv.id && i.id !== activePayingInvoiceId);
         } else {
           inv.status = 'Partial';
         }
@@ -1709,6 +1913,7 @@
         flat: currentUser.flat,
         mode: checkoutDetails.method,
         date: todayDate,
+        month: checkoutDetails.month,
         note: `Maintenance fee paid (${isFullyPaid ? 'Full' : 'Partial ₹' + payAmt.toLocaleString()}) for ${checkoutDetails.month}`
       };
 

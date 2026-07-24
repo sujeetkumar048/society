@@ -384,13 +384,6 @@
         isListeningComplaints = true;
         fbListen('society_complaints', (data) => {
           complaints = data || [];
-          if (complaints.length === 0) {
-            complaints = [
-              { id: "CMP-2026-042", title: "Lift not working", desc: "Lift in Tower A is not responding...", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress", priority: "High" },
-              { id: "CMP-2026-021", title: "Water leakage", desc: "Water leakage in corridor ceiling...", location: "Tower B", time: "15 Jul 2026 · 02:30 PM", status: "Resolved", priority: "Medium" }
-            ];
-            fbSet('society_complaints', complaints);
-          }
           localStorage.setItem('society_complaints', JSON.stringify(complaints));
           renderRecentComplaints();
         });
@@ -407,10 +400,8 @@
 
     const list = [...complaints];
     if (list.length === 0) {
-      list.push(
-        { title: "Lift not working", desc: "Lift in Tower A is not responding...", location: "Tower A", time: "18 Jul 2026 · 10:00 AM", status: "In Progress" },
-        { title: "Water leakage", desc: "Water leakage in corridor ceiling...", location: "Tower B", time: "15 Jul 2026 · 02:30 PM", status: "Resolved" }
-      );
+      complaintsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No complaints recorded yet.</div>';
+      return;
     }
 
     list.forEach(c => {
