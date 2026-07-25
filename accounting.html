@@ -613,10 +613,21 @@
   // Double databases lists
   let incomes = [];
   let expenses = [];
+  let pendingInvoicesList = [];
   let isListeningIncomes = false;
   let isListeningExpenses = false;
+  let isListeningPendingInvoices = false;
 
   window.deleteIncome = function(idx) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('accounting_delete'));
+    if (!hasPerm) {
+      alert('You do not have permission to delete income entries.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this income entry?')) return;
     incomes.splice(idx, 1);
     if (typeof fbSet === 'function') {
@@ -639,6 +650,15 @@
   };
 
   window.deleteExpense = function(idx) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('accounting_delete'));
+    if (!hasPerm) {
+      alert('You do not have permission to delete expense entries.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this expense entry?')) return;
     expenses.splice(idx, 1);
     if (typeof fbSet === 'function') {
@@ -679,10 +699,19 @@
           calculateSummaries();
         });
       }
+
+      if (!isListeningPendingInvoices) {
+        isListeningPendingInvoices = true;
+        fbListen('society_pending_invoices', (data) => {
+          pendingInvoicesList = data || [];
+          localStorage.setItem('society_pending_invoices', JSON.stringify(pendingInvoicesList));
+        });
+      }
     } else {
       // LocalStorage offline fallback
       incomes = JSON.parse(localStorage.getItem('society_incomes')) || [];
       expenses = JSON.parse(localStorage.getItem('society_expenses')) || [];
+      pendingInvoicesList = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
       renderLogs();
       calculateSummaries();
     }
@@ -950,10 +979,10 @@
         let totalCr = 0;
 
         incomes.forEach(i => {
-          totalCr += i.amount;
+          totalCr += Number(i.amount || 0);
         });
         expenses.forEach(e => {
-          totalDr += e.amount;
+          totalDr += Number(e.amount || 0);
         });
 
         body.innerHTML = `
@@ -962,14 +991,14 @@
               <tr><th>Account head description</th><th>Debit Bal (Dr)</th><th>Credit Bal (Cr)</th></tr>
             </thead>
             <tbody>
-              <tr><td>Maintenance Fee Collection</td><td>-</td><td>₹${incomes.filter(i => i.head==='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Rentals & Clubhouse income</td><td>-</td><td>₹${incomes.filter(i => i.head==='Rent').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Fines & Penalties</td><td>-</td><td>₹${incomes.filter(i => i.head==='Fine').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Interest on FD Accounts</td><td>-</td><td>₹${incomes.filter(i => i.head==='Interest').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Staff Salary expense</td><td>₹${expenses.filter(e => e.head==='Salary').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
-              <tr><td>Electricity common board</td><td>₹${expenses.filter(e => e.head==='Electricity').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
-              <tr><td>Water supply tankers expense</td><td>₹${expenses.filter(e => e.head==='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
-              <tr><td>Repairs & Upkeep</td><td>₹${expenses.filter(e => e.head==='Repairs').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Maintenance Fee Collection</td><td>-</td><td>₹${incomes.filter(i => i.head==='Maintenance').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Rentals & Clubhouse income</td><td>-</td><td>₹${incomes.filter(i => i.head==='Rent').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Fines & Penalties</td><td>-</td><td>₹${incomes.filter(i => i.head==='Fine').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Interest on FD Accounts</td><td>-</td><td>₹${incomes.filter(i => i.head==='Interest').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Staff Salary expense</td><td>₹${expenses.filter(e => e.head==='Salary').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Electricity common board</td><td>₹${expenses.filter(e => e.head==='Electricity').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Water supply tankers expense</td><td>₹${expenses.filter(e => e.head==='Water').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td><td>-</td></tr>
+              <tr><td>Repairs & Upkeep</td><td>₹${expenses.filter(e => e.head==='Repairs').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td><td>-</td></tr>
               <tr class="total-row"><td>Sum totals</td><td>₹${totalDr.toLocaleString()}</td><td>₹${totalCr.toLocaleString()}</td></tr>
             </tbody>
           </table>
@@ -985,14 +1014,14 @@
               <tr><th>Revenue streams</th><th>Amount (₹)</th></tr>
             </thead>
             <tbody>
-              <tr><td>Gross Maintenance Income</td><td>₹${incomes.filter(i=>i.head==='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Non-Maintenance Ancillary Income (Parking, fine, rent)</td><td>₹${incomes.filter(i=>i.head!=='Maintenance').reduce((sum,i)=>sum+i.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Gross Maintenance Income</td><td>₹${incomes.filter(i=>i.head==='Maintenance').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Non-Maintenance Ancillary Income (Parking, fine, rent)</td><td>₹${incomes.filter(i=>i.head!=='Maintenance').reduce((sum,i)=>sum+Number(i.amount || 0),0).toLocaleString()}</td></tr>
               <tr style="font-weight:600;"><td>Total Gross Income (A)</td><td>₹${totalInc.toLocaleString()}</td></tr>
               
               <tr><td style="padding-top:12px;"><b>Operating Expenses</b></td><td></td></tr>
-              <tr><td>Staff salaries & wages</td><td>₹${expenses.filter(e=>e.head==='Salary').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
-              <tr><td>Electricity & Water utilities</td><td>₹${expenses.filter(e=>e.head==='Electricity' || e.head==='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
-              <tr><td>General Repairs, gardening & housekeeping</td><td>₹${expenses.filter(e=>e.head!=='Salary'&&e.head!=='Electricity'&&e.head!=='Water').reduce((sum,e)=>sum+e.amount,0).toLocaleString()}</td></tr>
+              <tr><td>Staff salaries & wages</td><td>₹${expenses.filter(e=>e.head==='Salary').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>Electricity & Water utilities</td><td>₹${expenses.filter(e=>e.head==='Electricity' || e.head==='Water').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td></tr>
+              <tr><td>General Repairs, gardening & housekeeping</td><td>₹${expenses.filter(e=>e.head!=='Salary'&&e.head!=='Electricity'&&e.head!=='Water').reduce((sum,e)=>sum+Number(e.amount || 0),0).toLocaleString()}</td></tr>
               <tr style="font-weight:600;"><td>Total Operating Expenses (B)</td><td>₹${totalExp.toLocaleString()}</td></tr>
               
               <tr class="total-row"><td>Net Operating Profit (A - B)</td><td style="color:${netProfit >= 0 ? 'var(--forest)' : 'var(--terracotta)'}">₹${netProfit.toLocaleString()}</td></tr>
@@ -1003,23 +1032,20 @@
 
       case 'outstanding':
         title.textContent = 'Outstanding Maintenance Receivables';
-        // Read outstanding bills from society_pending_invoices database
-        const pendingInvoices = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-        
         let outstandingRows = '';
         let totalOutstanding = 0;
 
-        if (pendingInvoices.length === 0) {
+        if (pendingInvoicesList.length === 0) {
           outstandingRows = `<tr><td colspan="4" style="text-align:center; color:var(--muted);">All dues collected. No outstanding payments! 🎉</td></tr>`;
         } else {
-          pendingInvoices.forEach(inv => {
-            totalOutstanding += inv.total;
+          pendingInvoicesList.forEach(inv => {
+            totalOutstanding += Number(inv.total || 0);
             outstandingRows += `
               <tr>
                 <td>Flat ${inv.flat}</td>
                 <td>${inv.month}</td>
                 <td>${inv.id}</td>
-                <td style="font-weight:600; color:var(--terracotta);">₹${inv.total.toLocaleString()}</td>
+                <td style="font-weight:600; color:var(--terracotta);">₹${Number(inv.total || 0).toLocaleString()}</td>
               </tr>
             `;
           });
@@ -1044,8 +1070,7 @@
       case 'collection':
         title.textContent = 'Collection Status Analysis';
         // Shows summary details of paid vs unpaid units
-        const pendingInv = JSON.parse(localStorage.getItem('society_pending_invoices')) || [];
-        const unpaidCount = pendingInv.length;
+        const unpaidCount = pendingInvoicesList.length;
         const paidCount = incomes.filter(i => i.head === 'Maintenance').length;
         const collectionRate = (paidCount + unpaidCount) > 0 ? Math.round((paidCount / (paidCount + unpaidCount)) * 100) : 100;
 

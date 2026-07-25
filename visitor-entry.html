@@ -1129,48 +1129,91 @@
     }
   };
 
-  function residentApproveFromPanel(visId) {
+  window.residentApproveFromPanel = function(visId) {
     const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
     const idx = approvals.findIndex(p => p.id === visId);
     if (idx === -1) return;
 
     approvals[idx].status = 'Approved';
-    localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
-
+    
     // Log as visitor inside
     const p = approvals[idx];
+    const formattedTime = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
     const newV = {
       name: p.visitorName,
-      details: `${p.purpose} · Flat ${p.flatNo} · Entered ${p.timestamp}`,
+      details: `${p.visitorType || 'Guest'} · Flat ${p.flatNo} · Purpose: ${p.purpose} · Entered ${formattedTime}`,
       status: 'Inside',
-      type: 'Guest',
-      photo: p.photo,
-      exitTime: ''
+      type: p.visitorType || 'Guest',
+      photo: p.photo || defaultPhotoSVG,
+      exitTime: '',
+      flatNo: p.flatNo,
+      purpose: p.purpose,
+      entryTime: formattedTime,
+      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      timestamp: Date.now(),
+      visitorPhone: p.visitorPhone || '',
+      visitorType: p.visitorType || 'Guest'
     };
+
     visitors.unshift(newV);
-    localStorage.setItem('society_visitors', JSON.stringify(visitors));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_visitor_approvals', approvals).then(() => {
+        fbSet('society_visitors', visitors);
+      });
+    } else {
+      localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+      localStorage.setItem('society_visitors', JSON.stringify(visitors));
+    }
 
     renderPendingApprovals();
     renderVisitors();
     alert(`✅ Entry Approved!\n\n${p.visitorName} has been allowed entry to Flat ${p.flatNo}.\nGate opened and visitor logged.`);
-  }
+  };
 
-  function residentRejectFromPanel(visId) {
+  window.residentRejectFromPanel = function(visId) {
     const approvals = JSON.parse(localStorage.getItem('society_pending_visitor_approvals')) || [];
     const idx = approvals.findIndex(p => p.id === visId);
     if (idx === -1) return;
 
     const p = approvals[idx];
     approvals[idx].status = 'Rejected';
-    localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_pending_visitor_approvals', approvals);
+    } else {
+      localStorage.setItem('society_pending_visitor_approvals', JSON.stringify(approvals));
+    }
 
     renderPendingApprovals();
     alert(`❌ Entry Rejected!\n\n${p.visitorName}'s entry request has been denied.\nGate guard has been notified.`);
+  };
+
+  function getVisitorTimestamp(v, index) {
+    if (v.timestamp) return v.timestamp;
+    if (v.details) {
+      const match = v.details.match(/Entered\s+([0-9a-zA-Z\s·:]+)/i);
+      if (match && match[1]) {
+        const dateStr = match[1].replace(/·/g, '').trim();
+        const parsed = Date.parse(dateStr);
+        if (!isNaN(parsed)) return parsed;
+      }
+    }
+    return Date.now() - (index * 60000);
   }
 
   function renderVisitors() {
     const listContainer = document.getElementById('visitorsList');
     listContainer.innerHTML = '';
+
+    visitors.forEach((v, idx) => {
+      if (!v.timestamp) {
+        v.timestamp = getVisitorTimestamp(v, idx);
+      }
+    });
+
+    visitors.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
     const list = [...visitors];
     if (list.length === 0) {
@@ -1540,13 +1583,21 @@
       const now = new Date();
       const formattedTime = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
+      const phoneInput = document.getElementById('visPhone').value.trim();
       const newVisObj = {
         name: name,
         details: `${selectedVisTypeVal} · Flat ${flatInput} · Purpose: ${purpose} · Entered ${formattedTime}`,
         status: "Inside",
         type: selectedVisTypeVal,
         photo: capturedPhotoSvg || defaultPhotoSVG,
-        exitTime: ""
+        exitTime: "",
+        flatNo: flatInput,
+        purpose: purpose,
+        entryTime: formattedTime,
+        date: now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+        timestamp: now.getTime(),
+        visitorPhone: phoneInput,
+        visitorType: selectedVisTypeVal
       };
 
       visitors.unshift(newVisObj);

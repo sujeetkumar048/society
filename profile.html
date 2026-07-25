@@ -578,6 +578,30 @@
   .fp-back-link span{color:var(--forest);font-weight:600;}
   .fp-success-icon{width:72px;height:72px;background:#E4EEE8;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
   .fp-success-icon svg{width:36px;height:36px;stroke:var(--forest);}
+  .ud-tab-btn {
+    border: none;
+    background: none;
+    padding: 6px 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  .ud-tab-btn.active {
+    background: rgba(31, 77, 61, 0.08);
+    color: var(--forest);
+  }
+  .ud-list-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--ink);
+  }
 </style>
   <!-- ═══ Firebase SDK (Compat) ═══ -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -932,15 +956,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
-      <div class="menu-item" id="adminAccessMenuItem" onclick="openModal('adminAccessModal')" style="display:none;">
-        <div class="menu-icon terracotta">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div class="menu-text">Admin Access Control</div>
-        <div class="menu-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      </div>
       <div class="menu-item" onclick="openActivityLogsModalProfile()">
         <div class="menu-icon sky">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -950,11 +965,47 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
+      <div class="menu-item" id="adminAccessMenuItem" onclick="openModal('adminAccessModal')" style="display:none;">
+        <div class="menu-icon terracotta">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="menu-text">Admin Control</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" id="allUsersMenuItem" onclick="openAllUsersModal()" style="display:none;">
+        <div class="menu-icon forest">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="menu-text">Users Views</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
       <div class="menu-item" onclick="openModal('helpModal')">
         <div class="menu-icon terracotta">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="menu-text">Help & Support</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" id="adminStorageMenuItem" onclick="openStorageViewModal()" style="display:none;">
+        <div class="menu-icon sky">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <div class="menu-text">Storage View</div>
+        <div class="menu-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="menu-item" id="adminUsageMenuItem" onclick="openUsageViewModal()" style="display:none;">
+        <div class="menu-icon marigold">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="menu-text">Usage View</div>
         <div class="menu-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -1211,6 +1262,22 @@
         <div class="toggle-label">Delete/Clear Shift Attendance Logs</div>
         <div class="toggle-input active" id="togglePermAttendanceLogsDeleteClear" onclick="this.classList.toggle('active')"></div>
       </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Edit/Delete/Update Complaints</div>
+        <div class="toggle-input active" id="togglePermComplaintsEditDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Edit/Delete Announcements & Notices</div>
+        <div class="toggle-input active" id="togglePermNoticesEditDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Delete Accounting & Ledger Entries</div>
+        <div class="toggle-input active" id="togglePermAccountingDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="toggle-switch">
+        <div class="toggle-label">Upload/Delete Society Documents</div>
+        <div class="toggle-input active" id="togglePermDocumentsEditDelete" onclick="this.classList.toggle('active')"></div>
+      </div>
       <button class="modal-btn modal-btn-primary" onclick="saveAdminPermissions()" style="margin-top: 16px;">Save Permissions</button>
     </div>
   </div>
@@ -1239,6 +1306,246 @@
       </div>
 
       <button class="modal-btn modal-btn-primary" onclick="closeModal('activityLogsProfileModal')" style="margin-top: 12px;">Close</button>
+    </div>
+  </div>
+
+  <!-- ADMIN DATABASE STORAGE ANALYZER MODAL -->
+  <div class="modal-overlay" id="adminStorageModal">
+    <div class="modal" style="max-width: 500px; padding: 20px;">
+      <div class="modal-header" style="border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:14px;">
+        <div class="modal-title" style="font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700;">📦 Firebase Storage Analysis</div>
+        <div class="modal-close" onclick="closeModal('adminStorageModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      
+      <!-- Summary Card -->
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px; text-align:left; margin-bottom:16px; display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12.5px; color:var(--muted); font-weight:600;">Used Space:</span>
+          <span id="storageUsedText" style="font-size:14px; font-weight:700; color:var(--terracotta);">Calculating...</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12.5px; color:var(--muted); font-weight:600;">Available Free Space:</span>
+          <span id="storageFreeText" style="font-size:14px; font-weight:700; color:var(--forest);">Calculating...</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed var(--line); padding-top:10px;">
+          <span style="font-size:12.5px; color:var(--muted); font-weight:600;">Total Limit (Firebase Free):</span>
+          <span style="font-size:14px; font-weight:700; color:var(--forest-dark);">1.00 GB (1,024 MB)</span>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div style="width:100%; height:8px; background:rgba(31,77,61,0.06); border-radius:4px; overflow:hidden; margin-top:4px;">
+          <div id="storageProgressBar" style="width:0%; height:100%; background:var(--forest); transition: width 0.5s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Categories breakdown -->
+      <div style="text-align:left; margin-bottom:12px;">
+        <div style="font-size:12.5px; font-weight:700; color:var(--muted); text-transform:uppercase; font-family:'Space Grotesk',sans-serif; margin-bottom:10px;">Category Breakdown</div>
+        <div id="storageCategoriesContainer" style="display:flex; flex-direction:column; gap:10px; max-height:240px; overflow-y:auto; padding-right:4px;">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:18px;">
+        <button onclick="calculateFirebaseStorageSize()" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--paper); color:var(--forest); border:1px solid var(--forest); flex:1; height:42px; display:flex; align-items:center; justify-content:center; gap:6px;">
+          🔄 Refresh Size
+        </button>
+        <button onclick="closeModal('adminStorageModal')" class="modal-btn modal-btn-primary" style="margin-top:0; flex:1; height:42px;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN DATABASE USAGE ANALYZER MODAL -->
+  <div class="modal-overlay" id="adminUsageModal">
+    <div class="modal" style="max-width: 540px; padding: 20px;">
+      <div class="modal-header" style="border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:14px;">
+        <div class="modal-title" style="font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700;">📊 App Usage & Activity Insights</div>
+        <div class="modal-close" onclick="closeModal('adminUsageModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <div style="display:flex; background:rgba(31,77,61,0.05); padding:4px; border-radius:12px; margin-bottom:16px;">
+        <button id="btnUsageTabRanking" onclick="switchUsageSubTab('ranking')" style="flex:1; padding:8px; border:none; border-radius:8px; background:var(--forest); color:white; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:all 0.3s ease;">🏆 Top Users</button>
+        <button id="btnUsageTabCalendar" onclick="switchUsageSubTab('calendar')" style="flex:1; padding:8px; border:none; border-radius:8px; background:transparent; color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:all 0.3s ease;">📅 Calendar Log</button>
+      </div>
+
+      <!-- Sub-Tab 1: Ranking -->
+      <div id="usageSubTabRanking" style="display:block; text-align:left;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">Flat-wise rank sorted by total platform actions and page views:</div>
+        <div id="usageRankingContainer" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto; padding-right:4px;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Sub-Tab 2: Calendar day-on-day -->
+      <div id="usageSubTabCalendar" style="display:none; text-align:left;">
+        <!-- Calendar Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span id="usageCalendarMonthYear" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--forest-dark);">July 2026</span>
+          <div style="display:flex; gap:6px;">
+            <button onclick="changeUsageCalendarMonth(-1)" style="border:1px solid var(--line); background:var(--paper); border-radius:6px; width:28px; height:28px; cursor:pointer; font-weight:700; display:flex; align-items:center; justify-content:center;">&lt;</button>
+            <button onclick="changeUsageCalendarMonth(1)" style="border:1px solid var(--line); background:var(--paper); border-radius:6px; width:28px; height:28px; cursor:pointer; font-weight:700; display:flex; align-items:center; justify-content:center;">&gt;</button>
+          </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; text-align:center; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:6px;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="usageCalendarGrid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; margin-bottom:14px;">
+          <!-- Days populated dynamically -->
+        </div>
+
+        <!-- Selected Date Header -->
+        <div style="border-top:1px dashed var(--line); padding-top:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--forest-dark);" id="usageSelectedDateLabel">Logs for Today</span>
+            <span id="usageSelectedDateCountBadge" style="font-size:10px; background:rgba(31,77,61,0.08); color:var(--forest); font-weight:700; padding:2px 8px; border-radius:6px;">0 actions</span>
+          </div>
+          <div id="usageCalendarDayListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; padding-right:4px;">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid var(--line); padding-top:14px;">
+        <button onclick="loadUsageLogsAndRender()" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--paper); color:var(--forest); border:1px solid var(--forest); flex:1; height:42px; display:flex; align-items:center; justify-content:center; gap:6px;">
+          🔄 Refresh Activity
+        </button>
+        <button onclick="closeModal('adminUsageModal')" class="modal-btn modal-btn-primary" style="margin-top:0; flex:1; height:42px;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL USERS DIRECTORY MODAL -->
+  <div class="modal-overlay" id="allUsersModal">
+    <div class="modal" style="max-width: 520px; padding: 20px;">
+      <div class="modal-header">
+        <div class="modal-title" style="font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700;">👥 Users Views</div>
+        <div class="modal-close" onclick="closeModal('allUsersModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <input type="text" id="allUsersSearch" class="form-input" placeholder="🔍 Search by name, flat, role, status..." oninput="filterDirectoryUsers()" style="font-family:'Space Grotesk',sans-serif; font-size:13px; height:42px; padding:0 12px; border-radius:12px; border:1px solid var(--line); width:100%;">
+      </div>
+      <div id="allUsersModalList" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+        <!-- Dynamically filled -->
+      </div>
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('allUsersModal')" style="margin-top: 14px;">Close</button>
+    </div>
+  </div>
+
+  <!-- USER DETAILS DEEP DIVE MODAL -->
+  <div class="modal-overlay" id="userDetailsModal">
+    <div class="modal" style="max-width: 540px; padding: 20px;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px;">
+        <div style="display:flex; align-items:center; gap:12px; width:100%; text-align:left;">
+          <div id="udAvatar" style="width:46px; height:46px; border-radius:50%; background:var(--forest); color:white; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div id="udName" style="font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:var(--forest-dark); line-height:1.2;"></div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+              <span id="udRoleBadge" style="font-size:10px; font-weight:700; background:rgba(31,77,61,0.08); color:var(--forest); padding:2px 8px; border-radius:6px; font-family:'Space Grotesk',sans-serif;"></span>
+              <span id="udStatusBadge" style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; font-family:'Space Grotesk',sans-serif;"></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-close" onclick="closeModal('userDetailsModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 14px; overflow-x: auto; width:100%;">
+        <button class="ud-tab-btn active" onclick="switchUdTab(this, 'udTabProfile')" style="flex-shrink:0;">Profile & Society</button>
+        <button class="ud-tab-btn" onclick="switchUdTab(this, 'udTabSecurity')" style="flex-shrink:0;">Access & Login</button>
+        <button class="ud-tab-btn" onclick="switchUdTab(this, 'udTabVehicles')" style="flex-shrink:0;">Vehicles</button>
+        <button class="ud-tab-btn" onclick="switchUdTab(this, 'udTabTimeline')" style="flex-shrink:0;">Complaints & Visitors</button>
+        <button class="ud-tab-btn" onclick="switchUdTab(this, 'udTabHistory')" style="flex-shrink:0;">Activity History</button>
+      </div>
+
+      <!-- TAB CONTENTS -->
+      <!-- Profile & Society -->
+      <div id="udTabProfile" class="ud-tab-content active" style="text-align: left; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Email Address</label><div id="udEmail" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Phone Number</label><div id="udPhone" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Society Tower</label><div id="udTower" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Flat Number</label><div id="udFlat" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Flat Config</label><div id="udFlatType" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+          <div><label style="font-size:10.5px; color:var(--muted); font-weight:600; display:block; margin-bottom:2px;">Pets Status</label><div id="udPets" style="font-size:13px; font-weight:700; color:var(--ink);"></div></div>
+        </div>
+      </div>
+
+      <!-- Access & Security -->
+      <div id="udTabSecurity" class="ud-tab-content" style="text-align: left; display:none; flex-direction:column; gap:14px;">
+        <!-- Permissions Toggles -->
+        <div id="udPermissionsContainer" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Custom Access Permissions</div>
+          <!-- Filled dynamically -->
+        </div>
+
+        <!-- Account Controls (Approve, Revoke, etc.) -->
+        <div style="border-top: 1px solid var(--line); padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Account Status Actions</div>
+          <div id="udAccountActions" style="display:flex; gap:8px; width:100%; margin-top:4px;">
+            <!-- Buttons dynamically generated -->
+          </div>
+        </div>
+
+        <!-- Reset Password -->
+        <div id="udResetPasswordSection" style="border-top: 1px solid var(--line); padding-top:12px;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Force Reset Password</div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <input type="password" id="udNewPassword" class="form-input" placeholder="Enter new password" style="height:40px; font-size:13px; border-radius:10px; border:1px solid var(--line); flex:1; padding:0 10px;">
+            <button onclick="resetUserPasswordAdmin()" class="modal-btn modal-btn-primary" style="margin-top:0; width:auto; padding:0 16px; height:40px; border-radius:10px;">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicles -->
+      <div id="udTabVehicles" class="ud-tab-content" style="text-align: left; display:none; flex-direction:column; gap:10px;">
+        <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Registered Vehicles</div>
+        <div id="udVehiclesList" style="display:flex; flex-direction:column; gap:8px; max-height: 240px; overflow-y:auto; padding-right:4px;">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+
+      <!-- Timeline (Visitor & Complaints) -->
+      <div id="udTabTimeline" class="ud-tab-content" style="text-align: left; display:none; flex-direction:column; gap:14px;">
+        <!-- Complaints -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Complaints History</div>
+          <div id="udComplaintsList" style="display:flex; flex-direction:column; gap:8px; max-height: 140px; overflow-y:auto; padding-right:4px;">
+            <!-- Filled dynamically -->
+          </div>
+        </div>
+        <!-- Visitors -->
+        <div style="border-top:1px solid var(--line); padding-top:12px;">
+          <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Flat Visitors History</div>
+          <div id="udVisitorsList" style="display:flex; flex-direction:column; gap:8px; max-height: 140px; overflow-y:auto; padding-right:4px;">
+            <!-- Filled dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Timeline Logs -->
+      <div id="udTabHistory" class="ud-tab-content" style="text-align: left; display:none; flex-direction:column; gap:10px;">
+        <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.4px;">Recent System Punches & Actions</div>
+        <div id="udActivityList" style="display:flex; flex-direction:column; gap:8px; max-height: 240px; overflow-y:auto; padding-right:4px;">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+
+      <button class="modal-btn modal-btn-primary" onclick="closeModal('userDetailsModal')" style="margin-top: 18px;">Close</button>
     </div>
   </div>
 
@@ -1678,7 +1985,7 @@
       localStorage.setItem('currentUser', JSON.stringify(matchedUser));
       showToast('Logged in successfully! Redirecting...', 'success');
       setTimeout(() => {
-        window.location.href = 'index.html';
+        window.location.href = 'welcome.html';
       }, 1000);
     } else {
       showToast('Invalid credentials. If you are new, register first.', 'error');
@@ -1908,8 +2215,10 @@
       document.getElementById('editFlatType').value = currentUser.flatType || '3 BHK';
       document.getElementById('editPets').value = currentUser.pets || '';
 
-      // Disable email/phone if NOT admin
-      const isUserAdmin = currentUser.role && (currentUser.role.includes('Super Admin') || currentUser.role.includes('Committee Member'));
+      const isUserAdmin = currentUser.role && (
+        currentUser.role.toLowerCase().includes('admin') || 
+        currentUser.role.toLowerCase().includes('committee')
+      );
       document.getElementById('editPhone').disabled = !isUserAdmin;
       document.getElementById('editEmail').disabled = !isUserAdmin;
 
@@ -1917,6 +2226,18 @@
       const adminMenu = document.getElementById('adminAccessMenuItem');
       if (adminMenu) {
         adminMenu.style.display = isUserAdmin ? 'flex' : 'none';
+      }
+      const allUsersMenu = document.getElementById('allUsersMenuItem');
+      if (allUsersMenu) {
+        allUsersMenu.style.display = 'flex';
+      }
+      const storageMenu = document.getElementById('adminStorageMenuItem');
+      if (storageMenu) {
+        storageMenu.style.display = isUserAdmin ? 'flex' : 'none';
+      }
+      const usageMenu = document.getElementById('adminUsageMenuItem');
+      if (usageMenu) {
+        usageMenu.style.display = isUserAdmin ? 'flex' : 'none';
       }
 
       if (isUserAdmin) {
@@ -1927,7 +2248,11 @@
           invoice_delete: true,
           payment_history_clear: true,
           meter_readings_edit_delete: true,
-          attendance_logs_delete_clear: true
+          attendance_logs_delete_clear: true,
+          complaints_edit_delete: true,
+          notices_edit_delete: true,
+          accounting_delete: true,
+          documents_edit_delete: true
         };
         try {
           const stored = localStorage.getItem('society_admin_permissions');
@@ -1941,6 +2266,10 @@
         setToggleState('togglePermPaymentHistoryClear', adminPerms.payment_history_clear !== false);
         setToggleState('togglePermMeterReadingsEditDelete', adminPerms.meter_readings_edit_delete !== false);
         setToggleState('togglePermAttendanceLogsDeleteClear', adminPerms.attendance_logs_delete_clear !== false);
+        setToggleState('togglePermComplaintsEditDelete', adminPerms.complaints_edit_delete !== false);
+        setToggleState('togglePermNoticesEditDelete', adminPerms.notices_edit_delete !== false);
+        setToggleState('togglePermAccountingDelete', adminPerms.accounting_delete !== false);
+        setToggleState('togglePermDocumentsEditDelete', adminPerms.documents_edit_delete !== false);
       }
 
       // Populate Privacy toggles
@@ -2167,7 +2496,11 @@
       invoice_delete: getToggleState('togglePermInvoiceDelete'),
       payment_history_clear: getToggleState('togglePermPaymentHistoryClear'),
       meter_readings_edit_delete: getToggleState('togglePermMeterReadingsEditDelete'),
-      attendance_logs_delete_clear: getToggleState('togglePermAttendanceLogsDeleteClear')
+      attendance_logs_delete_clear: getToggleState('togglePermAttendanceLogsDeleteClear'),
+      complaints_edit_delete: getToggleState('togglePermComplaintsEditDelete'),
+      notices_edit_delete: getToggleState('togglePermNoticesEditDelete'),
+      accounting_delete: getToggleState('togglePermAccountingDelete'),
+      documents_edit_delete: getToggleState('togglePermDocumentsEditDelete')
     };
 
     localStorage.setItem('society_admin_permissions', JSON.stringify(config));
@@ -2186,10 +2519,939 @@
     }
   };
 
+  // ─── Society Users Directory & Deep Dive details ───
+  let selectedUserIndexForEdit = -1;
+
+  window.openAllUsersModal = function() {
+    document.getElementById('allUsersSearch').value = '';
+    renderDirectoryUsersList();
+    openModal('allUsersModal');
+  };
+
+  window.renderDirectoryUsersList = function() {
+    const list = document.getElementById('allUsersModalList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const query = document.getElementById('allUsersSearch').value.toLowerCase().trim();
+
+    users.forEach((u, index) => {
+      if (!u) return;
+
+      const name = (u.name || '').toLowerCase();
+      const flat = (u.flat || '').toLowerCase();
+      const role = (u.role || '').toLowerCase();
+      const status = (u.status || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const phone = (u.phone || '').toLowerCase();
+
+      if (query) {
+        if (!name.includes(query) && !flat.includes(query) && !role.includes(query) && !status.includes(query) && !email.includes(query) && !phone.includes(query)) {
+          return;
+        }
+      }
+
+      const initials = (u.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      const row = document.createElement('div');
+      row.className = 'member-row';
+      row.style.background = 'var(--card)';
+      row.style.borderRadius = '12px';
+      row.style.padding = '12px';
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      row.style.gap = '10px';
+      row.style.border = '1px solid var(--line)';
+      row.style.cursor = 'pointer';
+      
+      let statusColor = 'var(--muted)';
+      let statusBg = 'rgba(107,122,112,0.08)';
+      if (u.status === 'Active') {
+        statusColor = 'var(--forest)';
+        statusBg = 'rgba(31,77,61,0.08)';
+      } else if (u.status === 'Pending') {
+        statusColor = 'var(--marigold)';
+        statusBg = 'var(--marigold-soft)';
+      } else if (u.status === 'Rejected' || u.status === 'Revoked') {
+        statusColor = 'var(--terracotta)';
+        statusBg = 'rgba(193,80,61,0.08)';
+      }
+
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; flex:1; text-align:left;">
+          <div style="background:var(--forest); width:36px; height:36px; font-size:12px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center; border-radius:50%; flex-shrink:0;">${initials}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:13px; color:var(--forest-dark);">${u.name}</div>
+            <div style="font-size:11px; color:var(--muted);">${u.role} · Tower ${u.tower || 'A'}, Flat ${u.flat || 'N/A'}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; background:${statusBg}; color:${statusColor};">${u.status || 'Pending'}</span>
+          <svg style="width:14px; height:14px; stroke:var(--muted); fill:none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      `;
+
+      row.onclick = () => {
+        closeModal('allUsersModal');
+        window.openUserDetailsModal(index);
+      };
+
+      list.appendChild(row);
+    });
+
+    if (list.innerHTML === '') {
+      list.innerHTML = `<div style="text-align:center; padding:20px; font-size:12.5px; color:var(--muted);">No users matched search criteria.</div>`;
+    }
+  };
+
+  window.filterDirectoryUsers = function() {
+    renderDirectoryUsersList();
+  };
+
+  window.switchUdTab = function(btn, tabId) {
+    const parent = btn.parentNode;
+    parent.querySelectorAll('.ud-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const modal = parent.parentNode;
+    modal.querySelectorAll('.ud-tab-content').forEach(c => c.style.display = 'none');
+    
+    const target = document.getElementById(tabId);
+    if (target) {
+      target.style.display = 'flex';
+    }
+  };
+
+  window.openUserDetailsModal = function(userIndex) {
+    selectedUserIndexForEdit = userIndex;
+    const u = users[userIndex];
+    if (!u) return;
+
+    const tabBtns = document.querySelectorAll('.ud-tab-btn');
+    tabBtns.forEach(b => b.classList.remove('active'));
+    tabBtns[0].classList.add('active');
+    
+    document.querySelectorAll('.ud-tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById('udTabProfile').style.display = 'flex';
+
+    const initials = (u.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    document.getElementById('udAvatar').textContent = initials;
+    document.getElementById('udName').textContent = u.name;
+    document.getElementById('udRoleBadge').textContent = u.role || 'Resident';
+
+    let statusColor = 'var(--muted)';
+    let statusBg = 'rgba(107,122,112,0.08)';
+    if (u.status === 'Active') {
+      statusColor = 'var(--forest)';
+      statusBg = 'rgba(31,77,61,0.08)';
+    } else if (u.status === 'Pending') {
+      statusColor = 'var(--marigold)';
+      statusBg = 'var(--marigold-soft)';
+    } else if (u.status === 'Rejected' || u.status === 'Revoked') {
+      statusColor = 'var(--terracotta)';
+      statusBg = 'rgba(193,80,61,0.08)';
+    }
+    const statusBadge = document.getElementById('udStatusBadge');
+    statusBadge.textContent = u.status || 'Pending';
+    statusBadge.style.color = statusColor;
+    statusBadge.style.background = statusBg;
+
+    document.getElementById('udEmail').textContent = u.email || 'N/A';
+    document.getElementById('udPhone').textContent = u.phone || 'N/A';
+    document.getElementById('udTower').textContent = u.tower || 'N/A';
+    document.getElementById('udFlat').textContent = u.flat || 'N/A';
+    document.getElementById('udFlatType').textContent = u.flatType || 'N/A';
+    document.getElementById('udPets').textContent = u.pets || 'None';
+
+    const permContainer = document.getElementById('udPermissionsContainer');
+    permContainer.innerHTML = '';
+    
+    const isLoggedInAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+
+    const isTargetAdmin = u.role && (u.role.includes('Super Admin') || u.role.includes('Committee Member'));
+    if (isTargetAdmin) {
+      let userPerms = {
+        chat_admin: true,
+        vehicle_delete: true,
+        maint_rate_edit: true,
+        invoice_delete: true,
+        payment_history_clear: true,
+        meter_readings_edit_delete: true,
+        attendance_logs_delete_clear: true,
+        complaints_edit_delete: true,
+        notices_edit_delete: true,
+        accounting_delete: true,
+        documents_edit_delete: true
+      };
+      
+      try {
+        const cleanEmailKey = u.email.replace(/\./g, '_');
+        const stored = localStorage.getItem('society_admin_permissions_' + cleanEmailKey);
+        if (stored) userPerms = JSON.parse(stored);
+        else {
+          const globalPerms = localStorage.getItem('society_admin_permissions');
+          if (globalPerms) userPerms = JSON.parse(globalPerms);
+        }
+      } catch (e) {}
+
+      const toggleFields = [
+        { key: 'chat_admin', label: 'Chat Admin Actions' },
+        { key: 'vehicle_delete', label: 'Delete Resident Vehicles' },
+        { key: 'maint_rate_edit', label: 'Edit Monthly Maintenance Rate' },
+        { key: 'invoice_delete', label: 'Delete/Waive Maintenance Invoices' },
+        { key: 'payment_history_clear', label: 'Clear Payment History Logs' },
+        { key: 'meter_readings_edit_delete', label: 'Edit/Delete Meter Readings' },
+        { key: 'attendance_logs_delete_clear', label: 'Delete/Clear Shift Attendance Logs' },
+        { key: 'complaints_edit_delete', label: 'Edit/Delete/Update Complaints' },
+        { key: 'notices_edit_delete', label: 'Edit/Delete Announcements & Notices' },
+        { key: 'accounting_delete', label: 'Delete Accounting & Ledger Entries' },
+        { key: 'documents_edit_delete', label: 'Upload/Delete Society Documents' }
+      ];
+
+      toggleFields.forEach(f => {
+        const activeClass = userPerms[f.key] !== false ? 'active' : '';
+        const clickHandler = isLoggedInAdmin ? `this.classList.toggle('active'); saveIndividualUserPermissionsAdmin();` : '';
+        const switchRow = document.createElement('div');
+        switchRow.className = 'toggle-switch';
+        switchRow.style.margin = '4px 0';
+        switchRow.innerHTML = `
+          <div class="toggle-label" style="font-size:12px; color:var(--ink);">${f.label}</div>
+          <div class="toggle-input ${activeClass}" id="udPerm_${f.key}" onclick="${clickHandler}"></div>
+        `;
+        permContainer.appendChild(switchRow);
+      });
+    } else {
+      permContainer.innerHTML = `<div style="font-size:12.5px; color:var(--muted); padding:10px 0;">Access permissions are only applicable to Committee Members & Admins.</div>`;
+    }
+
+    const actionsRow = document.getElementById('udAccountActions');
+    actionsRow.innerHTML = '';
+    
+    if (isLoggedInAdmin) {
+      if (u.status === 'Pending') {
+        actionsRow.innerHTML = `
+          <button onclick="updateUserStatusAdmin('Active')" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--forest); flex:1; height:36px; font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:700;">✔️ Approve</button>
+          <button onclick="updateUserStatusAdmin('Rejected')" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--terracotta); flex:1; height:36px; font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:700;">❌ Reject</button>
+        `;
+      } else if (u.status === 'Active') {
+        actionsRow.innerHTML = `
+          <button onclick="updateUserStatusAdmin('Revoked')" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--terracotta); width:100%; height:36px; font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:700;">🚫 Revoke Access</button>
+        `;
+      } else {
+        actionsRow.innerHTML = `
+          <button onclick="updateUserStatusAdmin('Active')" class="modal-btn modal-btn-primary" style="margin-top:0; background:var(--forest); width:100%; height:36px; font-size:12px; font-family:'Space Grotesk',sans-serif; font-weight:700;">🔄 Reactivate Account</button>
+        `;
+      }
+    } else {
+      actionsRow.innerHTML = `<div style="font-size:12px; color:var(--muted); text-align:center; padding:6px; width:100%;">Only administrators can perform status actions.</div>`;
+    }
+
+    // Reset password input section visibility
+    const resetSec = document.getElementById('udResetPasswordSection');
+    if (resetSec) {
+      resetSec.style.display = isLoggedInAdmin ? 'block' : 'none';
+    }
+    document.getElementById('udNewPassword').value = '';
+
+    const vehiclesList = document.getElementById('udVehiclesList');
+    vehiclesList.innerHTML = '';
+    
+    let allVehicles = [];
+    try {
+      allVehicles = JSON.parse(localStorage.getItem('society_vehicles')) || [];
+    } catch(e) {}
+    
+    const userVehicles = allVehicles.filter(v => v && (String(v.flat) === String(u.flat) || String(v.addedBy).toLowerCase() === String(u.name).toLowerCase()));
+    if (userVehicles.length > 0) {
+      userVehicles.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'ud-list-card';
+        card.style.margin = '4px 0';
+        card.innerHTML = `
+          <div style="font-weight:700; color:var(--forest-dark); font-size:12.5px;">🚗 ${v.number}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px; font-size:10.5px; color:var(--muted);">
+            <span>${v.type} (${v.model || 'N/A'})</span>
+            <span>Owner: ${v.owner || 'Resident'}</span>
+          </div>
+        `;
+        vehiclesList.appendChild(card);
+      });
+    } else {
+      vehiclesList.innerHTML = `<div style="font-size:12px; color:var(--muted); text-align:center; padding:10px;">No registered vehicles found for this flat.</div>`;
+    }
+
+    const complaintsList = document.getElementById('udComplaintsList');
+    complaintsList.innerHTML = '';
+    
+    let allComplaints = [];
+    try {
+      allComplaints = JSON.parse(localStorage.getItem('society_complaints')) || [];
+    } catch(e) {}
+    
+    const userComplaints = allComplaints.filter(c => c && (String(c.flat) === String(u.flat) || (c.title && c.title.toLowerCase().includes(String(u.flat).toLowerCase())) || (c.desc && c.desc.toLowerCase().includes(String(u.flat).toLowerCase()))));
+    if (userComplaints.length > 0) {
+      userComplaints.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'ud-list-card';
+        card.style.margin = '4px 0';
+        card.innerHTML = `
+          <div style="font-weight:700; color:var(--forest-dark); display:flex; justify-content:space-between;">
+            <span>${c.id}</span>
+            <span style="color:var(--marigold);">${c.status}</span>
+          </div>
+          <div style="font-size:11px; margin-top:2px;">${c.title}</div>
+          <div style="font-size:9.5px; color:var(--muted); margin-top:2px;">${c.time}</div>
+        `;
+        complaintsList.appendChild(card);
+      });
+    } else {
+      complaintsList.innerHTML = `<div style="font-size:11px; color:var(--muted); text-align:center; padding:6px;">No complaints registered.</div>`;
+    }
+
+    const visitorsList = document.getElementById('udVisitorsList');
+    visitorsList.innerHTML = '';
+    
+    let allVisitors = [];
+    try {
+      allVisitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
+    } catch(e) {}
+    
+    const userVisitors = allVisitors.filter(v => v && String(v.flatNo) === String(u.flat));
+    if (userVisitors.length > 0) {
+      userVisitors.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'ud-list-card';
+        card.style.margin = '4px 0';
+        card.innerHTML = `
+          <div style="font-weight:700; color:var(--forest-dark); display:flex; justify-content:space-between;">
+            <span>👤 ${v.name}</span>
+            <span style="color:var(--forest);">${v.status || 'Entered'}</span>
+          </div>
+          <div style="font-size:10.5px; display:flex; justify-content:space-between; color:var(--muted); margin-top:2px;">
+            <span>Purpose: ${v.purpose}</span>
+            <span>Date: ${v.entryTime || v.date}</span>
+          </div>
+        `;
+        visitorsList.appendChild(card);
+      });
+    } else {
+      visitorsList.innerHTML = `<div style="font-size:11px; color:var(--muted); text-align:center; padding:6px;">No visitor logs found for this flat.</div>`;
+    }
+
+    const activityList = document.getElementById('udActivityList');
+    activityList.innerHTML = '';
+
+    let allActivity = [];
+    try {
+      allActivity = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
+    } catch(e) {}
+
+    const userActivity = allActivity.filter(log => {
+      if (!log) return false;
+
+      const nameMatch = log.name && log.name.toLowerCase().includes(u.name.toLowerCase());
+      const detailsMatch = log.details && log.details.toLowerCase().includes(u.name.toLowerCase());
+      const descMatch = log.desc && log.desc.toLowerCase().includes(u.name.toLowerCase());
+      
+      return nameMatch || detailsMatch || descMatch;
+    });
+    
+    let allPunches = [];
+    try {
+      allPunches = JSON.parse(localStorage.getItem('society_punches')) || [];
+    } catch(e) {}
+    const userPunches = allPunches.filter(p => p && p.empName.toLowerCase() === u.name.toLowerCase());
+
+    if (userActivity.length > 0 || userPunches.length > 0) {
+      userPunches.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'ud-list-card';
+        card.style.borderLeft = '3px solid var(--forest)';
+        card.style.margin = '4px 0';
+        card.innerHTML = `
+          <div style="font-weight:700; color:var(--forest-dark);">🕒 Attendance Shift Log</div>
+          <div style="font-size:11px; margin-top:2px;">Date: ${p.date} · In: ${p.inTime} · Out: ${p.outTime || 'Working'}</div>
+          <div style="font-size:9.5px; color:var(--muted); margin-top:2px;">Total Hours: ${p.hours || '-'} hrs</div>
+        `;
+        activityList.appendChild(card);
+      });
+
+      userActivity.forEach(log => {
+        const action = log.action || log.toolAction || 'System Action';
+        const details = log.details || log.status || log.desc || '';
+        const time = log.time || log.dateTime || (log.timestamp ? new Date(log.timestamp).toLocaleString('en-IN') : '');
+
+        const card = document.createElement('div');
+        card.className = 'ud-list-card';
+        card.style.margin = '4px 0';
+        card.innerHTML = `
+          <div style="font-weight:700; color:var(--forest-dark);">${action}</div>
+          <div style="font-size:11px; margin-top:2px;">${details}</div>
+          <div style="font-size:9.5px; color:var(--muted); margin-top:2px;">${time}</div>
+        `;
+        activityList.appendChild(card);
+      });
+    } else {
+      activityList.innerHTML = `<div style="font-size:12px; color:var(--muted); text-align:center; padding:10px;">No system activities recorded for this user.</div>`;
+    }
+
+    openModal('userDetailsModal');
+  };
+
+  window.saveIndividualUserPermissionsAdmin = function() {
+    if (selectedUserIndexForEdit === -1) return;
+    const u = users[selectedUserIndexForEdit];
+    if (!u) return;
+
+    const getToggleVal = (id) => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    };
+
+    const config = {
+      chat_admin: getToggleVal('udPerm_chat_admin'),
+      vehicle_delete: getToggleVal('udPerm_vehicle_delete'),
+      maint_rate_edit: getToggleVal('udPerm_maint_rate_edit'),
+      invoice_delete: getToggleVal('udPerm_invoice_delete'),
+      payment_history_clear: getToggleVal('udPerm_payment_history_clear'),
+      meter_readings_edit_delete: getToggleVal('udPerm_meter_readings_edit_delete'),
+      attendance_logs_delete_clear: getToggleVal('udPerm_attendance_logs_delete_clear'),
+      complaints_edit_delete: getToggleVal('udPerm_complaints_edit_delete'),
+      notices_edit_delete: getToggleVal('udPerm_notices_edit_delete'),
+      accounting_delete: getToggleVal('udPerm_accounting_delete'),
+      documents_edit_delete: getToggleVal('udPerm_documents_edit_delete')
+    };
+
+    const cleanEmailKey = u.email.replace(/\./g, '_');
+    localStorage.setItem('society_admin_permissions_' + cleanEmailKey, JSON.stringify(config));
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_admin_permissions_' + cleanEmailKey, config).catch(e => console.warn(e));
+    }
+  };
+
+  window.updateUserStatusAdmin = function(newStatus) {
+    if (selectedUserIndexForEdit === -1) return;
+    const u = users[selectedUserIndexForEdit];
+    if (!u) return;
+
+    if (!confirm(`Are you sure you want to change this user status to "${newStatus}"?`)) return;
+
+    users[selectedUserIndexForEdit].status = newStatus;
+    
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        alert(`User status updated to "${newStatus}" successfully!`);
+        closeModal('userDetailsModal');
+        renderPendingApprovals();
+        renderDirectoryUsersList();
+      }).catch(err => {
+        console.error(err);
+        alert('Error updating user status.');
+      });
+    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('society_users', JSON.stringify(users));
+      alert(`User status updated to "${newStatus}" successfully!`);
+      closeModal('userDetailsModal');
+      renderPendingApprovals();
+      renderDirectoryUsersList();
+    }
+
+    if (typeof logActivity === 'function') {
+      logActivity(`User Account (${u.name})`, `Status changed to ${newStatus}`);
+    }
+  };
+
+  window.resetUserPasswordAdmin = function() {
+    if (selectedUserIndexForEdit === -1) return;
+    const u = users[selectedUserIndexForEdit];
+    if (!u) return;
+
+    const newPass = document.getElementById('udNewPassword').value.trim();
+    if (!newPass || newPass.length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (!confirm(`Force reset password for ${u.name}?`)) return;
+
+    users[selectedUserIndexForEdit].password = newPass;
+
+    if (typeof fbSet === 'function') {
+      fbSet('society_users', users).then(() => {
+        alert('Password force reset successfully!');
+        document.getElementById('udNewPassword').value = '';
+      }).catch(err => {
+        console.error(err);
+        alert('Error resetting password.');
+      });
+    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('society_users', JSON.stringify(users));
+      alert('Password force reset successfully!');
+      document.getElementById('udNewPassword').value = '';
+    }
+
+    if (typeof logActivity === 'function') {
+      logActivity(`User Account (${u.name})`, 'Password force reset by Admin');
+    }
+  };
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
+
+  // ─── platform Usage View Functions ───
+  let currentUsageYear = 2026;
+  let currentUsageMonth = 6; // July
+  let selectedUsageDateStr = '';
+  const monthsAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function formatDateToIN(day, monthIndex, year) {
+    const dayStr = String(day).padStart(2, '0');
+    const monthStr = monthsAbbr[monthIndex];
+    return `${dayStr} ${monthStr} ${year}`;
+  }
+
+  window.openUsageViewModal = function() {
+    openModal('adminUsageModal');
+    window.loadUsageLogsAndRender();
+  };
+
+  window.switchUsageSubTab = function(tabName) {
+    const btnRanking = document.getElementById('btnUsageTabRanking');
+    const btnCalendar = document.getElementById('btnUsageTabCalendar');
+    const panelRanking = document.getElementById('usageSubTabRanking');
+    const panelCalendar = document.getElementById('usageSubTabCalendar');
+
+    if (tabName === 'ranking') {
+      btnRanking.style.background = 'var(--forest)';
+      btnRanking.style.color = 'white';
+      btnCalendar.style.background = 'transparent';
+      btnCalendar.style.color = 'var(--muted)';
+      panelRanking.style.display = 'block';
+      panelCalendar.style.display = 'none';
+    } else {
+      btnCalendar.style.background = 'var(--forest)';
+      btnCalendar.style.color = 'white';
+      btnRanking.style.background = 'transparent';
+      btnRanking.style.color = 'var(--muted)';
+      panelRanking.style.display = 'none';
+      panelCalendar.style.display = 'block';
+      renderUsageCalendar();
+    }
+  };
+
+  window.changeUsageCalendarMonth = function(delta) {
+    currentUsageMonth += delta;
+    if (currentUsageMonth < 0) {
+      currentUsageMonth = 11;
+      currentUsageYear--;
+    } else if (currentUsageMonth > 11) {
+      currentUsageMonth = 0;
+      currentUsageYear++;
+    }
+    renderUsageCalendar();
+  };
+
+  function renderUsageCalendar() {
+    const grid = document.getElementById('usageCalendarGrid');
+    const monthYearLabel = document.getElementById('usageCalendarMonthYear');
+    if (!grid || !monthYearLabel) return;
+
+    const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    monthYearLabel.textContent = `${monthsFull[currentUsageMonth]} ${currentUsageYear}`;
+
+    grid.innerHTML = '';
+
+    const firstDayIndex = new Date(currentUsageYear, currentUsageMonth, 1).getDay();
+    const totalDays = new Date(currentUsageYear, currentUsageMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      const empty = document.createElement('div');
+      grid.appendChild(empty);
+    }
+
+    let logs = [];
+    try {
+      logs = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
+    } catch(e) {}
+
+    const activeDates = new Set();
+    logs.forEach(l => {
+      if (l.dateTime) {
+        activeDates.add(l.dateTime.substring(0, 11));
+      }
+    });
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dayEl = document.createElement('div');
+      const dateStr = formatDateToIN(day, currentUsageMonth, currentUsageYear);
+      const isActive = activeDates.has(dateStr);
+      const isSelected = dateStr === selectedUsageDateStr;
+
+      dayEl.textContent = day;
+      dayEl.style = `
+        padding: 6px 0;
+        border-radius: 6px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 11px;
+        cursor: pointer;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.2s ease;
+        background: ${isSelected ? 'var(--forest)' : (isActive ? 'rgba(31,77,61,0.06)' : 'transparent')};
+        color: ${isSelected ? 'white' : (isActive ? 'var(--forest)' : 'var(--ink)')};
+        border: ${isActive ? '1px solid rgba(31,77,61,0.15)' : '1px solid transparent'};
+      `;
+
+      dayEl.onclick = () => {
+        selectedUsageDateStr = dateStr;
+        renderUsageCalendar();
+        window.showUsageForDate(dateStr);
+      };
+
+      grid.appendChild(dayEl);
+    }
+  }
+
+  window.loadUsageLogsAndRender = function() {
+    const rankingContainer = document.getElementById('usageRankingContainer');
+    if (rankingContainer) {
+      rankingContainer.innerHTML = `<div style="font-size:12.5px; color:var(--muted); text-align:center; padding:20px;">Fetching logs from Firebase...</div>`;
+    }
+
+    if (!selectedUsageDateStr) {
+      const today = new Date();
+      selectedUsageDateStr = formatDateToIN(today.getDate(), today.getMonth(), today.getFullYear());
+      currentUsageMonth = today.getMonth();
+      currentUsageYear = today.getFullYear();
+    }
+
+    const promises = [
+      fbGet('society_activity_logs').catch(() => null),
+      fbGet('society_users').catch(() => null)
+    ];
+
+    Promise.all(promises).then(results => {
+      const rawLogs = results[0] || [];
+      const rawUsers = results[1] || [];
+
+      localStorage.setItem('society_activity_logs', JSON.stringify(rawLogs));
+      localStorage.setItem('society_users', JSON.stringify(rawUsers));
+
+      const userByName = {};
+      rawUsers.forEach(u => {
+        if (u && u.name) {
+          userByName[u.name.trim().toLowerCase()] = u;
+        }
+      });
+
+      const statsByFlat = {};
+      rawLogs.forEach(l => {
+        if (!l || !l.name) return;
+        const nameKey = l.name.trim().toLowerCase();
+        const userObj = userByName[nameKey];
+        const flat = userObj ? userObj.flat : 'Admin/Staff';
+        const role = userObj ? userObj.role : 'Staff';
+
+        if (!statsByFlat[flat]) {
+          statsByFlat[flat] = {
+            flat: flat,
+            representativeName: l.name,
+            role: role,
+            pageViews: 0,
+            featureActions: 0,
+            total: 0
+          };
+        }
+
+        const isPageView = String(l.toolAction).startsWith('Page View:');
+        if (isPageView) {
+          statsByFlat[flat].pageViews++;
+        } else {
+          statsByFlat[flat].featureActions++;
+        }
+        statsByFlat[flat].total++;
+      });
+
+      const rankings = Object.values(statsByFlat).sort((a, b) => b.total - a.total);
+
+      if (rankingContainer) {
+        rankingContainer.innerHTML = '';
+        if (rankings.length === 0) {
+          rankingContainer.innerHTML = `<div style="font-size:12.5px; color:var(--muted); text-align:center; padding:20px;">No platform usage recorded yet.</div>`;
+        } else {
+          const maxTotal = rankings[0].total || 1;
+          rankings.forEach((r, idx) => {
+            const pct = Math.min(100, Math.max(5, (r.total / maxTotal) * 100));
+            const card = document.createElement('div');
+            card.style = 'background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px;';
+            card.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700; font-size:13px; color:var(--forest-dark); text-align:left;">Flat ${r.flat} (${r.representativeName})</div>
+                  <div style="font-size:10px; color:var(--muted); margin-top:2px; text-align:left;">Role: ${r.role} · Page Views: ${r.pageViews} · Features: ${r.featureActions}</div>
+                </div>
+                <div style="font-family:\'IBM Plex Mono\',monospace; font-weight:700; font-size:14px; color:var(--forest);">#${idx + 1}</div>
+              </div>
+              <div style="width:100%; height:6px; background:rgba(31,77,61,0.06); border-radius:3px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:var(--forest);"></div>
+              </div>
+            `;
+            rankingContainer.appendChild(card);
+          });
+        }
+      }
+
+      renderUsageCalendar();
+      window.showUsageForDate(selectedUsageDateStr);
+    }).catch(err => {
+      console.error('Usage analysis error:', err);
+      if (rankingContainer) {
+        rankingContainer.innerHTML = `<div style="font-size:12.5px; color:var(--terracotta); text-align:center; padding:20px;">Error loading logs: ${err.message}</div>`;
+      }
+    });
+  };
+
+  window.showUsageForDate = function(dateStr) {
+    const label = document.getElementById('usageSelectedDateLabel');
+    const badge = document.getElementById('usageSelectedDateCountBadge');
+    const listContainer = document.getElementById('usageCalendarDayListContainer');
+
+    if (label) label.textContent = `Logs for ${dateStr}`;
+    if (listContainer) listContainer.innerHTML = '';
+
+    let logs = [];
+    let users = [];
+    try {
+      logs = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
+      users = JSON.parse(localStorage.getItem('society_users')) || [];
+    } catch(e) {}
+
+    const userByName = {};
+    users.forEach(u => {
+      if (u && u.name) {
+        userByName[u.name.trim().toLowerCase()] = u;
+      }
+    });
+
+    const dayLogs = logs.filter(l => l && l.dateTime && l.dateTime.substring(0, 11) === dateStr);
+    if (badge) badge.textContent = `${dayLogs.length} action(s)`;
+
+    if (!listContainer) return;
+
+    if (dayLogs.length === 0) {
+      listContainer.innerHTML = `<div style="font-size:12px; color:var(--muted); text-align:center; padding:20px;">No platform usage logged on this date.</div>`;
+      return;
+    }
+
+    const logsByFlat = {};
+    dayLogs.forEach(l => {
+      const nameKey = l.name ? l.name.trim().toLowerCase() : '';
+      const userObj = userByName[nameKey];
+      const flat = userObj ? userObj.flat : 'Admin/Staff';
+      
+      if (!logsByFlat[flat]) {
+        logsByFlat[flat] = {
+          flat: flat,
+          name: l.name,
+          actions: []
+        };
+      }
+      logsByFlat[flat].actions.push(l);
+    });
+
+    Object.values(logsByFlat).forEach(group => {
+      const card = document.createElement('div');
+      card.style = 'background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:4px;';
+      
+      let actionsHtml = '';
+      group.actions.forEach(a => {
+        const timePart = a.dateTime ? a.dateTime.substring(12) : '';
+        const isPageView = String(a.toolAction).startsWith('Page View:');
+        const badgeColor = isPageView ? 'rgba(41,128,185,0.08)' : 'rgba(31,77,61,0.08)';
+        const textColor = isPageView ? '#2980b9' : 'var(--forest)';
+        
+        actionsHtml += `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed rgba(0,0,0,0.03);">
+            <span style="font-weight:600; color:var(--forest-dark); flex:1; text-align:left;">
+              <span style="background:${badgeColor}; color:${textColor}; padding:1px 5px; border-radius:4px; font-size:9.5px; margin-right:4px;">${isPageView ? 'View' : 'Action'}</span>
+              ${a.toolAction}
+            </span>
+            <span style="font-family:\'IBM Plex Mono\',monospace; color:var(--muted); font-size:10px;">${timePart}</span>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div style="font-weight:700; font-size:12.5px; color:var(--forest-dark); border-bottom:1px solid var(--line); padding-bottom:4px; margin-bottom:6px; text-align:left;">
+          🏢 Flat ${group.flat} <span style="font-weight:600; font-size:11px; color:var(--muted);">· ${group.name}</span>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+          ${actionsHtml}
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  };
+
+  // ─── Firebase Storage Analysis Functions ───
+  window.openStorageViewModal = function() {
+    openModal('adminStorageModal');
+    window.calculateFirebaseStorageSize();
+  };
+
+  window.calculateFirebaseStorageSize = function() {
+    const usedText = document.getElementById('storageUsedText');
+    const freeText = document.getElementById('storageFreeText');
+    const progressBar = document.getElementById('storageProgressBar');
+    const categoriesContainer = document.getElementById('storageCategoriesContainer');
+
+    if (usedText) usedText.textContent = 'Calculating...';
+    if (freeText) freeText.textContent = 'Calculating...';
+    if (progressBar) progressBar.style.width = '0%';
+    if (categoriesContainer) categoriesContainer.innerHTML = `<div style="font-size:12.5px; color:var(--muted); text-align:center; padding:20px;">Fetching Firebase Snapshot...</div>`;
+
+    const calculateSizes = (dbData) => {
+      if (!dbData) dbData = {};
+
+      const formatSize = (bytes) => {
+        if (bytes < 1024) return bytes + ' Bytes';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+      };
+
+      const jsonString = JSON.stringify(dbData);
+      const totalBytes = new Blob([jsonString]).size;
+      
+      const maxLimitBytes = 1073741824; // 1 GB
+      const freeBytes = Math.max(0, maxLimitBytes - totalBytes);
+
+      if (usedText) usedText.textContent = formatSize(totalBytes);
+      if (freeText) freeText.textContent = formatSize(freeBytes);
+      
+      const usedPercent = (totalBytes / maxLimitBytes) * 100;
+      if (progressBar) {
+        progressBar.style.width = Math.min(100, Math.max(0.5, usedPercent)) + '%';
+        if (usedPercent > 90) {
+          progressBar.style.backgroundColor = 'var(--terracotta)';
+        } else if (usedPercent > 70) {
+          progressBar.style.backgroundColor = 'var(--marigold)';
+        } else {
+          progressBar.style.backgroundColor = 'var(--forest)';
+        }
+      }
+
+      const categories = [];
+      const keys = Object.keys(dbData);
+      
+      keys.forEach(k => {
+        const value = dbData[k];
+        const valStr = JSON.stringify(value);
+        const valBytes = new Blob([valStr]).size;
+        
+        let label = k;
+        if (k === 'society_users' || k === 'users') label = 'Users Database';
+        else if (k === 'society_complaints') label = 'Complaints Registry';
+        else if (k === 'society_visitors') label = 'Visitor Logsheets';
+        else if (k === 'society_vehicles') label = 'Vehicles List';
+        else if (k === 'society_feed_posts' || k === 'feed_posts') label = 'Social Feed & Photos';
+        else if (k === 'society_attendance_logs' || k === 'society_punches') label = 'Attendance Logs';
+        else if (k === 'society_incomes' || k === 'society_expenses') label = 'Ledger Transactions';
+        else if (k === 'society_documents') label = 'Society Documents';
+        else if (k === 'society_activity_logs') label = 'System Activity Logs';
+
+        categories.push({
+          key: k,
+          label: label,
+          bytes: valBytes
+        });
+      });
+
+      categories.sort((a, b) => b.bytes - a.bytes);
+
+      if (categoriesContainer) {
+        categoriesContainer.innerHTML = '';
+        if (categories.length === 0) {
+          categoriesContainer.innerHTML = `<div style="font-size:12.5px; color:var(--muted); text-align:center; padding:10px;">No active data categories found.</div>`;
+          return;
+        }
+
+        categories.forEach(c => {
+          const categoryPercent = totalBytes > 0 ? ((c.bytes / totalBytes) * 100).toFixed(1) : '0';
+          const card = document.createElement('div');
+          card.style = 'background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:6px;';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:700; color:var(--forest-dark);">
+              <span>${c.label}</span>
+              <span style="font-size:12px; color:var(--ink);">${formatSize(c.bytes)} (${categoryPercent}%)</span>
+            </div>
+            <div style="width:100%; height:4px; background:rgba(31,77,61,0.06); border-radius:2px; overflow:hidden;">
+              <div style="width:${categoryPercent}%; height:100%; background:var(--forest);"></div>
+            </div>
+          `;
+          categoriesContainer.appendChild(card);
+        });
+      }
+    };
+
+    const paths = [
+      'society_users',
+      'society_complaints',
+      'society_visitors',
+      'society_vehicles',
+      'society_feed_posts',
+      'society_punches',
+      'society_incomes',
+      'society_expenses',
+      'society_documents',
+      'society_activity_logs',
+      'society_notices',
+      'society_sos_active'
+    ];
+
+    if (typeof fbGet === 'function') {
+      const promises = paths.map(p => {
+        return fbGet(p)
+          .then(val => ({ path: p, val: val }))
+          .catch(() => ({ path: p, val: null }));
+      });
+
+      Promise.all(promises).then(results => {
+        const dbData = {};
+        results.forEach(r => {
+          if (r.val !== null && r.val !== undefined) {
+            dbData[r.path] = r.val;
+          }
+        });
+        calculateSizes(dbData);
+      }).catch(err => {
+        console.error('Promise.all failed for Firebase read:', err);
+        fallbackLocalData();
+      });
+    } else {
+      fallbackLocalData();
+    }
+
+    function fallbackLocalData() {
+      const localData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        try {
+          localData[k] = JSON.parse(localStorage.getItem(k));
+        } catch(e) {
+          localData[k] = localStorage.getItem(k);
+        }
+      }
+      calculateSizes(localData);
+    }
+  };
 
   // Activity Logs in Profile
   window.openActivityLogsModalProfile = function() {
@@ -2219,7 +3481,13 @@
       logs = JSON.parse(localStorage.getItem('society_activity_logs')) || [];
     } catch(e) { logs = []; }
 
-    if (!Array.isArray(logs) || logs.length === 0) {
+    const filteredLogs = logs.filter(log => {
+      if (!log) return false;
+      const action = log.action || log.toolAction || '';
+      return !String(action).startsWith('Page View:');
+    });
+
+    if (filteredLogs.length === 0) {
       container.innerHTML = `
         <div style="text-align:center; padding:30px 10px; color:var(--muted);">
           <div style="font-size:32px; margin-bottom:6px;">📋</div>
@@ -2230,16 +3498,23 @@
       return;
     }
 
-    container.innerHTML = logs.map(log => `
-      <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-weight:700; color:var(--forest-dark);">${escapeHtml(log.action || 'Activity')}</span>
-          <span style="font-size:10px; color:var(--muted);">${escapeHtml(log.time || log.timestamp || 'Recent')}</span>
+    container.innerHTML = filteredLogs.map(log => {
+      const action = log.action || log.toolAction || 'Activity';
+      const time = log.time || log.dateTime || (log.timestamp ? new Date(log.timestamp).toLocaleString('en-IN') : 'Recent');
+      const details = log.details || log.status || log.desc || '';
+      const user = log.user || log.name || '';
+
+      return `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-weight:700; color:var(--forest-dark);">${escapeHtml(action)}</span>
+            <span style="font-size:10px; color:var(--muted);">${escapeHtml(time)}</span>
+          </div>
+          <div style="color:var(--ink); font-size:11.5px;">${escapeHtml(details)}</div>
+          ${user ? `<div style="font-size:10px; color:var(--muted); margin-top:2px;">By: ${escapeHtml(user)}</div>` : ''}
         </div>
-        <div style="color:var(--ink); font-size:11.5px;">${escapeHtml(log.details || log.desc || '')}</div>
-        ${log.user ? `<div style="font-size:10px; color:var(--muted); margin-top:2px;">By: ${escapeHtml(log.user)}</div>` : ''}
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   window.clearAllActivityLogsAdmin = function() {

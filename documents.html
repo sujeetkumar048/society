@@ -480,6 +480,13 @@
 
   window.uploadDocument = function() {
     const type = document.getElementById('docType').value;
+    if (type === 'society') {
+      const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('documents_edit_delete'));
+      if (!hasPerm) {
+        alert('You do not have permission to upload society documents.');
+        return;
+      }
+    }
     const name = document.getElementById('docName').value.trim();
     const fileInput = document.getElementById('docFile');
     const fileObj = fileInput.files[0];
@@ -531,13 +538,16 @@
   };
 
   window.deleteDoc = function(id) {
-    if (!isAdmin) {
-      alert('Only administrators are allowed to delete documents.');
-      return;
-    }
-
     const target = documents.find(d => d.id === id);
     if (!target) return;
+
+    if (target.type === 'society') {
+      const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('documents_edit_delete'));
+      if (!hasPerm) {
+        alert('Only authorized administrators are allowed to delete society documents.');
+        return;
+      }
+    }
 
     if (!confirm(`Are you sure you want to delete "${target.name}"? This action cannot be undone.`)) return;
 

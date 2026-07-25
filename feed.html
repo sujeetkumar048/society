@@ -789,7 +789,7 @@
     reader.onload = function(event) {
       const rawImg = new Image();
       rawImg.onload = function() {
-        compressImageTo5KB(rawImg, (compressedBase64, sizeKb) => {
+        compressImageTo15KB(rawImg, (compressedBase64, sizeKb) => {
           selectedBase64Img = compressedBase64;
           const preview = document.getElementById('imgPreview');
           const boxText = document.getElementById('uploadBoxText');
@@ -802,8 +802,8 @@
           if (boxText) boxText.style.display = 'none';
 
           if (badgeContainer) {
-            const isValid = sizeKb <= 5.5;
-            badgeContainer.innerHTML = `<span class="size-badge ${isValid ? 'valid' : 'invalid'}">Size: ${sizeKb.toFixed(1)} KB / 5.0 KB ${isValid ? '✅' : '⚠️'}</span>`;
+            const isValid = sizeKb <= 15.5;
+            badgeContainer.innerHTML = `<span class="size-badge ${isValid ? 'valid' : 'invalid'}">Size: ${sizeKb.toFixed(1)} KB / 15.0 KB ${isValid ? '✅' : '⚠️'}</span>`;
           }
         });
       };
@@ -812,8 +812,8 @@
     reader.readAsDataURL(file);
   }
 
-  function compressImageTo5KB(img, callback) {
-    let maxDim = 320; // Lower resolution for 5KB target
+  function compressImageTo15KB(img, callback) {
+    let maxDim = 640; // Crisp resolution max dimension
     let width = img.width;
     let height = img.height;
 
@@ -838,15 +838,15 @@
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, width, height);
 
-    let quality = 0.6;
+    let quality = 0.8; // High start quality
     let dataUrl = canvas.toDataURL('image/jpeg', quality);
     let sizeKb = Math.round((dataUrl.length * 3) / 4) / 1024;
 
-    while (sizeKb > 5.0 && (quality > 0.1 || maxDim > 100)) {
-      if (quality > 0.2) {
+    while (sizeKb > 15.0 && (quality > 0.15 || maxDim > 200)) {
+      if (quality > 0.3) {
         quality -= 0.1;
       } else {
-        maxDim -= 30;
+        maxDim -= 50;
         let newW = img.width;
         let newH = img.height;
         if (newW > newH) {
@@ -861,7 +861,7 @@
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, newW, newH);
-        quality = 0.5;
+        quality = 0.6;
       }
       dataUrl = canvas.toDataURL('image/jpeg', quality);
       sizeKb = Math.round((dataUrl.length * 3) / 4) / 1024;

@@ -606,7 +606,8 @@
       currentUser.role.includes('Super Admin') || 
       currentUser.role.includes('Committee Member')
     );
-    if (!isAdmin) {
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('notices_edit_delete'));
+    if (!hasPerm) {
       alert('You do not have permission to delete notices.');
       return;
     }
@@ -641,7 +642,8 @@
       currentUser.role.includes('Super Admin') || 
       currentUser.role.includes('Committee Member')
     );
-    if (!isAdmin) {
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('notices_edit_delete'));
+    if (!hasPerm) {
       alert('You do not have permission to edit notices.');
       return;
     }

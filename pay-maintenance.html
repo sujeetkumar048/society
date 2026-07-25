@@ -1453,7 +1453,6 @@
 
     // Match invoices strictly for current user flat (or all if admin)
     let myPending = auditedList.filter(i => {
-      if (isAdmin) return true;
       if (!currentUser || !currentUser.flat) return true;
       const invFlatNorm = normalizeFlat(i.flat);
       if (invFlatNorm && userFlatNorm) {

@@ -868,6 +868,64 @@
         </div>
       </div>
 
+      <!-- Government Main Meter & Unit Rate Analyzer (collapsible) -->
+      <div style="background:rgba(243,156,18,0.05); border:1px dashed #f39c12; border-radius:12px; padding:12px; margin-top:8px;">
+        <div onclick="toggleUsageAnalyzer()" style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; color:#b7791f; display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:2px 0;">
+          <span>⚡ Government Main Meter & Unit Rate Analyzer</span>
+          <span id="usageAnalyzerArrow" style="font-size:11px;">▼</span>
+        </div>
+
+        <div id="usageAnalyzerFields" style="display:none; flex-direction:column; gap:8px; margin-top:10px; text-align:left;">
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+              <label style="font-size:10px; font-weight:700; color:var(--muted);">Select Month</label>
+              <input type="month" id="analMonth" onchange="runMeterAnalysis()" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12px; font-family:'Space Grotesk',sans-serif;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:10px; font-weight:700; color:var(--muted);">Govt Meter Type</label>
+              <select id="analGovtMeter" onchange="runMeterAnalysis()" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12px; font-family:'Space Grotesk',sans-serif; background:white;">
+                <option value="both">Both Meters (19 kV + 49 kV)</option>
+                <option value="19kv">19 kV Main Meter Only</option>
+                <option value="49kv">49 kV Main Meter Only</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+              <label style="font-size:10px; font-weight:700; color:var(--muted);">19 kV Bill Amount (₹)</label>
+              <input type="number" id="anal19kvBill" value="15000" oninput="runMeterAnalysis()" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12px; font-family:'Space Grotesk',sans-serif;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:10px; font-weight:700; color:var(--muted);">49 kV Bill Amount (₹)</label>
+              <input type="number" id="anal49kvBill" value="35000" oninput="runMeterAnalysis()" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; font-size:12px; font-family:'Space Grotesk',sans-serif;">
+            </div>
+          </div>
+
+          <!-- Live Analysis Outputs -->
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px; margin-top:4px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--muted); font-weight:600;">Total Sub-meters Sum:</span>
+              <span id="analTotalUnits" style="font-weight:700; color:var(--forest-dark);">0 Units</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--muted); font-weight:600;">Combined Bill Amount:</span>
+              <span id="analCombinedBill" style="font-weight:700; color:var(--forest-dark);">₹0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; border-top:1px dashed var(--line); padding-top:6px;">
+              <span style="color:var(--muted); font-weight:600;">Effective Rate:</span>
+              <span id="analEffectiveRate" style="font-weight:800; color:var(--terracotta);">₹0.00 / Unit</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span style="color:var(--muted); font-weight:600;">Received Units per Rupee:</span>
+              <span id="analUnitsPerRupee" style="font-weight:800; color:var(--forest);">0.00 Units</span>
+            </div>
+          </div>
+          <div id="analFlatWiseDetails" style="max-height:120px; overflow-y:auto; font-size:11px; color:var(--muted); margin-top:4px; display:flex; flex-direction:column; gap:4px;">
+            <!-- Flat-wise breakdown filled dynamically -->
+          </div>
+        </div>
+      </div>
+
       <button class="modal-btn modal-btn-primary" onclick="closeModal('meterReadingsModal')" style="margin-top:14px;">Close</button>
     </div>
   </div>
@@ -1915,6 +1973,13 @@
       monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     }
 
+    // Pre-fill analyzer month
+    const analMonthInput = document.getElementById('analMonth');
+    if (analMonthInput && !analMonthInput.value) {
+      const now = new Date();
+      analMonthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    }
+
     // Pre-fill flat from currentUser
     const flatInput = document.getElementById('mtrFlat');
     if (flatInput && !flatInput.value && currentUser) {
@@ -2061,6 +2126,91 @@
     }
   };
 
+  window.toggleUsageAnalyzer = function() {
+    const fields = document.getElementById('usageAnalyzerFields');
+    const arrow  = document.getElementById('usageAnalyzerArrow');
+    if (fields.style.display === 'none') {
+      fields.style.display = 'flex';
+      arrow.textContent = '▲';
+    } else {
+      fields.style.display = 'none';
+      arrow.textContent = '▼';
+    }
+  };
+
+  window.runMeterAnalysis = function() {
+    const selectedMonth = document.getElementById('analMonth').value;
+    const meterSelection = document.getElementById('analGovtMeter').value;
+    const bill19 = Number(document.getElementById('anal19kvBill').value || 0);
+    const bill49 = Number(document.getElementById('anal49kvBill').value || 0);
+
+    const totalUnitsSpan = document.getElementById('analTotalUnits');
+    const combinedBillSpan = document.getElementById('analCombinedBill');
+    const effectiveRateSpan = document.getElementById('analEffectiveRate');
+    const unitsPerRupeeSpan = document.getElementById('analUnitsPerRupee');
+    const breakdownDiv = document.getElementById('analFlatWiseDetails');
+
+    if (!selectedMonth) return;
+
+    // Filter readings for selected month and type is Electricity
+    const monthReadings = meterReadings.filter(r => r.month === selectedMonth && (r.type === 'Electricity' || !r.type));
+
+    let totalSubUnits = 0;
+    monthReadings.forEach(r => {
+      const initial = r.initial !== undefined ? Number(r.initial) : 0;
+      const final = r.final !== undefined ? Number(r.final) : Number(r.reading || 0);
+      totalSubUnits += Math.max(0, final - initial);
+    });
+
+    let billAmt = 0;
+    if (meterSelection === 'both') {
+      billAmt = bill19 + bill49;
+    } else if (meterSelection === '19kv') {
+      billAmt = bill19;
+    } else {
+      billAmt = bill49;
+    }
+
+    if (totalUnitsSpan) totalUnitsSpan.textContent = totalSubUnits.toLocaleString() + ' Units';
+    if (combinedBillSpan) combinedBillSpan.textContent = '₹' + billAmt.toLocaleString();
+
+    let unitRate = 0;
+    let unitsPerRupee = 0;
+    if (totalSubUnits > 0) {
+      unitRate = billAmt / totalSubUnits;
+    }
+    if (billAmt > 0) {
+      unitsPerRupee = totalSubUnits / billAmt;
+    }
+
+    if (effectiveRateSpan) effectiveRateSpan.textContent = '₹' + unitRate.toFixed(2) + ' / Unit';
+    if (unitsPerRupeeSpan) unitsPerRupeeSpan.textContent = unitsPerRupee.toFixed(4) + ' Units / ₹';
+
+    if (breakdownDiv) {
+      breakdownDiv.innerHTML = '';
+      if (monthReadings.length === 0) {
+        breakdownDiv.innerHTML = `<div style="text-align:center; padding:10px; color:var(--muted); font-size:11px;">No sub-meter readings recorded for this month.</div>`;
+      } else {
+        const sortedReadings = [...monthReadings].sort((a,b) => a.flat.localeCompare(b.flat));
+        sortedReadings.forEach(r => {
+          const initial = r.initial !== undefined ? Number(r.initial) : 0;
+          const final = r.final !== undefined ? Number(r.final) : Number(r.reading || 0);
+          const consumed = Math.max(0, final - initial);
+          const sharePct = totalSubUnits > 0 ? ((consumed / totalSubUnits) * 100).toFixed(1) : '0.0';
+          const costContribution = consumed * unitRate;
+
+          const row = document.createElement('div');
+          row.style = 'display:flex; justify-content:space-between; padding:2px 0; border-bottom:1px dashed rgba(0,0,0,0.03);';
+          row.innerHTML = `
+            <span>🏢 Flat ${r.flat}: <b>${consumed} units</b> (${sharePct}%)</span>
+            <span style="font-weight:700; color:var(--forest);">₹${costContribution.toFixed(2)}</span>
+          `;
+          breakdownDiv.appendChild(row);
+        });
+      }
+    }
+  };
+
   function renderMeterReadings() {
     const container = document.getElementById('meterReadingsContainer');
     if (!container) return;
@@ -2107,6 +2257,9 @@
     });
 
     container.innerHTML = html;
+    if (typeof runMeterAnalysis === 'function') {
+      runMeterAnalysis();
+    }
   }
 
   window.deleteMeterReading = function(id) {
@@ -2471,7 +2624,7 @@
 
       const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
       const visValEl = document.getElementById('statVisitorsVal');
-      if (visValEl) visValEl.textContent = 25 + visitors.length;
+      if (visValEl) visValEl.textContent = visitors.length;
 
       const notifications = JSON.parse(localStorage.getItem('society_notifications')) || [];
       renderNotificationsUI(notifications);
@@ -2525,7 +2678,7 @@
       fbListen('society_visitors', (data) => {
         const visitors = data || [];
         const visValEl = document.getElementById('statVisitorsVal');
-        if (visValEl) visValEl.textContent = 25 + visitors.length;
+        if (visValEl) visValEl.textContent = visitors.length;
       });
 
       // Listen to Notifications
@@ -2565,6 +2718,12 @@
       fbListen('society_users', (data) => {
         localStorage.setItem('society_users', JSON.stringify(data || []));
         updatePendingApprovalsCount();
+      });
+
+      // Listen to Pending Invoices
+      fbListen('society_pending_invoices', (data) => {
+        localStorage.setItem('society_pending_invoices', JSON.stringify(data || []));
+        updateCollectionProgress();
       });
     } else {
       // Local fallback checking
@@ -2875,28 +3034,33 @@
         break;
       case 'visitors':
         const visitors = JSON.parse(localStorage.getItem('society_visitors')) || [];
-        const customCount = visitors.length;
+        const totalCount = visitors.length;
+        const insideCount = visitors.filter(v => v && v.status === 'Inside').length;
+        const guestCount = visitors.filter(v => v && (v.type === 'Guest' || String(v.details).toLowerCase().includes('guest'))).length;
+        const deliveryCount = visitors.filter(v => v && (v.type === 'Delivery' || String(v.details).toLowerCase().includes('delivery'))).length;
+        const serviceCount = visitors.filter(v => v && (v.type === 'Service' || String(v.details).toLowerCase().includes('service'))).length;
+
         title.textContent = 'Visitor Statistics';
         content.innerHTML = `
           <div class="detail-row">
             <div class="detail-label">Total Today</div>
-            <div class="detail-value">${25 + customCount}</div>
+            <div class="detail-value">${totalCount}</div>
           </div>
           <div class="detail-row">
             <div class="detail-label">Currently Inside</div>
-            <div class="detail-value">${12 + visitors.filter(v => v.status === 'Inside').length}</div>
+            <div class="detail-value">${insideCount}</div>
           </div>
           <div class="detail-row">
             <div class="detail-label">Guests</div>
-            <div class="detail-value">${18 + visitors.filter(v => v.type === 'Guest').length}</div>
+            <div class="detail-value">${guestCount}</div>
           </div>
           <div class="detail-row">
             <div class="detail-label">Delivery</div>
-            <div class="detail-value">${5 + visitors.filter(v => v.type === 'Delivery').length}</div>
+            <div class="detail-value">${deliveryCount}</div>
           </div>
           <div class="detail-row">
             <div class="detail-label">Service</div>
-            <div class="detail-value">${2 + visitors.filter(v => v.type === 'Service').length}</div>
+            <div class="detail-value">${serviceCount}</div>
           </div>
         `;
         break;

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surakshit Society — Syncing Status</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --ink: #1B2420;
+      --paper: #F1F4EF;
+      --card: #FFFFFF;
+      --forest: #1F4D3D;
+      --forest-dark: #153529;
+      --marigold: #D9A62E;
+      --marigold-soft: #F4E4BC;
+      --terracotta: #C1503D;
+      --sky: #3E7CB1;
+      --line: #DDE3DA;
+      --muted: #6B7A70;
+      --radius: 18px;
+      --glow: rgba(31, 77, 61, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #DDE3DA; /* Same outer background color as other screens */
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Standardized app mobile frame matching index.html */
+    .app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: var(--paper);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Ambient background pattern matching header layout details */
+    .app::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 140px;
+      height: 140px;
+      border: 1px dashed rgba(31, 77, 61, 0.15);
+      border-radius: 50%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      left: -40px;
+      bottom: -40px;
+      width: 180px;
+      height: 180px;
+      border: 1px dashed rgba(31, 77, 61, 0.12);
+      border-radius: 50%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Premium glowing logo matching brand styling */
+    .logo-container {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      background: var(--card);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid var(--line);
+      box-shadow: 0 10px 25px rgba(27, 36, 32, 0.04), 
+                  0 0 20px var(--glow);
+      margin-bottom: 24px;
+      animation: pulseGlow 3s ease-in-out infinite alternate;
+    }
+
+    .logo-svg {
+      width: 58px;
+      height: 58px;
+      fill: none;
+      stroke: var(--forest);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .welcome-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--forest-dark);
+      margin-bottom: 4px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
+    }
+
+    .brand-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--forest);
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      margin-bottom: 24px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.4s;
+    }
+
+    /* Dynamic loading status messages box */
+    .status-box {
+      min-height: 40px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.6s;
+    }
+
+    .status-text {
+      font-size: 13.5px;
+      color: var(--muted);
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modern linear progress loader matching forest theme */
+    .progress-track {
+      width: 180px;
+      height: 5px;
+      background: var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 0.8s;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--forest) 0%, var(--muted) 100%);
+      border-radius: 10px;
+      animation: fillProgress 8s linear forwards;
+    }
+
+    /* Animations */
+    @keyframes pulseGlow {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(27, 36, 32, 0.04), 
+                    0 0 15px var(--glow);
+      }
+      100% {
+        transform: scale(1.03);
+        box-shadow: 0 14px 30px rgba(27, 36, 32, 0.08), 
+                    0 0 25px rgba(31, 77, 61, 0.35);
+      }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes fillProgress {
+      to { width: 100%; }
+    }
+
+    /* Small spinner for status */
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(31, 77, 61, 0.25);
+      border-top-color: var(--forest);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Standardized App Frame -->
+  <div class="app">
+    <div class="container">
+      <!-- Brand Glowing Shield Logo -->
+      <div class="logo-container">
+        <svg class="logo-svg" viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M12 8v8" style="stroke-dasharray: 2 2;" />
+          <path d="M9 11l3-3 3 3" />
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div class="welcome-text">Welcome Back!</div>
+      <div class="brand-title">Surakshit Society</div>
+
+      <!-- Sync Status Messages -->
+      <div class="status-box">
+        <div id="status" class="status-text">
+          <span class="spinner"></span>
+          <span>Connecting to society desk...</span>
+        </div>
+      </div>
+
+      <!-- Loading Bar -->
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Security check: Verify local storage credentials
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      window.location.href = 'profile.html';
+    }
+
+    // List of active syncing milestones spread over 8 seconds
+    const syncSteps = [
+      { delay: 0, text: "Securing society data channel..." },
+      { delay: 1500, text: "Refreshing society accounting ledger..." },
+      { delay: 3000, text: "Syncing monthly maintenance status..." },
+      { delay: 4500, text: "Downloading latest bulletin updates..." },
+      { delay: 6000, text: "Finalizing session handshake..." },
+      { delay: 7200, text: "Ready! Redirecting to dashboard..." }
+    ];
+
+    const statusEl = document.getElementById('status');
+
+    syncSteps.forEach(step => {
+      setTimeout(() => {
+        statusEl.style.opacity = 0;
+        setTimeout(() => {
+          statusEl.innerHTML = `<span class="spinner"></span> <span>${step.text}</span>`;
+          statusEl.style.opacity = 1;
+        }, 150);
+      }, step.delay);
+    });
+
+    // Dynamic redirect after exactly 8 seconds
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 8000);
+  </script>
+</body>
+</html>

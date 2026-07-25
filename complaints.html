@@ -415,7 +415,7 @@
         <div class="detail-label">Status</div>
         <div class="detail-value" id="modalStatus" style="font-weight: 700;">Pending</div>
       </div>
-      <div class="detail-row">
+      <div class="detail-row" id="changeStatusRow">
         <div class="detail-label">Change Status</div>
         <select id="statusChangeSelect" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="updateComplaintStatus()">
           <option value="">Select new status...</option>
@@ -607,6 +607,17 @@
     
     // Set dropdown to current status
     document.getElementById('statusChangeSelect').value = status || 'Pending';
+
+    // Show/hide status change dropdown based on complaints_edit_delete permission
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('complaints_edit_delete'));
+    const changeRow = document.getElementById('changeStatusRow');
+    if (changeRow) {
+      changeRow.style.display = hasPerm ? 'flex' : 'none';
+    }
     
     openModal('complaintModal');
   }
@@ -657,7 +668,8 @@
       currentUser.role.includes('Super Admin') || 
       currentUser.role.includes('Committee Member')
     );
-    if (!isAdmin) {
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('complaints_edit_delete'));
+    if (!hasPerm) {
       alert('You do not have permission to delete complaints.');
       return;
     }
@@ -694,7 +706,12 @@
   }
 
   window.editComplaint = async function(complaintId) {
-    if (!currentUser || (!(currentUser.role.includes('Super Admin') || currentUser.role.includes('Committee Member')))) {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    const hasPerm = isAdmin && (typeof getAdminPermission !== 'function' || getAdminPermission('complaints_edit_delete'));
+    if (!hasPerm) {
       alert('You do not have permission to edit complaints.');
       return;
     }

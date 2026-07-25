@@ -63,6 +63,7 @@ const DB_PATHS = {
   'society_salary_employees'           : '/salary_employees',
   'society_accounting_entries'         : '/accounting/entries',
   'society_admin_permissions'          : '/admin_permissions_config',
+  'society_feed_posts'                 : '/feed_posts',
 };
 
 // ─── Core Helper: fbDB ──────────────────────────────────────────────────────
@@ -348,13 +349,13 @@ window.logActivity = function(toolAction, status, name) {
     timestamp: Date.now()
   };
 
-  const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  const fourDaysAgo = Date.now() - (4 * 24 * 60 * 60 * 1000);
 
   if (typeof fbGet === 'function') {
     fbGet('society_activity_logs').then(list => {
       const arr = (list || []).filter(l => {
         const t = l.timestamp || (l.dateTime ? new Date(l.dateTime).getTime() : 0);
-        return !t || isNaN(t) || t >= sevenDaysAgo;
+        return !t || isNaN(t) || t >= fourDaysAgo;
       });
       arr.unshift(logEntry);
       if (arr.length > 200) arr.length = 200;
@@ -368,8 +369,9 @@ window.logActivity = function(toolAction, status, name) {
   }
 };
 
-// ─── 7-Day Auto Cleanup for Logs & Notifications ─────────────────────────────────────
+// ─── Auto Cleanup for Logs (4 Days) & Notifications (7 Days) ────────────────────────
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
 
 window.autoCleanOldLogsAndNotifications = function() {
   const now = Date.now();
@@ -385,13 +387,13 @@ window.autoCleanOldLogsAndNotifications = function() {
     });
   };
 
-  // 2. Clean Activity Logs older than 7 days
+  // 2. Clean Activity Logs older than 4 days
   const cleanLogs = (list) => {
     if (!Array.isArray(list)) return list;
     return list.filter(l => {
       const itemTime = l.timestamp || (l.dateTime ? new Date(l.dateTime).getTime() : 0);
       if (!itemTime || isNaN(itemTime)) return true;
-      return (now - itemTime) <= SEVEN_DAYS_MS;
+      return (now - itemTime) <= FOUR_DAYS_MS;
     });
   };
 
@@ -442,7 +444,156 @@ try {
 console.log('[SR Gold Society] Firebase initialised → project: society048');
 
 // ─── Real-Time Emergency SOS System ──────────────────────────────────────────
+let activeSirenContext = null;
+let activeSirenOscillator = null;
+let activeSirenGain = null;
+let sirenTimeout = null;
+let isSirenMuted = false;
 let sosAlarmInterval = null;
+
+window.playSiren = function() {
+  if (isSirenMuted) return;
+  try {
+    window.stopSiren();
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) return;
+    
+    // Resume context if suspended (browser security)
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.type = 'sawtooth';
+    const duration = 3.0;
+    const interval = 0.35;
+    oscillator.frequency.setValueAtTime(950, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+    
+    for (let time = 0; time < duration; time += interval) {
+      const pitch = (Math.round(time / interval) % 2 === 0) ? 1200 : 750;
+      oscillator.frequency.setValueAtTime(pitch, audioCtx.currentTime + time);
+    }
+    
+    oscillator.start();
+    
+    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime + duration - 0.2);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    oscillator.stop(audioCtx.currentTime + duration);
+    
+    activeSirenContext = audioCtx;
+    activeSirenOscillator = oscillator;
+    activeSirenGain = gainNode;
+
+    sirenTimeout = setTimeout(() => {
+      window.stopSiren();
+    }, 3000);
+  } catch(e) {
+    console.error('Siren play failed:', e);
+  }
+};
+
+window.stopSiren = function() {
+  if (sirenTimeout) {
+    clearTimeout(sirenTimeout);
+    sirenTimeout = null;
+  }
+  try {
+    if (activeSirenOscillator) {
+      activeSirenOscillator.stop();
+      activeSirenOscillator.disconnect();
+    }
+  } catch(e) {}
+  try {
+    if (activeSirenContext) {
+      activeSirenContext.close();
+    }
+  } catch(e) {}
+  activeSirenContext = null;
+  activeSirenOscillator = null;
+  activeSirenGain = null;
+};
+
+window.sendGlobalSOSAlert = function() {
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  if (!user) return;
+  
+  const sosData = {
+    id: Date.now().toString(),
+    active: true,
+    sender: user.name || 'Anonymous Resident',
+    flat: user.flat || 'N/A',
+    tower: user.tower || 'N/A',
+    timestamp: Date.now(),
+    desc: `EMERGENCY ALERT: SOS triggered from Flat ${user.flat || 'N/A'}, Tower ${user.tower || 'N/A'}`
+  };
+  
+  localStorage.setItem('society_sos_active', JSON.stringify(sosData));
+  
+  if (typeof fbSet === 'function') {
+    fbSet('society_sos_active', sosData).catch(e => console.warn(e));
+  }
+
+  // Broadcast Notification to notifications panel
+  const notifMsg = `🚨 EMERGENCY SOS! Triggered by ${user.name} (Flat ${user.flat || 'N/A'}, Tower ${user.tower || 'N/A'})`;
+  if (typeof window.pushNotification === 'function') {
+    window.pushNotification(notifMsg, "sos");
+  }
+};
+
+window.triggerSosClick = function() {
+  if (document.getElementById('sosConfirmModal')) return;
+  
+  const confirmModal = document.createElement('div');
+  confirmModal.id = 'sosConfirmModal';
+  confirmModal.style = `
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+  `;
+  confirmModal.innerHTML = `
+    <div style="background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div style="width: 64px; height: 64px; background: #FFEBEB; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 2px solid #FF3B30;">
+        <svg style="width:32px; height:32px; stroke:#FF3B30; fill:none;" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3 style="margin: 0 0 8px; color: #1a1a1a; font-size: 18px; font-weight: 800;">Emergency SOS Trigger</h3>
+      <p style="margin: 0 0 24px; color: #666; font-size: 13.5px; line-height: 1.5;">Are you sure you want to send an Emergency SOS Alert to all society members?</p>
+      <div style="display: flex; gap: 10px;">
+        <button id="btnSosConfirmCancel" style="flex: 1; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #f5f5f5; color: #333; font-weight: 700; font-size: 13px; cursor: pointer;">Cancel</button>
+        <button id="btnSosConfirmSend" style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: #FF3B30; color: white; font-weight: 700; font-size: 13px; cursor: pointer;">Send SOS</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmModal);
+  
+  document.getElementById('btnSosConfirmCancel').addEventListener('click', () => {
+    confirmModal.remove();
+  });
+  document.getElementById('btnSosConfirmSend').addEventListener('click', () => {
+    confirmModal.remove();
+    window.sendGlobalSOSAlert();
+  });
+};
+
 function checkAndShowSOS(sos) {
   if (!sos || !sos.active) {
     removeSOSOverlay();
@@ -483,29 +634,52 @@ function checkAndShowSOS(sos) {
     `;
 
     // Add keyframes styles
-    const styleEl = document.createElement('style');
-    styleEl.innerHTML = `
-      @keyframes sosFlash {
-        0% { background: rgba(139, 0, 0, 0.95); }
-        100% { background: rgba(220, 20, 60, 0.98); }
-      }
-    `;
-    document.head.appendChild(styleEl);
+    if (!document.getElementById('sosOverlayStyles')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'sosOverlayStyles';
+      styleEl.innerHTML = `
+        @keyframes sosFlash {
+          0% { background: rgba(139, 0, 0, 0.95); }
+          100% { background: rgba(220, 20, 60, 0.98); }
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const isUserAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
 
     overlay.innerHTML = `
-      <div style="max-width: 450px; width: 100%; background: #ffffff; color: #1a1a1a; border-radius: 20px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center;">
-        <div style="font-size: 50px; margin-bottom: 12px; animation: scaleUp 0.5s infinite alternate;">🚨</div>
-        <h2 style="margin: 0; color: #DC143C; font-size: 24px; font-weight: 800;">EMERGENCY SOS ALERT</h2>
-        <div style="font-size: 16px; font-weight: 700; margin: 12px 0 6px; color: #1a1a1a;">
-          Flat: <span style="background: #FFEBEB; padding: 2px 8px; border-radius: 6px; color: #DC143C;">${sos.flat}</span>
-        </div>
-        <div style="font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; word-break: break-word;">
-          "${sos.desc}"
-        </div>
+      <div style="max-width: 450px; width: 100%; background: #ffffff; color: #1a1a1a; border-radius: 24px; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; font-family:'Space Grotesk',sans-serif; border: 3px solid #FF3B30;">
+        <div style="font-size: 54px; margin-bottom: 8px; animation: scaleUp 0.5s infinite alternate;">🚨</div>
+        <h2 style="margin: 0 0 16px; color: #FF3B30; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">🚨 EMERGENCY ALERT 🚨</h2>
         
-        <button id="btnDismissSosGlobal" style="width: 100%; padding: 14px; border: none; border-radius: 12px; background: #DC143C; color: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;">
-          Dismiss Alert
-        </button>
+        <div style="display:flex; flex-direction:column; gap:12px; text-align:left; margin-bottom:24px; background:#FDF2F2; padding:18px; border-radius:16px; border:1px solid #FBD5D5;">
+          <div><span style="font-size:10px; color:#9B1C1C; font-weight:700; text-transform:uppercase;">Resident Name</span><div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-top:2px;">${sos.sender}</div></div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div><span style="font-size:10px; color:#9B1C1C; font-weight:700; text-transform:uppercase;">Flat Number</span><div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-top:2px;">${sos.flat}</div></div>
+            <div><span style="font-size:10px; color:#9B1C1C; font-weight:700; text-transform:uppercase;">Tower</span><div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-top:2px;">${sos.tower || 'A'}</div></div>
+          </div>
+          <div><span style="font-size:10px; color:#9B1C1C; font-weight:700; text-transform:uppercase;">Trigger Time</span><div style="font-size:13px; font-weight:700; color:#1a1a1a; margin-top:2px;">${new Date(sos.timestamp).toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</div></div>
+          <div><span style="font-size:10px; color:#9B1C1C; font-weight:700; text-transform:uppercase;">Emergency Message</span><div style="font-size:13px; font-weight:700; color:#DC143C; margin-top:2px; line-height:1.4;">${sos.desc}</div></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button id="btnMuteSosGlobal" style="flex:1; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #f5f5f5; color: #333; font-weight: 700; font-size: 13px; cursor: pointer;">
+            🔊 Mute Siren
+          </button>
+          <button id="btnDismissSosGlobal" style="flex:1; padding: 14px; border: none; border-radius: 12px; background: #FF3B30; color: white; font-weight: 700; font-size: 13px; cursor: pointer;">
+            Dismiss Alert
+          </button>
+        </div>
+        ${isUserAdmin ? `
+          <button id="btnResetSosGlobal" style="width:100%; padding: 14px; border: none; border-radius: 12px; background: #22c55e; color: white; font-weight: 700; font-size: 13px; cursor: pointer; margin-top:10px;">
+            🟢 Clear SOS Globally
+          </button>
+        ` : ''}
       </div>
     `;
 
@@ -515,30 +689,56 @@ function checkAndShowSOS(sos) {
       sessionStorage.setItem('dismissed_sos_' + sos.id, 'true');
       removeSOSOverlay();
     });
+
+    const muteBtn = document.getElementById('btnMuteSosGlobal');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', () => {
+        if (isSirenMuted) {
+          isSirenMuted = false;
+          muteBtn.innerHTML = '🔊 Mute Siren';
+          window.playSiren();
+        } else {
+          isSirenMuted = true;
+          muteBtn.innerHTML = '🔈 Unmute';
+          window.stopSiren();
+        }
+      });
+    }
+
+    if (isUserAdmin) {
+      const resetBtn = document.getElementById('btnResetSosGlobal');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (confirm('Clear this Emergency SOS globally for all users?')) {
+            const clearData = { active: false, timestamp: Date.now() };
+            localStorage.setItem('society_sos_active', JSON.stringify(clearData));
+            if (typeof fbSet === 'function') {
+              fbSet('society_sos_active', clearData).catch(e => console.warn(e));
+            }
+          }
+        });
+      }
+    }
   }
 
-  // Play periodic loud alarm sound (3 seconds duration, repeating every 5 seconds)
-  if (!sosAlarmInterval) {
-    if (typeof window.playBeepSound === 'function') {
-      window.playBeepSound('error');
-    }
-    const startTime = Date.now();
+  // Play periodic siren sound (3 seconds duration, repeating every 7 seconds)
+  if (!sosAlarmInterval && !isSirenMuted) {
+    window.playSiren();
     sosAlarmInterval = setInterval(() => {
-      if (Date.now() - startTime >= 30000) { // Auto-stop repeating after 30 seconds
+      if (isSirenMuted) {
         clearInterval(sosAlarmInterval);
         sosAlarmInterval = null;
         return;
       }
-      if (typeof window.playBeepSound === 'function') {
-        window.playBeepSound('error');
-      }
-    }, 5000);
+      window.playSiren();
+    }, 7000);
   }
 }
 
 function removeSOSOverlay() {
   const overlay = document.getElementById('globalSosOverlay');
   if (overlay) overlay.remove();
+  window.stopSiren();
   if (sosAlarmInterval) {
     clearInterval(sosAlarmInterval);
     sosAlarmInterval = null;
@@ -551,7 +751,6 @@ if (typeof db !== 'undefined' && typeof db.ref === 'function') {
     checkAndShowSOS(snap.val());
   });
 } else {
-  // Local fallback checker
   setInterval(() => {
     try {
       const sos = JSON.parse(localStorage.getItem('society_sos_active'));
@@ -560,9 +759,91 @@ if (typeof db !== 'undefined' && typeof db.ref === 'function') {
   }, 2000);
 }
 
+// ─── Floating SOS button Injection ───────────────────────────────────────────
+window.initializeFloatingSosButton = function() {
+  if (document.getElementById('floatingSosBtn')) return;
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) return;
+
+  const btn = document.createElement('div');
+  btn.id = 'floatingSosBtn';
+  btn.title = 'EMERGENCY SOS';
+  btn.style = `
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF3B30, #FF2D55);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0.3);
+    z-index: 99999;
+    cursor: pointer;
+    border: 2px solid white;
+    user-select: none;
+    transition: all 0.2s ease;
+    animation: sosPulse 2s infinite;
+  `;
+
+  if (!document.getElementById('sosPulseStyle')) {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'sosPulseStyle';
+    styleEl.innerHTML = `
+      @keyframes sosPulse {
+        0% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0.4); }
+        70% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 15px rgba(255, 45, 85, 0); }
+        100% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0); }
+      }
+      @keyframes scaleUp {
+        0% { transform: scale(0.9); }
+        100% { transform: scale(1.1); }
+      }
+    `;
+    document.head.appendChild(styleEl);
+  }
+
+  btn.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <svg style="width:24px; height:24px; stroke:white; fill:none;" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span style="font-size:8px; font-weight:900; margin-top:2px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">SOS</span>
+    </div>
+  `;
+
+  btn.onclick = function() {
+    window.triggerSosClick();
+  };
+
+  document.body.appendChild(btn);
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.initializeFloatingSosButton);
+} else {
+  window.initializeFloatingSosButton();
+}
+setInterval(window.initializeFloatingSosButton, 2000);
+
 // ─── Shared Admin Permissions Getter ─────────────────────────────────────────
 window.getAdminPermission = function(permKey) {
   try {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.email) {
+      const cleanEmailKey = currentUser.email.replace(/\./g, '_');
+      const stored = localStorage.getItem('society_admin_permissions_' + cleanEmailKey);
+      if (stored) {
+        const config = JSON.parse(stored);
+        return config[permKey] !== false;
+      }
+    }
     const config = JSON.parse(localStorage.getItem('society_admin_permissions')) || {
       chat_admin: true,
       vehicle_delete: true,
@@ -570,7 +851,11 @@ window.getAdminPermission = function(permKey) {
       invoice_delete: true,
       payment_history_clear: true,
       meter_readings_edit_delete: true,
-      attendance_logs_delete_clear: true
+      attendance_logs_delete_clear: true,
+      complaints_edit_delete: true,
+      notices_edit_delete: true,
+      accounting_delete: true,
+      documents_edit_delete: true
     };
     return config[permKey] !== false;
   } catch(e) {
@@ -682,3 +967,36 @@ window.validateAndProcessDocument = function(file, targetSizeKb, callback) {
     }
   }
 };
+
+// ─── Automatic Page View Tracker ───
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const pageName = window.location.pathname.split('/').pop() || 'index.html';
+    if (pageName && pageName !== 'welcome.html') {
+      const pageTitles = {
+        'index.html': 'Dashboard Home',
+        'profile.html': 'Profile & Settings',
+        'complaints.html': 'Complaints Desk',
+        'notices.html': 'Notice Board',
+        'pay-maintenance.html': 'Maintenance & Payments',
+        'accounting.html': 'Accounting Desk',
+        'visitor-entry.html': 'Visitor Guard Panel',
+        'documents.html': 'Documents Center',
+        'gate-requests.html': 'Gate Requests Board',
+        'staff-attendance.html': 'Staff Attendance',
+        'parking.html': 'Parking Management',
+        'local-services.html': 'Local Services Directory'
+      };
+      const title = pageTitles[pageName] || pageName;
+      
+      // Delay slightly to ensure user auth is parsed and loaded
+      setTimeout(() => {
+        if (typeof window.logActivity === 'function') {
+          window.logActivity('Page View: ' + title, 'Opened');
+        }
+      }, 800);
+    }
+  } catch (e) {
+    console.error('Error logging page view:', e);
+  }
+});
