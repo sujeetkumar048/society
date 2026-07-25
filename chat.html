@@ -55,7 +55,7 @@
   .fab:active{transform:scale(.92);}
 
   /* ── FULL-SCREEN CHAT WINDOW ── */
-  .chat-window{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:200;display:none;flex-direction:column;}
+  .chat-window{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:2000;display:none;flex-direction:column;}
   .cw-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));color:#fff;padding:16px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:relative;}
   .cw-back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0;}
   .cw-back svg{width:15px;height:15px;stroke:#fff;}
@@ -67,7 +67,7 @@
   .cw-more svg{width:16px;height:16px;stroke:#fff;}
 
   /* ── CHAT ACTIONS DROPDOWN ── */
-  .cw-dropdown{position:absolute;top:60px;right:14px;background:var(--card);border-radius:12px;box-shadow:0 8px 28px rgba(21,53,41,.18);border:1px solid var(--line);z-index:350;min-width:200px;overflow:hidden;display:none;}
+  .cw-dropdown{position:absolute;top:60px;right:14px;background:var(--card);border-radius:12px;box-shadow:0 8px 28px rgba(21,53,41,.18);border:1px solid var(--line);z-index:2800;min-width:200px;overflow:hidden;display:none;}
   .cw-dropdown.open{display:block;}
   .cw-dropdown-item{padding:13px 16px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);transition:background .15s;}
   .cw-dropdown-item:last-child{border-bottom:none;}
@@ -79,7 +79,7 @@
   .chat-bubble.received{background:var(--card);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--line);}
   .bubble-sender{font-size:10px;font-weight:700;color:var(--marigold);margin-bottom:3px;}
   .bubble-time{font-size:9.5px;margin-top:4px;text-align:right;opacity:.7;}
-  .cw-input-bar{padding:10px 12px;background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .cw-input-bar{padding:10px 12px;background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-shrink:0;z-index:2100;}
   .cw-input{flex:1;padding:11px 16px;border:1.5px solid var(--line);border-radius:22px;font-family:'Inter',sans-serif;font-size:13.5px;background:var(--paper);color:var(--ink);outline:none;}
   .cw-input:focus{border-color:var(--forest);}
   .cw-send{width:42px;height:42px;border-radius:50%;background:var(--forest);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s;}
@@ -88,7 +88,7 @@
   .typing-row{padding:0 16px 8px;font-size:12px;color:var(--muted);font-style:italic;display:none;}
 
   /* ── MODALS ── */
-  .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:400;}
+  .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:4000;}
   .modal-overlay.active{display:flex;}
   .modal{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px;max-height:90vh;overflow-y:auto;}
   .modal-handle{width:40px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 20px;}
@@ -110,7 +110,7 @@
   .empty-state-icon{font-size:42px;margin-bottom:10px;}
 
   /* ── GROUP SETTINGS PANEL ── */
-  .settings-panel{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:300;display:none;flex-direction:column;}
+  .settings-panel{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:100%;background:var(--paper);z-index:2500;display:none;flex-direction:column;}
   .sp-header{background:linear-gradient(160deg,var(--forest),var(--forest-dark));padding:16px 14px;display:flex;align-items:center;gap:10px;color:#fff;}
   .sp-content{flex:1;overflow-y:auto;padding:16px;}
 
@@ -340,7 +340,7 @@ if (currentUser && currentUser.flat) {
 // ── sample flat directory (used when society_users is empty) ──
 const sampleUsers = [];
 
-let allUsers = JSON.parse(localStorage.getItem('society_users')) || sampleUsers;
+let allUsers = JSON.parse(localStorage.getItem('society_users')) || JSON.parse(localStorage.getItem('users')) || [];
 
 // ── Firebase Listener for Users ──
 if (typeof fbListen === 'function') {
@@ -348,13 +348,13 @@ if (typeof fbListen === 'function') {
     if (data && data.length > 0) {
       allUsers = data;
     } else {
-      allUsers = sampleUsers;
+      allUsers = JSON.parse(localStorage.getItem('society_users')) || JSON.parse(localStorage.getItem('users')) || [];
     }
     // Re-populate active lists if needed
-    if (document.getElementById('modalGroup').classList.contains('active')) {
+    if (document.getElementById('modalGroup') && document.getElementById('modalGroup').classList.contains('active')) {
       populateGroupMemberPicker();
     }
-    if (document.getElementById('settingsPanel').style.display === 'flex') {
+    if (document.getElementById('settingsPanel') && document.getElementById('settingsPanel').style.display === 'flex') {
       openGroupSettings();
     }
   });
@@ -403,30 +403,66 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 // ══════════════════════════════════════════════
 //  THREAD HELPERS
 // ══════════════════════════════════════════════
-function myFlatKey()  { return `flat_${currentUser.flat}`; }
+function cleanFlatStr(val) {
+  if (!val) return '';
+  return String(val).toLowerCase().replace(/flat\s*/i, '').trim();
+}
+
+function myFlatKey()  { return `flat_${cleanFlatStr(currentUser.flat)}`; }
 
 /** Individual thread id: sorted pair of flat numbers */
 function indThreadId(flatA, flatB) {
-  return ['flat_' + flatA, 'flat_' + flatB].sort().join('__');
+  const fA = cleanFlatStr(flatA) || 'userA';
+  const fB = cleanFlatStr(flatB) || 'userB';
+  return ['flat_' + fA, 'flat_' + fB].sort().join('__');
+}
+
+/** Helper to identify other member in individual thread */
+function getOtherMember(t) {
+  if (!t || !t.members || !currentUser) return null;
+  const myFlatNorm = cleanFlatStr(currentUser.flat);
+  const myEmailNorm = String(currentUser.email || '').toLowerCase().trim();
+
+  return (t.members || []).find(m => {
+    if (!m) return false;
+    const mFlatNorm = cleanFlatStr(m.flat);
+    const mEmailNorm = String(m.email || '').toLowerCase().trim();
+    if (myFlatNorm && mFlatNorm && myFlatNorm === mFlatNorm) return false;
+    if (myEmailNorm && mEmailNorm && myEmailNorm === mEmailNorm) return false;
+    return true;
+  });
 }
 
 /** Return display name for a thread from the perspective of currentUser */
 function threadDisplayName(t) {
   if (t.type === 'group') return t.name || 'Group';
-  // individual: show other party
-  const other = (t.members || []).find(m => String(m.flat) !== String(currentUser.flat));
+  const other = getOtherMember(t);
   return other ? `Flat ${other.flat} · ${other.name}` : t.name || 'Chat';
 }
 
 function threadAvatarText(t) {
   if (t.type === 'group') return (t.name||'G').substring(0,2).toUpperCase();
-  const other = (t.members||[]).find(m=>String(m.flat)!==String(currentUser.flat));
+  const other = getOtherMember(t);
   return other ? `F${other.flat}` : 'CH';
 }
 
 function isThreadMine(t) {
-  if (!t.members) return false;
-  return t.members.some(m => String(m.flat) === String(currentUser.flat));
+  if (!t || !t.members || !currentUser) return false;
+  const myFlatNorm = cleanFlatStr(currentUser.flat);
+  const myEmailNorm = String(currentUser.email || '').toLowerCase().trim();
+  const myPhoneNorm = String(currentUser.phone || '').trim();
+
+  return t.members.some(m => {
+    if (!m) return false;
+    const mFlatNorm = cleanFlatStr(m.flat);
+    const mEmailNorm = String(m.email || '').toLowerCase().trim();
+    const mPhoneNorm = String(m.phone || '').trim();
+
+    if (myFlatNorm && mFlatNorm && myFlatNorm === mFlatNorm) return true;
+    if (myEmailNorm && mEmailNorm && myEmailNorm === mEmailNorm) return true;
+    if (myPhoneNorm && mPhoneNorm && myPhoneNorm === mPhoneNorm) return true;
+    return false;
+  });
 }
 
 function lastMsg(t) {
@@ -528,6 +564,9 @@ function renderChatList() {
   const el = document.getElementById('mainContent');
   el.innerHTML = '';
 
+  const roleLower = String(currentUser?.role || '').toLowerCase();
+  const isSocietyAdmin = currentUser && (roleLower.includes('admin') || roleLower.includes('committee'));
+
   const myThreads = Object.entries(threads).filter(([id, t]) =>
     t.type === currentTab && isThreadMine(t)
   );
@@ -548,6 +587,21 @@ function renderChatList() {
     return tb - ta;
   });
 
+  // Admin Bulk Delete Header for Groups
+  if (isSocietyAdmin && currentTab === 'group') {
+    const bulkBar = document.createElement('div');
+    bulkBar.style.cssText = 'background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;';
+    bulkBar.innerHTML = `
+      <div style="font-size:12px; font-weight:700; color:var(--forest-dark); font-family:'Space Grotesk',sans-serif;">
+        👑 Admin Group Actions (${myThreads.length} active)
+      </div>
+      <button onclick="deleteSelectedGroupsBulk()" style="background:#FFF0EE; border:1px solid var(--terracotta); color:var(--terracotta); padding:6px 12px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+        🗑️ Delete Selected
+      </button>
+    `;
+    el.appendChild(bulkBar);
+  }
+
   myThreads.forEach(([tid, t]) => {
     const displayName = threadDisplayName(t);
     const avatarText  = threadAvatarText(t);
@@ -558,12 +612,17 @@ function renderChatList() {
     const timeLabel   = lm ? fmtTime(lm.timestamp) : '';
     const preview     = lm ? lm.text : 'Start chatting…';
 
+    const canDeleteThis = isSocietyAdmin || (t.type === 'group' && cleanFlatStr(t.adminFlat) === cleanFlatStr(currentUser.flat));
+
     const card = document.createElement('div');
     card.className = 'chat-item';
+    card.style.cssText = 'display:flex; align-items:center; gap:10px; position:relative;';
     card.onclick = () => openChat(tid);
+    
     card.innerHTML = `
+      ${isSocietyAdmin && currentTab === 'group' ? `<input type="checkbox" class="grp-select-cb" value="${tid}" onclick="event.stopPropagation();" style="width:18px; height:18px; accent-color:var(--forest); cursor:pointer; flex-shrink:0;">` : ''}
       <div class="avatar ${avatarClass}">${avatarText}</div>
-      <div class="chat-info">
+      <div class="chat-info" style="flex:1; min-width:0;">
         <div class="chat-meta">
           <div class="chat-name">${displayName}</div>
           <div class="chat-time">${timeLabel}</div>
@@ -571,10 +630,77 @@ function renderChatList() {
         <div class="chat-preview">${escHtml(preview)}</div>
         ${t.type==='group' && membersList ? `<div style="font-size:10px;color:var(--muted);margin-top:3px;">👥 ${membersList}</div>` : ''}
       </div>
+      ${canDeleteThis ? `
+        <button title="Delete Group" onclick="deleteGroupDirectly('${tid}', event)" style="background:transparent; border:none; color:var(--terracotta); font-size:16px; cursor:pointer; padding:6px; flex-shrink:0; border-radius:6px;" onmouseover="this.style.background='#FFF0EE'" onmouseout="this.style.background='transparent'">
+          🗑️
+        </button>
+      ` : ''}
     `;
     el.appendChild(card);
   });
 }
+
+window.deleteGroupDirectly = function(tid, event) {
+  if (event) event.stopPropagation();
+  const t = threads[tid];
+  const name = t ? (t.name || threadDisplayName(t)) : 'Group';
+  if (!confirm(`Are you sure you want to DELETE group "${name}"? This removes all messages and history permanently.`)) return;
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      firebase.database().ref(`/chat_threads/${tid}`).remove();
+    }
+  } catch(e) {}
+
+  delete threads[tid];
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  delete localThreads[tid];
+  localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+
+  if (typeof fbSet === 'function') {
+    fbSet('society_chat_threads', Object.values(threads));
+  }
+
+  if (activeThreadId === tid) {
+    closeChatWindow();
+  }
+  renderChatList();
+  if (typeof showToast === 'function') showToast(`Group "${name}" deleted!`, 'success');
+  else alert(`Group "${name}" deleted!`);
+};
+
+window.deleteSelectedGroupsBulk = function() {
+  const selected = Array.from(document.querySelectorAll('.grp-select-cb:checked')).map(cb => cb.value);
+  if (selected.length === 0) {
+    alert('Please select at least one group to delete using the checkboxes.');
+    return;
+  }
+  if (!confirm(`Are you sure you want to DELETE ${selected.length} selected group(s)? This action cannot be undone.`)) return;
+
+  selected.forEach(tid => {
+    try {
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref(`/chat_threads/${tid}`).remove();
+      }
+    } catch(e) {}
+    delete threads[tid];
+  });
+
+  const localThreads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+  selected.forEach(tid => delete localThreads[tid]);
+  localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+
+  if (typeof fbSet === 'function') {
+    fbSet('society_chat_threads', Object.values(threads));
+  }
+
+  if (selected.includes(activeThreadId)) {
+    closeChatWindow();
+  }
+  renderChatList();
+  if (typeof showToast === 'function') showToast(`${selected.length} group(s) deleted!`, 'success');
+  else alert(`${selected.length} group(s) deleted successfully!`);
+};
 
 // ══════════════════════════════════════════════
 //  FIREBASE LISTENER — load all threads
@@ -582,12 +708,34 @@ function renderChatList() {
 function startThreadsListener() {
   if (unsub) unsub();
   
+  const processRawThreads = (raw) => {
+    const threadMap = {};
+    if (!raw) return threadMap;
+
+    const list = Array.isArray(raw) ? raw : Object.values(raw);
+    list.forEach((t, i) => {
+      if (!t) return;
+      let tid = t.id;
+      if (!tid) {
+        if (t.type === 'individual' && t.members && t.members.length >= 2) {
+          tid = indThreadId(t.members[0].flat, t.members[1].flat);
+        } else {
+          tid = 'grp_' + (t.createdAt || i);
+        }
+      }
+      threadMap[tid] = { ...t, id: tid };
+    });
+
+    return threadMap;
+  };
+
   let firebaseActive = false;
   try {
     if (typeof firebase !== 'undefined' && firebase.database) {
       const ref = firebase.database().ref('/chat_threads');
       ref.on('value', snap => {
-        threads = snap.val() || {};
+        threads = processRawThreads(snap.val());
+        localStorage.setItem('society_chat_threads', JSON.stringify(threads));
         renderChatList();
         if (activeThreadId && threads[activeThreadId]) {
           renderMessages();
@@ -603,7 +751,8 @@ function startThreadsListener() {
   if (!firebaseActive) {
     // Local storage fallback listener simulation
     const loadLocalThreads = () => {
-      threads = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+      const local = JSON.parse(localStorage.getItem('society_chat_threads')) || {};
+      threads = processRawThreads(local);
       renderChatList();
       if (activeThreadId && threads[activeThreadId]) {
         renderMessages();
@@ -700,11 +849,12 @@ function clearChatMessages() {
   if (!activeThreadId) return;
 
   const t = threads[activeThreadId];
-  const isAdminUser = currentUser && currentUser.role && (
-    currentUser.role.includes('Super Admin') || 
-    currentUser.role.includes('Committee Member')
-  ) && (typeof getAdminPermission === 'function' ? getAdminPermission('chat_admin') : true);
-  const isGroupAdminUser = t && t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
+  const roleLower = String(currentUser?.role || '').toLowerCase();
+  const isAdminUser = currentUser && (
+    roleLower.includes('admin') || 
+    roleLower.includes('committee')
+  );
+  const isGroupAdminUser = t && t.type === 'group' && cleanFlatStr(t.adminFlat) === cleanFlatStr(currentUser.flat);
 
   if (!isAdminUser && !isGroupAdminUser) {
     alert('Permission denied. Only administrators are allowed to clear chats.');
@@ -715,18 +865,13 @@ function clearChatMessages() {
 
   try {
     if (typeof firebase !== 'undefined' && firebase.database) {
-      firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).set({}).then(() => {
-        alert('All messages cleared successfully.');
-      }).catch(err => {
-        console.warn('Firebase clear failed, clearing locally:', err.message);
-        clearChatMessagesLocally();
-      });
-    } else {
-      clearChatMessagesLocally();
+      firebase.database().ref(`/chat_threads/${activeThreadId}/messages`).set({});
     }
   } catch(e) {
-    clearChatMessagesLocally();
+    console.warn('Firebase clear error:', e.message);
   }
+
+  clearChatMessagesLocally();
 }
 
 function clearChatMessagesLocally() {
@@ -734,10 +879,15 @@ function clearChatMessagesLocally() {
   if (localThreads[activeThreadId]) {
     localThreads[activeThreadId].messages = {};
     localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
-    threads[activeThreadId].messages = {};
-    renderMessages();
-    alert('All messages cleared.');
   }
+  if (threads[activeThreadId]) {
+    threads[activeThreadId].messages = {};
+  }
+  if (typeof fbSet === 'function') {
+    fbSet('society_chat_threads', Object.values(threads));
+  }
+  renderMessages();
+  alert('All messages cleared successfully.');
 }
 
 // Admin: Delete entire chat thread
@@ -746,11 +896,12 @@ function deleteChatThread() {
   if (!activeThreadId) return;
   const t = threads[activeThreadId];
 
-  const isAdminUser = currentUser && currentUser.role && (
-    currentUser.role.includes('Super Admin') || 
-    currentUser.role.includes('Committee Member')
-  ) && (typeof getAdminPermission === 'function' ? getAdminPermission('chat_admin') : true);
-  const isGroupAdminUser = t && t.type === 'group' && String(t.adminFlat) === String(currentUser.flat);
+  const roleLower = String(currentUser?.role || '').toLowerCase();
+  const isAdminUser = currentUser && (
+    roleLower.includes('admin') || 
+    roleLower.includes('committee')
+  );
+  const isGroupAdminUser = t && t.type === 'group' && cleanFlatStr(t.adminFlat) === cleanFlatStr(currentUser.flat);
 
   if (!isAdminUser && !isGroupAdminUser) {
     alert('Permission denied. Only administrators are allowed to delete chats.');
@@ -762,19 +913,13 @@ function deleteChatThread() {
 
   try {
     if (typeof firebase !== 'undefined' && firebase.database) {
-      firebase.database().ref(`/chat_threads/${activeThreadId}`).remove().then(() => {
-        closeChatWindow();
-        alert('Chat deleted successfully.');
-      }).catch(err => {
-        console.warn('Firebase delete failed, deleting locally:', err.message);
-        deleteChatThreadLocally();
-      });
-    } else {
-      deleteChatThreadLocally();
+      firebase.database().ref(`/chat_threads/${activeThreadId}`).remove();
     }
   } catch(e) {
-    deleteChatThreadLocally();
+    console.warn('Firebase delete error:', e.message);
   }
+
+  deleteChatThreadLocally();
 }
 
 function deleteChatThreadLocally() {
@@ -782,9 +927,14 @@ function deleteChatThreadLocally() {
   delete localThreads[activeThreadId];
   delete threads[activeThreadId];
   localStorage.setItem('society_chat_threads', JSON.stringify(localThreads));
+
+  if (typeof fbSet === 'function') {
+    fbSet('society_chat_threads', Object.values(threads));
+  }
+
   closeChatWindow();
   renderChatList();
-  alert('Chat deleted.');
+  alert('Chat deleted successfully.');
 }
 
 // ══════════════════════════════════════════════
@@ -806,7 +956,13 @@ function renderMessages() {
   }
 
   msgs.forEach(m => {
-    const isMe = String(m.senderFlat) === String(currentUser.flat);
+    const myFlatNorm = cleanFlatStr(currentUser.flat);
+    const myEmailNorm = String(currentUser.email || '').toLowerCase().trim();
+    const senderFlatNorm = cleanFlatStr(m.senderFlat);
+    const senderEmailNorm = String(m.senderEmail || '').toLowerCase().trim();
+
+    const isMe = (myEmailNorm && senderEmailNorm && myEmailNorm === senderEmailNorm) ||
+                 (myFlatNorm && senderFlatNorm && myFlatNorm === senderFlatNorm);
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${isMe ? 'sent' : 'received'}`;
     const showSender = !isMe && t.type === 'group';
@@ -1226,6 +1382,18 @@ function openGroupSettings() {
     html += `</div>`;
   }
 
+  if (isAdmin) {
+    html += `
+      <div style="margin-top:24px; display:flex; flex-direction:column; gap:10px;">
+        <button onclick="clearChatMessages()" style="width:100%;padding:13px;border:1px solid var(--terracotta);border-radius:12px;background:#FFF0EE;color:var(--terracotta);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          🧹 Clear All Group Messages
+        </button>
+        <button onclick="deleteChatThread()" style="width:100%;padding:13px;border:none;border-radius:12px;background:var(--terracotta);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          ❌ Delete Entire Group
+        </button>
+      </div>`;
+  }
+
   if (!isAdmin) {
     html += `
       <button onclick="leaveGroup('${activeThreadId}')" style="margin-top:24px;width:100%;padding:14px;border:none;border-radius:12px;background:#f5e1dc;color:var(--terracotta);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">
@@ -1375,109 +1543,9 @@ function escHtml(str) {
 }
 
 // ══════════════════════════════════════════════
-//  SEED default threads on first open
-// ══════════════════════════════════════════════
-async function seedDefaultThreads() {
-  try {
-    if (typeof firebase !== 'undefined' && firebase.database) {
-      const snap = await firebase.database().ref('/chat_threads').once('value');
-      if (snap.val()) return; // already has data
-
-      const now = Date.now();
-      const defaults = {
-        ['flat_201__flat_202']: {
-          type:'individual', name:'Flat 201 ↔ Flat 202',
-          members:[
-            { flat:'201', name:'Sujeet Sharma', email:'sujeet@email.com' },
-            { flat:'202', name:'Priya Mehta', email:'priya@email.com' }
-          ],
-          createdAt: now - 86400000,
-          messages: {
-            a1: { text:'Hi Priya, could you share the electrician contact?', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 86400000 },
-            a2: { text:'Sure! Rajesh Electrician: +91 98989 77777', senderFlat:'202', senderName:'Priya Mehta', timestamp: now - 86000000 },
-            a3: { text:'Thanks!', senderFlat:'201', senderName:'Sujeet Sharma', timestamp: now - 85000000 }
-          }
-        }
-      };
-
-      await firebase.database().ref('/chat_threads').set(defaults);
-    }
-  } catch(e) {
-    console.warn("Firebase RTDB not available for seeding:", e.message);
-  }
-}
-
-// ── Manual SMS Send UI helpers ──
-window.updateSmsRecipientPhone = function() {
-  const email = document.getElementById('smsRecipient').value;
-  const container = document.getElementById('smsPhoneContainer');
-  const input = document.getElementById('smsPhone');
-  if (email === 'broadcast') {
-    input.value = 'All Residents (Broadcast)';
-    container.style.display = 'block';
-  } else {
-    const target = allUsers.find(u => u.email === email);
-    if (target) {
-      input.value = target.phone || 'No phone number listed';
-      container.style.display = 'block';
-    } else {
-      container.style.display = 'none';
-    }
-  }
-};
-
-window.sendManualSMS = function() {
-  const email = document.getElementById('smsRecipient').value;
-  const text = document.getElementById('smsText').value.trim();
-  if (!email) { alert('Please select a recipient first.'); return; }
-  if (!text) { alert('Please enter message text.'); return; }
-
-  if (email === 'broadcast') {
-    if (!confirm('Are you sure you want to broadcast this SMS notification to all residents?')) return;
-    
-    // Send simulated SMS to all residents
-    allUsers.forEach(u => {
-      if (String(u.flat) !== String(currentUser.flat)) {
-        sendSMSNotification(u.phone || 'N/A', currentUser.name, text, 'sms_broadcast');
-      }
-    });
-
-    // Push an in-app notice
-    if (typeof pushNotification === 'function') {
-      pushNotification(`[Broadcast] From Flat ${currentUser.flat} (${currentUser.name}): "${text}"`, "notice");
-    }
-
-    alert(`Broadcast SMS delivered successfully to all residents!`);
-  } else {
-    const target = allUsers.find(u => u.email === email);
-    if (!target) { alert('Recipient not found.'); return; }
-
-    // Send the simulated SMS
-    sendSMSNotification(target.phone || 'N/A', currentUser.name, text, 'sms');
-
-    // Push an in-app notice
-    if (typeof pushNotification === 'function') {
-      pushNotification(`[SMS Notification] From Flat ${currentUser.flat} (${currentUser.name}): "${text}"`, "notice");
-    }
-
-    alert(`SMS Notification delivered successfully to Flat ${target.flat} (${target.name})!`);
-  }
-  
-  // Clear fields
-  document.getElementById('smsRecipient').value = '';
-  document.getElementById('smsText').value = '';
-  document.getElementById('smsPhoneContainer').style.display = 'none';
-
-  // Rerender logs
-  renderSMSLog();
-};
-
-// ══════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════
-seedDefaultThreads().then(() => {
-  startThreadsListener();
-});
+startThreadsListener();
 
 // Close modals tapping backdrop
 document.querySelectorAll('.modal-overlay').forEach(el => {

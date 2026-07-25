@@ -1799,10 +1799,8 @@
 
     let html = '<div style="display:flex; flex-direction:column; gap:10px; padding:10px 0;">';
     sortedServices.forEach(srv => {
-      const displayedPhone = isAdmin ? srv.phone : '+91 XXXXX XXXXX';
-      
-      // Category (Service Name) - Name - Contact - Review - Rating format
-      const rowText = `${srv.category} - ${srv.name} - ${displayedPhone} - ${srv.reviews} Reviews - ⭐ ${srv.rating}`;
+      const phoneNum = srv.phone || 'N/A';
+      const rowText = `${srv.category} - ${srv.name} - <a href="tel:${phoneNum}" style="color:var(--forest); font-weight:700; text-decoration:underline;">📞 ${phoneNum}</a> - ${srv.reviews || 0} Reviews - ⭐ ${srv.rating || '5.0'}`;
 
       html += `
         <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px; font-family:'Space Grotesk',sans-serif; color:var(--forest-dark); font-weight:600; line-height:1.4; word-break:break-word; box-shadow: 0 2px 8px rgba(0,0,0,0.01); display:flex; justify-content:space-between; align-items:center; gap:8px;">

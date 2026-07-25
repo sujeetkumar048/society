@@ -183,7 +183,7 @@
       height: 100%;
       background: linear-gradient(90deg, var(--forest) 0%, var(--muted) 100%);
       border-radius: 10px;
-      animation: fillProgress 8s linear forwards;
+      animation: fillProgress 4s linear forwards;
     }
 
     /* Animations */
@@ -270,14 +270,13 @@
       window.location.href = 'profile.html';
     }
 
-    // List of active syncing milestones spread over 8 seconds
+    // List of active syncing milestones spread over 4 seconds
     const syncSteps = [
       { delay: 0, text: "Securing society data channel..." },
-      { delay: 1500, text: "Refreshing society accounting ledger..." },
-      { delay: 3000, text: "Syncing monthly maintenance status..." },
-      { delay: 4500, text: "Downloading latest bulletin updates..." },
-      { delay: 6000, text: "Finalizing session handshake..." },
-      { delay: 7200, text: "Ready! Redirecting to dashboard..." }
+      { delay: 1000, text: "Refreshing society accounting ledger..." },
+      { delay: 2000, text: "Syncing monthly maintenance status..." },
+      { delay: 3000, text: "Finalizing session handshake..." },
+      { delay: 3600, text: "Ready! Redirecting to dashboard..." }
     ];
 
     const statusEl = document.getElementById('status');
@@ -292,10 +291,10 @@
       }, step.delay);
     });
 
-    // Dynamic redirect after exactly 8 seconds
+    // Dynamic redirect after exactly 4 seconds
     setTimeout(() => {
       window.location.href = 'index.html';
-    }, 8000);
+    }, 4000);
   </script>
 </body>
 </html>

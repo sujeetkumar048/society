@@ -112,38 +112,53 @@ window.fbDB = {
 };
 
 // ─── High-Level Sync Helpers ────────────────────────────────────────────────
+// ─── High-Level Sync Helpers (Optimistic 0ms SWR Layer) ──────────────────────
+const _fbListenCallbacks = {};
+
+function notifyLocalDataUpdate(localKey, data) {
+  if (_fbListenCallbacks[localKey]) {
+    _fbListenCallbacks[localKey].forEach(cb => {
+      try { cb(data); } catch(e) { console.error('[Sync Error]', e); }
+    });
+  }
+}
+
 /**
- * Read a key — tries Firebase first, falls back to localStorage on error.
- * Also seeds localStorage cache so pages work offline.
+ * Read a key — returns local cache instantly, revalidates from Firebase in background.
  */
 window.fbGet = async function(localKey) {
-  const path = DB_PATHS[localKey];
-  if (!path) return JSON.parse(localStorage.getItem(localKey));
+  const cached = localStorage.getItem(localKey);
+  const parsedCache = cached ? JSON.parse(cached) : null;
 
-  try {
-    const val = await fbDB.get(path);
+  const path = DB_PATHS[localKey];
+  if (!path) return parsedCache;
+
+  // Asynchronous background revalidation
+  fbDB.get(path).then(val => {
     if (val !== null) {
-      // Cache locally
-      localStorage.setItem(localKey, JSON.stringify(Array.isArray(val) ? val : Object.values(val)));
-      return Array.isArray(val) ? val : Object.values(val);
+      const arr = Array.isArray(val) ? val : Object.values(val);
+      localStorage.setItem(localKey, JSON.stringify(arr));
+      notifyLocalDataUpdate(localKey, arr);
     }
-  } catch (e) {
-    console.warn('[fbGet] Firebase unavailable, using localStorage:', e.message);
-  }
-  return JSON.parse(localStorage.getItem(localKey));
+  }).catch(e => {
+    console.warn('[fbGet] Background sync skipped:', e.message);
+  });
+
+  return parsedCache;
 };
 
 /**
- * Write an array to Firebase AND localStorage (dual-write for offline resilience).
+ * Write an array with 0ms optimistic UI update, then syncs to Firebase.
  */
 window.fbSet = async function(localKey, dataArray) {
   localStorage.setItem(localKey, JSON.stringify(dataArray));
+  // 0ms Optimistic UI Trigger
+  notifyLocalDataUpdate(localKey, dataArray);
 
   const path = DB_PATHS[localKey];
   if (!path) return;
 
   try {
-    // Store arrays as indexed objects in RTDB (Firebase doesn't support raw arrays)
     const obj = {};
     if (Array.isArray(dataArray)) {
       dataArray.forEach((item, i) => { obj[i] = item; });
@@ -152,17 +167,19 @@ window.fbSet = async function(localKey, dataArray) {
     }
     await fbDB.set(path, obj);
   } catch (e) {
-    console.warn('[fbSet] Firebase write failed (cached locally):', e.message);
+    console.warn('[fbSet] Firebase write queued/failed:', e.message);
   }
 };
 
 /**
- * Push a single new item to a Firebase list AND prepend to the localStorage array.
+ * Push a new item with 0ms optimistic local update, then syncs to Firebase.
  */
 window.fbPush = async function(localKey, item) {
   const current = JSON.parse(localStorage.getItem(localKey)) || [];
   current.unshift(item);
   localStorage.setItem(localKey, JSON.stringify(current));
+  // 0ms Optimistic UI Trigger
+  notifyLocalDataUpdate(localKey, current);
 
   const path = DB_PATHS[localKey];
   if (!path) return;
@@ -170,28 +187,46 @@ window.fbPush = async function(localKey, item) {
   try {
     await fbDB.push(path, item);
   } catch (e) {
-    console.warn('[fbPush] Firebase push failed (cached locally):', e.message);
+    console.warn('[fbPush] Firebase push queued/failed:', e.message);
   }
 };
 
 /**
- * Subscribe to real-time changes for a given key. Calls `callback(array)` on
- * every update. Returns an unsubscribe function.
+ * Subscribe to real-time changes with instant 0ms cached rendering.
  */
 window.fbListen = function(localKey, callback) {
-  const path = DB_PATHS[localKey];
-  if (!path) {
-    callback(JSON.parse(localStorage.getItem(localKey)));
-    return () => {};
+  if (!_fbListenCallbacks[localKey]) {
+    _fbListenCallbacks[localKey] = new Set();
+  }
+  _fbListenCallbacks[localKey].add(callback);
+
+  // 1. Instant 0ms execution from local cache
+  const cached = localStorage.getItem(localKey);
+  if (cached !== null) {
+    try {
+      const parsed = JSON.parse(cached);
+      callback(parsed);
+    } catch(e) {}
   }
 
-  return fbDB.listen(path, val => {
+  const path = DB_PATHS[localKey];
+  if (!path) {
+    return () => { _fbListenCallbacks[localKey].delete(callback); };
+  }
+
+  // 2. Real-Time Firebase WebSocket Listener
+  const unsubFB = fbDB.listen(path, val => {
     const arr = val
       ? (Array.isArray(val) ? val : Object.values(val)).filter(Boolean)
       : [];
     localStorage.setItem(localKey, JSON.stringify(arr));
     callback(arr);
   });
+
+  return () => {
+    _fbListenCallbacks[localKey].delete(callback);
+    unsubFB();
+  };
 };
 
 // ─── One-time Migration: push localStorage → Firebase on first load ──────────
