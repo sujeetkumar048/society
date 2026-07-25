@@ -904,18 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentUser.role.toLowerCase().includes('committee')
     );
 
-    // Enforce admin-only access for Notice Board (notices.html)
-    if (!isAdmin) {
-      document.querySelectorAll('a[href="notices.html"]').forEach(el => {
-        el.style.display = 'none';
-      });
-      const pageName = window.location.pathname.split('/').pop() || 'index.html';
-      if (pageName === 'notices.html') {
-        alert('Access Denied: Notice Board is restricted to Admins only.');
-        window.location.href = 'index.html';
-        return;
-      }
-    }
+
 
     const pageName = window.location.pathname.split('/').pop() || 'index.html';
     if (pageName && pageName !== 'welcome.html') {

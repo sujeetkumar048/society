@@ -429,18 +429,10 @@
 </div>
 
 <script>
-  // Auth control & Admin Restricting
+  // Auth control
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
     window.location.href = 'profile.html';
-  } else {
-    const isAdmin = currentUser.role && (
-      currentUser.role.toLowerCase().includes('admin') || 
-      currentUser.role.toLowerCase().includes('committee')
-    );
-    if (!isAdmin) {
-      window.location.href = 'index.html';
-    }
   }
 
   function openModal(modalId) {
@@ -519,6 +511,15 @@
   }
 
   function addNotice() {
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.includes('Super Admin') || 
+      currentUser.role.includes('Committee Member')
+    );
+    if (!isAdmin) {
+      alert('Access Denied: Only Admins can add new notices.');
+      return;
+    }
+
     const type = document.getElementById('noticeType').value;
     const title = document.getElementById('noticeTitle').value.trim();
     const description = document.getElementById('noticeDescription').value.trim();
