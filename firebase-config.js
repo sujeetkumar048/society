@@ -759,79 +759,6 @@ if (typeof db !== 'undefined' && typeof db.ref === 'function') {
   }, 2000);
 }
 
-// ─── Floating SOS button Injection ───────────────────────────────────────────
-window.initializeFloatingSosButton = function() {
-  if (document.getElementById('floatingSosBtn')) return;
-
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) return;
-
-  const btn = document.createElement('div');
-  btn.id = 'floatingSosBtn';
-  btn.title = 'EMERGENCY SOS';
-  btn.style = `
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FF3B30, #FF2D55);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0.3);
-    z-index: 99999;
-    cursor: pointer;
-    border: 2px solid white;
-    user-select: none;
-    transition: all 0.2s ease;
-    animation: sosPulse 2s infinite;
-  `;
-
-  if (!document.getElementById('sosPulseStyle')) {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'sosPulseStyle';
-    styleEl.innerHTML = `
-      @keyframes sosPulse {
-        0% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0.4); }
-        70% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 15px rgba(255, 45, 85, 0); }
-        100% { box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4), 0 0 0 0px rgba(255, 45, 85, 0); }
-      }
-      @keyframes scaleUp {
-        0% { transform: scale(0.9); }
-        100% { transform: scale(1.1); }
-      }
-    `;
-    document.head.appendChild(styleEl);
-  }
-
-  btn.innerHTML = `
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-      <svg style="width:24px; height:24px; stroke:white; fill:none;" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-      <span style="font-size:8px; font-weight:900; margin-top:2px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">SOS</span>
-    </div>
-  `;
-
-  btn.onclick = function() {
-    window.triggerSosClick();
-  };
-
-  document.body.appendChild(btn);
-};
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', window.initializeFloatingSosButton);
-} else {
-  window.initializeFloatingSosButton();
-}
-setInterval(window.initializeFloatingSosButton, 2000);
-
 // ─── Shared Admin Permissions Getter ─────────────────────────────────────────
 window.getAdminPermission = function(permKey) {
   try {
@@ -968,9 +895,28 @@ window.validateAndProcessDocument = function(file, targetSizeKb, callback) {
   }
 };
 
-// ─── Automatic Page View Tracker ───
+// ─── Automatic Page View Tracker & Access Control ───
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const isAdmin = currentUser && currentUser.role && (
+      currentUser.role.toLowerCase().includes('admin') || 
+      currentUser.role.toLowerCase().includes('committee')
+    );
+
+    // Enforce admin-only access for Notice Board (notices.html)
+    if (!isAdmin) {
+      document.querySelectorAll('a[href="notices.html"]').forEach(el => {
+        el.style.display = 'none';
+      });
+      const pageName = window.location.pathname.split('/').pop() || 'index.html';
+      if (pageName === 'notices.html') {
+        alert('Access Denied: Notice Board is restricted to Admins only.');
+        window.location.href = 'index.html';
+        return;
+      }
+    }
+
     const pageName = window.location.pathname.split('/').pop() || 'index.html';
     if (pageName && pageName !== 'welcome.html') {
       const pageTitles = {
@@ -997,6 +943,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 800);
     }
   } catch (e) {
-    console.error('Error logging page view:', e);
+    console.error('Error in DOMContentLoaded handler:', e);
   }
 });

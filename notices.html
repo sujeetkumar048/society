@@ -429,10 +429,18 @@
 </div>
 
 <script>
-  // Auth control
+  // Auth control & Admin Restricting
   let currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser) {
     window.location.href = 'profile.html';
+  } else {
+    const isAdmin = currentUser.role && (
+      currentUser.role.toLowerCase().includes('admin') || 
+      currentUser.role.toLowerCase().includes('committee')
+    );
+    if (!isAdmin) {
+      window.location.href = 'index.html';
+    }
   }
 
   function openModal(modalId) {

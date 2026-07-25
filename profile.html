@@ -1291,8 +1291,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </div>
       </div>
-      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.4;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.4;">
         Real-time log of user actions, approvals, gate entries, submissions & updates.
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12px; font-weight:600; color:var(--forest-dark); font-family:'Space Grotesk',sans-serif;">
+        <span id="activityLogsCountLabel">Showing 0 of 0 logs</span>
+        <button id="btnToggleActivityShowLimit" onclick="toggleActivityLogsShowLimit()" style="background:transparent; border:none; color:var(--forest); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer; text-decoration:underline; padding:0; display:none;">Show All</button>
       </div>
       <div id="profileActivityLogsContainer" style="max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
         <!-- Filled dynamically -->
@@ -2338,7 +2342,19 @@
     }
 
     // Update in users database
-    const idx = users.findIndex(u => u && ((u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) || (u.phone && u.phone === currentUser.phone)));
+    const currEmail = (currentUser.email || '').toLowerCase().trim();
+    const currPhone = (currentUser.phone || '').trim();
+
+    const idx = users.findIndex(u => {
+      if (!u) return false;
+      const uEmail = (u.email || '').toLowerCase().trim();
+      const uPhone = (u.phone || '').trim();
+      
+      if (currEmail && uEmail && uEmail === currEmail) return true;
+      if (currPhone && uPhone && uPhone === currPhone) return true;
+      return false;
+    });
+
     if (idx !== -1) {
       users[idx].name = name;
       users[idx].phone = phone;
@@ -3454,8 +3470,11 @@
   };
 
   // Activity Logs in Profile
+  let showAllProfileActivities = false;
+
   window.openActivityLogsModalProfile = function() {
     try {
+      showAllProfileActivities = false;
       renderProfileActivityLogs();
       
       // Check if logged in user is admin
@@ -3472,8 +3491,15 @@
     }
   };
 
+  window.toggleActivityLogsShowLimit = function() {
+    showAllProfileActivities = !showAllProfileActivities;
+    renderProfileActivityLogs();
+  };
+
   function renderProfileActivityLogs() {
     const container = document.getElementById('profileActivityLogsContainer');
+    const countLabel = document.getElementById('activityLogsCountLabel');
+    const toggleBtn = document.getElementById('btnToggleActivityShowLimit');
     if (!container) return;
 
     let logs = [];
@@ -3488,6 +3514,8 @@
     });
 
     if (filteredLogs.length === 0) {
+      if (countLabel) countLabel.textContent = 'Showing 0 logs';
+      if (toggleBtn) toggleBtn.style.display = 'none';
       container.innerHTML = `
         <div style="text-align:center; padding:30px 10px; color:var(--muted);">
           <div style="font-size:32px; margin-bottom:6px;">📋</div>
@@ -3498,7 +3526,27 @@
       return;
     }
 
-    container.innerHTML = filteredLogs.map(log => {
+    // Determine slice limit
+    let displayLogs = filteredLogs;
+    if (filteredLogs.length > 15) {
+      if (toggleBtn) {
+        toggleBtn.style.display = 'inline-block';
+        toggleBtn.textContent = showAllProfileActivities ? 'Show Less' : 'Show All';
+      }
+      if (countLabel) {
+        countLabel.textContent = showAllProfileActivities 
+          ? `Showing all ${filteredLogs.length} logs` 
+          : `Showing 15 of ${filteredLogs.length} logs`;
+      }
+      if (!showAllProfileActivities) {
+        displayLogs = filteredLogs.slice(0, 15);
+      }
+    } else {
+      if (toggleBtn) toggleBtn.style.display = 'none';
+      if (countLabel) countLabel.textContent = `Showing all ${filteredLogs.length} logs`;
+    }
+
+    container.innerHTML = displayLogs.map(log => {
       const action = log.action || log.toolAction || 'Activity';
       const time = log.time || log.dateTime || (log.timestamp ? new Date(log.timestamp).toLocaleString('en-IN') : 'Recent');
       const details = log.details || log.status || log.desc || '';
@@ -3741,14 +3789,41 @@
       currentUser.photo = compressedBase64;
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-      const uIndex = users.findIndex(u => u.email === currentUser.email);
+      const currEmail = (currentUser.email || '').toLowerCase().trim();
+      const currPhone = (currentUser.phone || '').trim();
+
+      const uIndex = users.findIndex(u => {
+        if (!u) return false;
+        const uEmail = (u.email || '').toLowerCase().trim();
+        const uPhone = (u.phone || '').trim();
+        
+        if (currEmail && uEmail && uEmail === currEmail) return true;
+        if (currPhone && uPhone && uPhone === currPhone) return true;
+        return false;
+      });
+
       if (uIndex > -1) {
         users[uIndex].photo = compressedBase64;
         localStorage.setItem('users', JSON.stringify(users));
-      }
+        localStorage.setItem('society_users', JSON.stringify(users));
 
-      showToast('Profile photo updated & compressed successfully!');
-      updateProfileUI();
+        if (typeof fbSet === 'function') {
+          fbSet('society_users', users).then(() => {
+            showToast('Profile photo updated & compressed successfully!');
+            updateProfileUI();
+          }).catch(err => {
+            console.error('Firebase save failed:', err);
+            showToast('Profile photo saved locally.', 'warning');
+            updateProfileUI();
+          });
+        } else {
+          showToast('Profile photo updated & compressed successfully!');
+          updateProfileUI();
+        }
+      } else {
+        showToast('Profile photo updated locally.');
+        updateProfileUI();
+      }
     });
   }
 

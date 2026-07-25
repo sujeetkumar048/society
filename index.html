@@ -640,6 +640,7 @@
   <!-- ACTIVITY LOGS SECTION AT BOTTOM -->
   <div class="section" style="margin-bottom: 24px;">
     <div class="section-title">Activity Logs <span class="eyebrow" id="dashboardLogsCount">4 logged</span></div>
+    <div id="dashboardLogsToggleContainer" style="margin-bottom:8px;"></div>
     <div id="dashboardLogsList" style="display: flex; flex-direction: column; gap: 8px;">
       <!-- Dynamic real-time activity logs rendered here in required format: name - date time - status - tool/action -->
     </div>
@@ -1120,9 +1121,11 @@
     const DASHBOARD_LOGS_LIMIT = 5;
 
     const renderDashboardLogsWithToggle = (list) => {
+      const toggleContainer = document.getElementById('dashboardLogsToggleContainer');
       if (!dashboardContainer) return;
       if (list.length === 0) {
         dashboardContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">No activity logs yet.</div>';
+        if (toggleContainer) toggleContainer.innerHTML = '';
         return;
       }
 
@@ -1133,13 +1136,19 @@
 
       if (hidden.length > 0) {
         html += `
-          <div id="dashboardLogsHidden" style="display:none; flex-direction:column; gap:8px;">
+          <div id="dashboardLogsHidden" style="display:none; flex-direction:column; gap:8px; margin-top:8px;">
             ${hidden.map(buildLogHtml).join('')}
           </div>
-          <button id="dashboardLogsToggleBtn" onclick="toggleDashboardLogsExpand()" style="width:100%; padding:9px; margin-top:4px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); color:var(--forest-dark); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer;">
-            ▼ Show ${hidden.length} More Logs
-          </button>
         `;
+        if (toggleContainer) {
+          toggleContainer.innerHTML = `
+            <button id="dashboardLogsToggleBtn" onclick="toggleDashboardLogsExpand()" style="width:100%; padding:9px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); color:var(--forest-dark); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; cursor:pointer;">
+              ▼ Show ${hidden.length} More Logs
+            </button>
+          `;
+        }
+      } else {
+        if (toggleContainer) toggleContainer.innerHTML = '';
       }
 
       dashboardContainer.innerHTML = html;
@@ -1161,7 +1170,12 @@
     };
 
     const renderLogs = (logs) => {
-      const list = logs || [];
+      const rawList = logs || [];
+      const list = rawList.filter(log => {
+        if (!log) return false;
+        const action = log.action || log.toolAction || '';
+        return !String(action).startsWith('Page View:');
+      });
 
       // Modal: show all logs
       if (modalContainer) {
